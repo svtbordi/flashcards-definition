@@ -14,11 +14,21 @@ Application installable (téléphone Android ou iPhone, ordinateur) pour apprend
 - Fonctionne sans connexion une fois installée.
 - Sauvegarde et restauration de la progression dans un fichier.
 
+## Suivi par l'enseignant (bilans)
+
+L'application n'envoie rien toute seule. Pour un suivi, l'élève ouvre « Ma progression », puis « Préparer mon bilan pour le professeur », indique son nom et enregistre le fichier du bilan (ou le copie) pour te l'envoyer par l'ENT ou par mail.
+
+Le bilan contient : réponses sur 7 et 30 jours et taux de réussite, jours de travail, définitions vues et acquises, progression par partie du programme, 20 définitions les plus ratées sur 30 jours, nombre de réponses par jour.
+
+Pour regrouper les bilans : ouvre `prof.html` (lien « Espace enseignant » en bas des Réglages), dépose les fichiers ou colle les textes reçus. La page affiche un tableau par élève (les élèves sans activité dans la semaine sont signalés), un tableau par partie et les définitions les plus ratées de la classe, et exporte le tout en tableur Excel. Rien n'est envoyé : les bilans sont lus dans ton navigateur.
+
+Les bilans sont déclarés par les élèves (un élève peut modifier son fichier) : c'est un outil de suivi, pas de contrôle.
+
 ## Données personnelles
 
-Aucune donnée ne quitte l'appareil : pas de compte, pas de nom, pas d'e-mail, pas de cookie ni de mesure d'audience. La progression est stockée dans le navigateur de l'élève. L'hébergeur sert seulement les fichiers de l'application.
+Aucune donnée ne quitte l'appareil sans action de l'élève : pas de compte, pas d'e-mail, pas de cookie ni de mesure d'audience. La progression est stockée dans le navigateur de l'élève. Le nom n'est demandé que pour le bilan ; il reste sur l'appareil et ne figure que dans le bilan que l'élève choisit d'envoyer. L'hébergeur sert seulement les fichiers de l'application.
 
-Conséquence : l'enseignant n'a aucun suivi des élèves dans cette version, et un élève qui change de téléphone doit exporter puis restaurer sa sauvegarde.
+Un élève qui change de téléphone doit exporter puis restaurer sa sauvegarde.
 
 ## Mettre à jour les définitions (enseignant)
 
@@ -43,6 +53,7 @@ Le terme sert d'identifiant : corriger une définition garde la progression des 
 npm install          # bibliothèques et Playwright pour les tests
 npm run serve        # http://localhost:8765
 npm test             # parcours complet dans un navigateur de téléphone simulé
+node tools/bilan_test.mjs /tmp   # bilans de trois élèves simulés, regroupement et export Excel
 ```
 
 - `www/` : l'application (HTML, CSS, JavaScript sans étape de compilation).

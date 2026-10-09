@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Bilans de la classe</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#1f6f5c">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="styles.css">
+<style>
+  main.wide-main { max-width: 1100px; }
+  .drop { border: 2px dashed var(--line); border-radius: 12px; padding: 20px; text-align: center; }
+  .drop.over { border-color: var(--accent); background: var(--surface); }
+  .drop textarea { width: 100%; min-height: 80px; margin-top: 12px; font: 13px/1.4 ui-monospace, monospace; background: var(--bg); color: var(--text); border: 1px solid var(--line); border-radius: 8px; padding: 8px; }
+  .scroll { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; font-variant-numeric: tabular-nums; }
+  th, td { padding: 6px 8px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; }
+  th:first-child, td:first-child, td.txt, th.txt { text-align: left; }
+  td.txt { white-space: normal; min-width: 180px; }
+  th { color: var(--muted); font-weight: 600; font-size: 13px; }
+  tr.alert td:first-child::after { content: " · inactif cette semaine"; color: var(--again); font-size: 12px; }
+  .pills { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 0; }
+  .pills span { background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 2px 10px; font-size: 13px; }
+  .row-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; }
+</style>
+</head>
+<body>
+<header class="top">
+  <a class="icon-btn" href="./" aria-label="Retour à l’application" style="text-decoration:none;display:grid;place-items:center">&#8592;</a>
+  <h1>Bilans de la classe</h1>
+</header>
+<main class="wide-main" id="prof">
+  <section class="card">
+    <p>Dépose ici les bilans envoyés par les élèves (fichiers <code>bilan-….json</code>) ou colle le texte qu’ils t’ont copié. Rien n’est envoyé sur internet : les bilans sont lus dans ce navigateur et oubliés quand tu fermes la page.</p>
+    <div class="drop" id="drop">
+      <label class="file" style="display:inline-block">Choisir des fichiers de bilan<input type="file" id="files" accept=".json,application/json,.txt" multiple></label>
+      <textarea id="paste" placeholder="Ou colle ici un ou plusieurs bilans copiés par les élèves"></textarea>
+      <button id="read-paste">Lire le texte collé</button>
+    </div>
+    <div class="pills" id="loaded"></div>
+  </section>
+  <div id="results"></div>
+</main>
+<div id="toast" role="status" hidden></div>
+<script src="prof.js"></script>
+</body>
+</html>
