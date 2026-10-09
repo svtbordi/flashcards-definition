@@ -1,0 +1,490 @@
+[
+{
+"code": "SV-A",
+"title": "L’organisme vivant en lien avec son environnement",
+"year": "BCPST 1 et 2"
+},
+{
+"code": "SV-B",
+"title": "Interactions entre les organismes et leur milieu de vie",
+"year": "BCPST 1 et 2"
+},
+{
+"code": "SV-C",
+"title": "La cellule dans son environnement",
+"year": "BCPST 1"
+},
+{
+"code": "SV-D",
+"title": "Organisation fonctionnelle des molécules du vivant",
+"year": "BCPST 1"
+},
+{
+"code": "SV-E",
+"title": "Le métabolisme cellulaire",
+"year": "BCPST 1"
+},
+{
+"code": "SV-F",
+"title": "Génomique structurale et fonctionnelle",
+"year": "BCPST 1 et 2"
+},
+{
+"code": "SV-G",
+"title": "Reproduction",
+"year": "BCPST 2"
+},
+{
+"code": "SV-H",
+"title": "Mécanismes du développement : développement du membre des Tétrapodes",
+"year": "BCPST 2"
+},
+{
+"code": "SV-I",
+"title": "Communications intercellulaires et intégration d’une fonction à l’organisme",
+"year": "BCPST 2"
+},
+{
+"code": "SV-J",
+"title": "Populations et écosystèmes",
+"year": "BCPST 1"
+},
+{
+"code": "SV-K",
+"title": "Évolution et phylogénie",
+"year": "BCPST 1 et 2"
+},
+{
+"code": "BG-A",
+"title": "Les grands cycles biogéochimiques",
+"year": "BCPST 2"
+},
+{
+"code": "BG-B",
+"title": "Les sols",
+"year": "BCPST 2"
+},
+{
+"code": "BG-C",
+"title": "Le climat de la Terre",
+"year": "BCPST 1 et 2"
+},
+{
+"code": "ST-A",
+"title": "La carte géologique et ses utilisations",
+"year": "BCPST 1"
+},
+{
+"code": "ST-B",
+"title": "La structure de la planète Terre",
+"year": "BCPST 1"
+},
+{
+"code": "ST-C",
+"title": "La dynamique des enveloppes internes",
+"year": "BCPST 1"
+},
+{
+"code": "ST-D",
+"title": "Les déformations de la lithosphère",
+"year": "BCPST 1"
+},
+{
+"code": "ST-E",
+"title": "Le phénomène sédimentaire",
+"year": "BCPST 1"
+},
+{
+"code": "ST-F",
+"title": "Le magmatisme",
+"year": "BCPST 2"
+},
+{
+"code": "ST-G",
+"title": "Le métamorphisme, marqueur de la géodynamique interne",
+"year": "BCPST 2"
+},
+{
+"code": "ST-H",
+"title": "La mesure du temps : outils et méthodes",
+"year": "BCPST 1"
+},
+{
+"code": "ST-I",
+"title": "Les risques et les ressources géologiques",
+"year": "BCPST 2"
+},
+{
+"code": "ST-J",
+"title": "Les grands ensembles géologiques",
+"year": "BCPST 2"
+},
+{
+"code": "SV-A-1",
+"title": "Regards sur un organisme Métazoaire : un Bovidé"
+},
+{
+"code": "SV-A-2",
+"title": "Regards sur un organisme Angiosperme : une Fabacée"
+},
+{
+"code": "SV-A-3",
+"title": "Regards sur les organismes unicellulaires"
+},
+{
+"code": "SV-B-1",
+"title": "La respiration : une fonction en interaction directe avec le milieu"
+},
+{
+"code": "SV-B-2",
+"title": "Nutrition des Angiospermes en lien avec le milieu"
+},
+{
+"code": "SV-B-2-1",
+"title": "Absorption d’eau et d’ions dans le milieu de vie"
+},
+{
+"code": "SV-B-2-2",
+"title": "Échanges gazeux avec le milieu de vie"
+},
+{
+"code": "SV-B-2-3",
+"title": "Distribution des assimilats photosynthétiques au sein du végétal"
+},
+{
+"code": "SV-B-3",
+"title": "Le développement post-embryonnaire des Angiospermes : adaptations et plasticité phénotypique"
+},
+{
+"code": "SV-B-3-1",
+"title": "Développement végétatif à l’interface sol/air"
+},
+{
+"code": "SV-B-3-2",
+"title": "Développement de l'appareil reproducteur"
+},
+{
+"code": "SV-B-3-3",
+"title": "Adaptations et plasticité phénotypique"
+},
+{
+"code": "SV-C-1",
+"title": "Les cellules au sein d’un organisme"
+},
+{
+"code": "SV-C-2",
+"title": "Organisation fonctionnelle de la cellule"
+},
+{
+"code": "SV-C-3",
+"title": "Membranes et échanges membranaires"
+},
+{
+"code": "SV-D-1",
+"title": "Les constituants du vivant"
+},
+{
+"code": "SV-D-2",
+"title": "Les grandes familles biochimiques"
+},
+{
+"code": "SV-D-2-1",
+"title": "Lipides"
+},
+{
+"code": "SV-D-2-2",
+"title": "Oses et polyosides"
+},
+{
+"code": "SV-D-2-3",
+"title": "Nucléotides et acides nucléiques"
+},
+{
+"code": "SV-D-2-4",
+"title": "Acides aminés et protéines"
+},
+{
+"code": "SV-E-1",
+"title": "L'approvisionnement en matière organique"
+},
+{
+"code": "SV-E-2",
+"title": "Le devenir de la matière organique"
+},
+{
+"code": "SV-E-3",
+"title": "Les enzymes et la catalyse des réactions"
+},
+{
+"code": "SV-F-1",
+"title": "Génome des cellules et des virus, transmission de l’information génétique"
+},
+{
+"code": "SV-F-1-1",
+"title": "Organisation des génomes"
+},
+{
+"code": "SV-F-1-2",
+"title": "La transmission de l’information génétique au cours des divisions cellulaires chez les Eucaryotes"
+},
+{
+"code": "SV-F-2",
+"title": "L’expression du génome"
+},
+{
+"code": "SV-F-3",
+"title": "Le contrôle de l’expression du génome"
+},
+{
+"code": "SV-F-4",
+"title": "La diversification des génomes"
+},
+{
+"code": "SV-F-4-1",
+"title": "Diversité des mutations et diversification des génomes"
+},
+{
+"code": "SV-F-4-2",
+"title": "Brassage génétique et diversification des génomes"
+},
+{
+"code": "SV-G-1",
+"title": "La reproduction sexuée chez les Embryophytes"
+},
+{
+"code": "SV-G-2",
+"title": "La reproduction asexuée chez les Angiospermes"
+},
+{
+"code": "SV-G-3",
+"title": "La reproduction sexuée des Mammifères"
+},
+{
+"code": "SV-H-1",
+"title": "Les étapes du développement embryonnaire chez les Vertébrés"
+},
+{
+"code": "SV-H-2",
+"title": "Développement du bourgeon de membre"
+},
+{
+"code": "SV-H-3",
+"title": "Différenciation d’un type cellulaire : la cellule musculaire striée squelettique"
+},
+{
+"code": "SV-I-1",
+"title": "Intégration d’une fonction à l’échelle de l’organisme : la circulation sanguine chez les Mammifères"
+},
+{
+"code": "SV-I-2",
+"title": "Communications intercellulaires chez les Métazoaires"
+},
+{
+"code": "SV-J-1",
+"title": "Les populations et leur démographie"
+},
+{
+"code": "SV-J-2",
+"title": "Les écosystèmes : structure, fonctionnement et dynamique"
+},
+{
+"code": "SV-J-2-1",
+"title": "Organisation des écosystèmes"
+},
+{
+"code": "SV-J-2-2",
+"title": "Diversité des relations interspécifiques et conséquences sur la structure de l’écosystème"
+},
+{
+"code": "SV-J-2-3",
+"title": "Fonctionnement des écosystèmes"
+},
+{
+"code": "SV-J-2-4",
+"title": "Dynamique des écosystèmes"
+},
+{
+"code": "SV-K-1",
+"title": "Les mécanismes de l’évolution"
+},
+{
+"code": "SV-K-2",
+"title": "Une approche phylogénétique de la biodiversité"
+},
+{
+"code": "SV-K-2-1",
+"title": "Classer la biodiversité"
+},
+{
+"code": "SV-K-2-2",
+"title": "Analyser des arbres phylogénétiques pour construire des scénarios évolutifs"
+},
+{
+"code": "BG-A-1",
+"title": "Le cycle du carbone"
+},
+{
+"code": "BG-A-2",
+"title": "Le cycle de l’azote"
+},
+{
+"code": "BG-A-3",
+"title": "Impacts des activités humaines sur les cycles biogéochimiques"
+},
+{
+"code": "BG-B-1",
+"title": "Le sol : une interface vivante entre lithosphère et atmosphère"
+},
+{
+"code": "BG-B-1-1",
+"title": "La phase solide des sols"
+},
+{
+"code": "BG-B-1-2",
+"title": "Les phases fluides des sols"
+},
+{
+"code": "BG-B-1-3",
+"title": "Le sol, un ensemble dynamique"
+},
+{
+"code": "BG-B-2",
+"title": "Les enjeux de la gestion des sols"
+},
+{
+"code": "BG-C-1",
+"title": "L’atmosphère et l’océan : composition et structure verticale"
+},
+{
+"code": "BG-C-2",
+"title": "Les circulations atmosphériques et océaniques"
+},
+{
+"code": "BG-C-2-1",
+"title": "Bilan énergétique des enveloppes fluides de la Terre et circulations"
+},
+{
+"code": "BG-C-2-2",
+"title": "La circulation atmosphérique"
+},
+{
+"code": "BG-C-2-3",
+"title": "La circulation océanique"
+},
+{
+"code": "BG-C-3",
+"title": "Climat et variabilité climatique"
+},
+{
+"code": "BG-C-3-1",
+"title": "Variabilité climatique à courte échelle de temps"
+},
+{
+"code": "BG-C-3-2",
+"title": "Marqueurs climatiques et variabilité à longue échelle de temps"
+},
+{
+"code": "BG-C-3-3",
+"title": "Changement climatique anthropique et impacts sur la biodiversité"
+},
+{
+"code": "ST-C-1",
+"title": "Bilan thermique et conséquences"
+},
+{
+"code": "ST-C-2",
+"title": "La lithosphère en équilibre sur l’asthénosphère"
+},
+{
+"code": "ST-C-3",
+"title": "La géodynamique de la lithosphère"
+},
+{
+"code": "ST-D-1",
+"title": "La rhéologie de la lithosphère"
+},
+{
+"code": "ST-D-2",
+"title": "Les séismes : origine et conséquences"
+},
+{
+"code": "ST-E-1",
+"title": "Modelés des paysages et transferts de matériaux en surface"
+},
+{
+"code": "ST-E-1-1",
+"title": "Les facteurs d’altération"
+},
+{
+"code": "ST-E-1-2",
+"title": "Érosion et entraînement de matière"
+},
+{
+"code": "ST-E-2",
+"title": "La sédimentation des particules et des solutés"
+},
+{
+"code": "ST-E-3",
+"title": "La diagenèse"
+},
+{
+"code": "ST-F-1",
+"title": "La mise en place des magmas"
+},
+{
+"code": "ST-F-2",
+"title": "Les processus fondamentaux du magmatisme"
+},
+{
+"code": "ST-F-2-1",
+"title": "Production des magmas primaires"
+},
+{
+"code": "ST-F-2-2",
+"title": "Évolution des liquides"
+},
+{
+"code": "ST-G-1",
+"title": "Les associations minéralogiques indicatrices de pression et de température"
+},
+{
+"code": "ST-G-2",
+"title": "La distribution spatiale des roches métamorphiques et les variations temporelles des"
+},
+{
+"code": "ST-H-1",
+"title": "L'échelle stratigraphique"
+},
+{
+"code": "ST-H-2",
+"title": "Datation absolue"
+},
+{
+"code": "ST-H-3",
+"title": "Synthèse stratigraphique"
+},
+{
+"code": "ST-I-1",
+"title": "Les risques géologiques"
+},
+{
+"code": "ST-I-2",
+"title": "Les ressources géologiques"
+},
+{
+"code": "ST-J-1",
+"title": "Une chaîne de montagnes"
+},
+{
+"code": "ST-J-2",
+"title": "Étude de quelques grands ensembles structuraux français"
+},
+{
+"code": "ST-J-2-1",
+"title": "Quelques grands ensembles structuraux de France métropolitaine"
+},
+{
+"code": "ST-J-2-2",
+"title": "Les îles océaniques"
+}
+]
