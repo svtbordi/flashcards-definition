@@ -9,6 +9,7 @@ Application installable (téléphone Android ou iPhone, ordinateur) pour apprend
 - Révision en avance avant une colle, sans fausser le calendrier.
 - Objectif quotidien, jours d'affilée, avertissement le soir si l'objectif n'est pas atteint.
 - Rappel quotidien ajouté au calendrier du téléphone (fichier .ics) et nombre de cartes à revoir sur l'icône (Android et ordinateur).
+- Lexique (loupe en haut de l'écran) : recherche d'un terme avec complétion, accents facultatifs, ou sommaire des parties et sous-parties avec leurs termes par ordre alphabétique ; la définition s'ouvre dans une bulle. Le lexique n'est pas accessible pendant une séance.
 - Progression par partie et liste des définitions les plus ratées.
 - Mise à jour des définitions : automatique quand l'enseignant publie un nouveau tableur, ou import d'un fichier .xlsx par l'élève. La progression est conservée pour chaque terme inchangé.
 - Fonctionne sans connexion une fois installée.

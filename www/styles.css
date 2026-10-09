@@ -188,3 +188,18 @@ button:focus-visible, .file:focus-within { outline: 2px solid var(--accent); out
 .form input[type=text] { font: inherit; padding: 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--text); width: 100%; min-width: 0; }
 .copy-fallback { width: 100%; height: 120px; font: 12px/1.4 ui-monospace, monospace; margin-top: 12px; }
 a.link { color: var(--accent); }
+
+/* Lexique */
+.lex-search { position: relative; margin-bottom: 8px; }
+.lex-search input { font: inherit; font-size: 17px; width: 100%; min-width: 0; padding: 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--text); }
+.sugg { position: absolute; left: 0; right: 0; top: 100%; z-index: 10; margin: 4px 0 0; padding: 4px 0; list-style: none; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 6px 18px rgba(0,0,0,.15); max-height: 60vh; overflow-y: auto; }
+.sugg li { padding: 10px 12px; cursor: pointer; }
+.sugg li[aria-selected=true], .sugg li[data-i]:hover { background: var(--bg); }
+.sugg li.none { color: var(--muted); cursor: default; }
+button.lex-item { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; background: none; border: 0; padding: 6px 0; color: var(--text); font: inherit; }
+button.lex-item.open .chap-name { color: var(--accent); }
+.terms { list-style: none; margin: 4px 0 8px; padding: 0 0 0 8px; border-left: 3px solid var(--learning); }
+button.term { display: block; background: none; border: 0; padding: 8px 4px; min-height: 40px; width: 100%; text-align: left; font: inherit; color: var(--accent); }
+.def-box { max-height: 85vh; overflow-y: auto; }
+.def-box h2 { margin: 0 0 10px; }
+.def-codes { list-style: none; padding: 0; margin: 0 0 16px; }

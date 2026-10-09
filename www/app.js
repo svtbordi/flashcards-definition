@@ -342,6 +342,7 @@ function back() {
 
 backBtn.addEventListener('click', back);
 document.getElementById('btn-settings').addEventListener('click', () => go('settings'));
+document.getElementById('btn-lexicon').addEventListener('click', () => go('lexicon'));
 
 function esc(s) {
   return String(s).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
@@ -383,9 +384,11 @@ function bar(s) {
 
 function render() {
   backBtn.hidden = view === 'home';
-  const titles = { home: 'Flashcards BCPST', choose: 'Choisir des chapitres', session: 'Entraînement', progress: 'Ma progression', settings: 'Réglages', privacy: 'Données et confidentialité', install: 'Installer l’application', bilan: 'Mon bilan' };
+  // pas de lexique pendant une séance : chercher la réponse avant de la donner annule l'effet du test
+  document.getElementById('btn-lexicon').hidden = view === 'session' || view === 'lexicon';
+  const titles = { home: 'Flashcards BCPST', choose: 'Choisir des chapitres', session: 'Entraînement', progress: 'Ma progression', settings: 'Réglages', privacy: 'Données et confidentialité', install: 'Installer l’application', bilan: 'Mon bilan', lexicon: 'Lexique' };
   titleEl.textContent = titles[view] || 'Flashcards BCPST';
-  ({ home: renderHome, choose: renderChoose, session: renderSession, progress: renderProgress, settings: renderSettings, privacy: renderPrivacy, install: renderInstall, bilan: renderBilan })[view]();
+  ({ home: renderHome, choose: renderChoose, session: renderSession, progress: renderProgress, settings: renderSettings, privacy: renderPrivacy, install: renderInstall, bilan: renderBilan, lexicon: renderLexicon })[view]();
 }
 
 function renderHome() {
@@ -414,6 +417,7 @@ function renderHome() {
     </div>
     <div class="actions secondary">
       <button id="go-progress">Ma progression</button>
+      <button id="go-lexicon">Lexique : chercher une définition</button>
       <button id="go-install">Installer l’application et les rappels</button>
     </div>
     <p class="muted small">${deck.cards.length} définitions · version ${esc(deck.version)}</p>`;
@@ -423,6 +427,7 @@ function renderHome() {
   const last = document.getElementById('go-last');
   if (last) last.onclick = () => startSession(store.selection, 'Dernière sélection');
   document.getElementById('go-progress').onclick = () => go('progress');
+  document.getElementById('go-lexicon').onclick = () => go('lexicon');
   document.getElementById('go-install').onclick = () => go('install');
 }
 
@@ -633,6 +638,111 @@ function renderProgress() {
   }
   app.innerHTML = html;
   document.getElementById('go-bilan').onclick = () => go('bilan');
+}
+
+/* ---------- Lexique ---------- */
+
+let lexQuery = '';
+let lexOpenParts = new Set();
+let lexShown = ''; // code dont la liste des termes est affichée
+
+const byTerm = (a, b) => a.term.localeCompare(b.term, 'fr', { sensitivity: 'base' });
+
+// Termes qui correspondent à la saisie : début du terme, puis début d'un mot, puis n'importe où.
+function lexSuggest(query, max = 8) {
+  const q = normTerm(query);
+  if (!q) return [];
+  const rank = c => {
+    const t = c.id;
+    if (t.startsWith(q)) return 0;
+    if (t.split(/[\s'-]+/).some(w => w.startsWith(q))) return 1;
+    return t.includes(q) ? 2 : 3;
+  };
+  return deck.cards.map(c => [rank(c), c]).filter(([r]) => r < 3)
+    .sort((a, b) => a[0] - b[0] || a[1].term.length - b[1].term.length || byTerm(a[1], b[1]))
+    .slice(0, max).map(([, c]) => c);
+}
+
+function showDefinition(card) {
+  const box = document.createElement('div');
+  box.className = 'modal';
+  const codes = cardCodes(card).map(code => `<li><b>${code === NO_CODE ? '' : esc(code)}</b> ${esc(chapterTitle[code] || chapterTitle[partOf(code)] || '')}</li>`).join('');
+  box.innerHTML = `<div class="modal-box def-box" role="dialog" aria-modal="true" aria-labelledby="def-term">
+    <h2 id="def-term">${esc(card.term)}</h2>
+    <p>${esc(card.def).replace(/\n/g, '<br>')}</p>
+    <ul class="def-codes muted small">${codes}</ul>
+    <button class="primary wide" id="def-close">Fermer</button></div>`;
+  document.body.appendChild(box);
+  const close = () => { box.remove(); document.removeEventListener('keydown', onKey); };
+  const onKey = e => { if (e.key === 'Escape') close(); };
+  document.addEventListener('keydown', onKey);
+  box.addEventListener('click', e => { if (e.target === box) close(); });
+  box.querySelector('#def-close').onclick = close;
+  box.querySelector('#def-close').focus();
+}
+
+function termList(code) {
+  const cards = deck.cards.filter(c => matchesSelection(c, [code])).sort(byTerm);
+  return `<ul class="terms">${cards.map(c => `<li><button class="term" data-id="${esc(c.id)}">${esc(c.term)}</button></li>`).join('')}</ul>`;
+}
+
+function renderLexicon() {
+  const tree = chapterTree();
+  const count = code => deck.cards.filter(c => matchesSelection(c, [code])).length;
+  const item = (code, label) => `<button class="lex-item ${lexShown === code ? 'open' : ''}" data-show="${code}">
+      <span class="chap-name">${label}</span><span class="count">${count(code)}</span></button>
+    ${lexShown === code ? termList(code) : ''}`;
+  let html = `<div class="lex-search" role="combobox" aria-expanded="false" aria-owns="lex-sugg" aria-haspopup="listbox">
+      <input type="search" id="lex-q" placeholder="Tape un terme…" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Chercher un terme" aria-controls="lex-sugg" value="${esc(lexQuery)}">
+      <ul id="lex-sugg" class="sugg" role="listbox" hidden></ul>
+    </div>
+    <h2>Sommaire</h2>
+    <p class="muted small">Touche une partie pour voir ses sous-parties, puis un titre pour voir ses termes par ordre alphabétique.</p>`;
+  for (const p of tree) {
+    const title = `<b>${p.code === NO_CODE ? '' : esc(p.code)}</b> ${esc(chapterTitle[p.code] || '')}`;
+    if (!p.subs.length) { html += `<div class="chap">${item(p.code, title)}</div>`; continue; }
+    const open = lexOpenParts.has(p.code);
+    html += `<div class="chap"><button class="lex-item" data-part="${p.code}" aria-expanded="${open}">
+        <span class="chap-name">${title}</span><span class="count">${count(p.code)} ${open ? '▾' : '▸'}</span></button>
+      ${open ? `<div class="subs">${item(p.code, 'Tous les termes de la partie')}${p.subs.map(code => item(code, `<b>${esc(code)}</b> ${esc(chapterTitle[code] || '')}`)).join('')}</div>` : ''}
+    </div>`;
+  }
+  app.innerHTML = html;
+
+  const byId = new Map(deck.cards.map(c => [c.id, c]));
+  app.querySelectorAll('[data-part]').forEach(b => {
+    b.onclick = () => { const c = b.dataset.part; lexOpenParts.has(c) ? lexOpenParts.delete(c) : lexOpenParts.add(c); render(); };
+  });
+  app.querySelectorAll('[data-show]').forEach(b => {
+    b.onclick = () => { lexShown = lexShown === b.dataset.show ? '' : b.dataset.show; render(); };
+  });
+  app.querySelectorAll('.term').forEach(b => { b.onclick = () => showDefinition(byId.get(b.dataset.id)); });
+
+  const input = document.getElementById('lex-q');
+  const list = document.getElementById('lex-sugg');
+  let items = [];
+  let active = -1;
+  const paint = () => {
+    list.innerHTML = items.length
+      ? items.map((c, i) => `<li role="option" id="sg-${i}" data-i="${i}" aria-selected="${i === active}">${esc(c.term)}</li>`).join('')
+      : (input.value.trim() ? '<li class="none">Aucun terme trouvé</li>' : '');
+    list.hidden = !input.value.trim();
+    input.setAttribute('aria-activedescendant', active >= 0 ? `sg-${active}` : '');
+  };
+  const pick = c => { if (!c) return; input.value = c.term; lexQuery = c.term; items = []; paint(); list.hidden = true; showDefinition(c); };
+  input.oninput = () => { lexQuery = input.value; items = lexSuggest(input.value); active = -1; paint(); };
+  input.onkeydown = e => {
+    if (e.key === 'ArrowDown' && items.length) { e.preventDefault(); active = (active + 1) % items.length; paint(); }
+    else if (e.key === 'ArrowUp' && items.length) { e.preventDefault(); active = (active - 1 + items.length) % items.length; paint(); }
+    else if (e.key === 'Enter') { e.preventDefault(); pick(items[active] || items[0]); }
+  };
+  // pointerdown plutôt que click : la liste ne disparaît pas avant que le choix soit pris en compte
+  list.addEventListener('pointerdown', e => {
+    const li = e.target.closest('li[data-i]');
+    if (li) { e.preventDefault(); pick(items[Number(li.dataset.i)]); }
+  });
+  if (lexQuery) { items = lexSuggest(lexQuery); paint(); list.hidden = true; }
+  input.onfocus = () => { if (input.value.trim()) { items = lexSuggest(input.value); paint(); } };
 }
 
 /* ---------- Bilan pour l'enseignant ---------- */
