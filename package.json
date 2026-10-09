@@ -1,0 +1,14 @@
+{
+  "name": "flashcards-bcpst",
+  "private": true,
+  "description": "Flashcards des définitions de SVT du programme BCPST, en répétition espacée (FSRS).",
+  "scripts": {
+    "serve": "python3 -m http.server 8765 --directory www",
+    "test": "node tools/smoke.mjs /tmp"
+  },
+  "devDependencies": {
+    "playwright": "1.56.1",
+    "ts-fsrs": "5.4.2",
+    "xlsx": "0.18.5"
+  }
+}
