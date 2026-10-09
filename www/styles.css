@@ -183,3 +183,8 @@ button.link { border: 0; background: none; color: var(--accent); padding: 8px 0;
 .modal-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .modal-actions button { text-align: center; }
 button:focus-visible, .file:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
+.wide { width: 100%; margin-bottom: 16px; text-align: center; }
+.facts { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
+.form input[type=text] { font: inherit; padding: 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--text); width: 100%; min-width: 0; }
+.copy-fallback { width: 100%; height: 120px; font: 12px/1.4 ui-monospace, monospace; margin-top: 12px; }
+a.link { color: var(--accent); }

@@ -383,9 +383,9 @@ function bar(s) {
 
 function render() {
   backBtn.hidden = view === 'home';
-  const titles = { home: 'Flashcards BCPST', choose: 'Choisir des chapitres', session: 'Entraînement', progress: 'Ma progression', settings: 'Réglages', privacy: 'Données et confidentialité', install: 'Installer l’application' };
+  const titles = { home: 'Flashcards BCPST', choose: 'Choisir des chapitres', session: 'Entraînement', progress: 'Ma progression', settings: 'Réglages', privacy: 'Données et confidentialité', install: 'Installer l’application', bilan: 'Mon bilan' };
   titleEl.textContent = titles[view] || 'Flashcards BCPST';
-  ({ home: renderHome, choose: renderChoose, session: renderSession, progress: renderProgress, settings: renderSettings, privacy: renderPrivacy, install: renderInstall })[view]();
+  ({ home: renderHome, choose: renderChoose, session: renderSession, progress: renderProgress, settings: renderSettings, privacy: renderPrivacy, install: renderInstall, bilan: renderBilan })[view]();
 }
 
 function renderHome() {
@@ -609,7 +609,8 @@ function renderProgress() {
   const revs = k => (store.days[k] ? store.days[k].reviews : 0);
   const maxRev = Math.max(1, ...days.map(revs));
   const anyDay = days.some(k => revs(k) > 0);
-  let html = `<section class="card">
+  let html = `<button class="primary wide" id="go-bilan">Préparer mon bilan pour le professeur</button>
+  <section class="card">
     <div class="legend"><span class="l-mastered">acquises</span><span class="l-learning">en cours</span><span class="l-due">à revoir</span><span class="l-new">jamais vues</span></div>
     <p><b>Tout le programme</b> : ${all.mastered} acquises, ${all.learning} en cours, ${all.due} à revoir, ${all.new} jamais vues.</p>
     ${bar(all)}
@@ -626,12 +627,136 @@ function renderProgress() {
     html += `<div class="prow"><div class="row"><span class="chap-name"><b>${p.code === NO_CODE ? '' : esc(p.code)}</b> ${esc(chapterTitle[p.code] || '')}</span><span class="count">${s.seen}/${s.total} vues</span></div>${bar(s)}</div>`;
   }
   html += '</section>';
-  const hard = deck.cards.map(c => ({ c, st: store.cards[c.id] })).filter(x => x.st && x.st.lapses > 0)
-    .sort((a, b) => b.st.lapses - a.st.lapses).slice(0, 10);
+  const hard = mostFailed(store.log).slice(0, 10);
   if (hard.length) {
-    html += `<section class="card"><h2>Les définitions que tu rates le plus</h2><ol class="hard">${hard.map(x => `<li><b>${esc(x.c.term)}</b> <span class="muted">(${plural(x.st.lapses, 'oubli', 'oublis')})</span></li>`).join('')}</ol></section>`;
+    html += `<section class="card"><h2>Les définitions que tu rates le plus</h2><ol class="hard">${hard.map(x => `<li><b>${esc(x.c.term)}</b> <span class="muted">(${plural(x.n, 'fois', 'fois')})</span></li>`).join('')}</ol></section>`;
   }
   app.innerHTML = html;
+  document.getElementById('go-bilan').onclick = () => go('bilan');
+}
+
+/* ---------- Bilan pour l'enseignant ---------- */
+
+// Définitions classées par nombre de réponses « Raté » dans les entrées du journal données.
+function mostFailed(entries) {
+  const byId = new Map(deck.cards.map(c => [c.id, c]));
+  const count = new Map();
+  for (const r of entries) if (r.g === Rating.Again && byId.has(r.id)) count.set(r.id, (count.get(r.id) || 0) + 1);
+  return [...count].map(([id, n]) => ({ c: byId.get(id), n })).sort((a, b) => b.n - a.n || a.c.term.localeCompare(b.c.term, 'fr'));
+}
+
+function buildBilan(name) {
+  const now = new Date();
+  const since = d => now.getTime() - d * 864e5;
+  const recent = store.log.filter(x => Date.parse(x.t) >= since(30));
+  const week = recent.filter(x => Date.parse(x.t) >= since(7));
+  const activeDays = n => Object.keys(store.days).filter(k => store.days[k].reviews > 0 && k >= dayKey(new Date(since(n)))).length;
+  const byId = new Map(deck.cards.map(c => [c.id, c]));
+  const endDay = endOfStudyDay(now);
+  const chap = {};
+  // regroupement par partie du programme (SV-A, BG-C…) : les codes des cartes n'ont pas tous la même précision
+  const partsOf = c => [...new Set(cardCodes(c).map(partOf))];
+  for (const c of deck.cards) {
+    const status = cardStatus(c, now, endDay);
+    for (const code of partsOf(c)) {
+      const x = chap[code] || (chap[code] = { code, total: 0, vues: 0, acquises: 0, a_revoir: 0, reponses_30j: 0, ratees_30j: 0 });
+      x.total += 1;
+      if (status !== 'new') x.vues += 1;
+      if (status === 'mastered') x.acquises += 1;
+      if (status === 'due') x.a_revoir += 1;
+    }
+  }
+  for (const r of recent) {
+    const c = byId.get(r.id);
+    if (!c) continue;
+    for (const code of partsOf(c)) {
+      chap[code].reponses_30j += 1;
+      if (r.g === Rating.Again) chap[code].ratees_30j += 1;
+    }
+  }
+  const all = statsFor(deck.cards);
+  const jours = {};
+  Object.keys(store.days).filter(k => k >= dayKey(new Date(since(30)))).sort()
+    .forEach(k => { jours[k] = store.days[k].reviews; });
+  return {
+    app: 'flashcards-bcpst-bilan',
+    v: 1,
+    nom: name,
+    genere: now.toISOString(),
+    definitions: deck.version,
+    resume: {
+      reponses_7j: week.length,
+      reponses_30j: recent.length,
+      ratees_30j: recent.filter(x => x.g === Rating.Again).length,
+      jours_actifs_7j: activeDays(7),
+      jours_actifs_30j: activeDays(30),
+      serie: streak(),
+      cartes_vues: all.seen,
+      cartes_acquises: all.mastered,
+      cartes_a_revoir: all.due,
+      cartes_total: all.total,
+    },
+    chapitres: Object.values(chap).filter(x => x.vues > 0)
+      .sort((a, b) => (chapterOrder[a.code] ?? 9999) - (chapterOrder[b.code] ?? 9999) || a.code.localeCompare(b.code)),
+    plus_ratees: mostFailed(recent).slice(0, 20).map(x => ({ terme: x.c.term, ratees: x.n })),
+    jours,
+  };
+}
+
+function renderBilan() {
+  const name = store.settings.studentName || '';
+  const b = buildBilan(name);
+  const r = b.resume;
+  const pct = r.reponses_30j ? Math.round(100 * (1 - r.ratees_30j / r.reponses_30j)) : null;
+  app.innerHTML = `
+    <section class="card form">
+      <p>Ton bilan résume ton travail des 30 derniers jours. Il ne part nulle part tout seul : c’est toi qui l’envoies à ton professeur (par l’ENT ou par mail).</p>
+      <label>Ton nom (tel que ton professeur te connaît) <input type="text" id="sname" maxlength="60" autocomplete="name" value="${esc(name)}"></label>
+    </section>
+    <section class="card">
+      <h2>Ce que contient le bilan</h2>
+      <ul class="facts">
+        <li><b>${r.reponses_7j}</b> réponses cette semaine, <b>${r.reponses_30j}</b> sur 30 jours${pct === null ? '' : `, dont ${pct} % réussies`}</li>
+        <li><b>${r.jours_actifs_7j}</b> ${r.jours_actifs_7j > 1 ? 'jours' : 'jour'} de travail sur 7, <b>${r.jours_actifs_30j}</b> sur 30</li>
+        <li><b>${r.cartes_vues}</b> définitions vues sur ${r.cartes_total}, dont <b>${r.cartes_acquises}</b> acquises</li>
+        <li>${plural(b.chapitres.length, 'chapitre travaillé', 'chapitres travaillés')}, ${plural(b.plus_ratees.length, 'définition souvent ratée', 'définitions souvent ratées')}</li>
+      </ul>
+    </section>
+    <div class="actions">
+      <button class="primary" id="bilan-file">Enregistrer le fichier du bilan</button>
+      <button id="bilan-copy">Copier le bilan (à coller dans un message)</button>
+    </div>
+    <p class="muted small">Le nom n’est enregistré que sur cet appareil et n’apparaît que dans le bilan que tu envoies.</p>`;
+  const input = document.getElementById('sname');
+  input.onchange = () => { store.settings.studentName = input.value.trim(); persist(); };
+  const current = () => {
+    store.settings.studentName = input.value.trim();
+    persist();
+    if (!store.settings.studentName) { toast('Indique ton nom pour que ton professeur reconnaisse ton bilan.'); input.focus(); return null; }
+    return buildBilan(store.settings.studentName);
+  };
+  document.getElementById('bilan-file').onclick = () => {
+    const data = current();
+    if (!data) return;
+    const slug = normTerm(data.nom).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'eleve';
+    download(`bilan-${slug}-${dayKey()}.json`, JSON.stringify(data), 'application/json');
+  };
+  document.getElementById('bilan-copy').onclick = async () => {
+    const data = current();
+    if (!data) return;
+    const text = `Bilan flashcards BCPST de ${data.nom} (${dayKey()})\n` + JSON.stringify(data);
+    try {
+      await navigator.clipboard.writeText(text);
+      toast('Bilan copié. Colle-le dans un message à ton professeur.');
+    } catch (e) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.className = 'copy-fallback';
+      app.appendChild(ta);
+      ta.select();
+      toast('Sélectionne le texte affiché et copie-le.');
+    }
+  };
 }
 
 /* ---------- Réglages, import, sauvegarde ---------- */
@@ -666,7 +791,8 @@ function renderSettings() {
       <label class="file">Restaurer une sauvegarde<input type="file" id="import" accept=".json,application/json"></label>
       <button class="danger" id="reset">Effacer toute ma progression</button>
     </section>
-    <button class="link" id="privacy">Données et confidentialité</button>`;
+    <button class="link" id="privacy">Données et confidentialité</button>
+    <p><a class="link" href="prof.html">Espace enseignant : regrouper les bilans des élèves</a></p>`;
   const num = (id, min, max) => {
     const el = document.getElementById(id);
     el.onchange = () => {
@@ -859,7 +985,7 @@ function renderInstall() {
 
 function renderPrivacy() {
   app.innerHTML = `<section class="card prose">
-    <p><b>Aucune donnée personnelle ne quitte ton appareil.</b> L’application ne demande ni nom, ni adresse e-mail, ni compte.</p>
+    <p><b>Aucune donnée personnelle ne quitte ton appareil sans ton action.</b> L’application ne demande ni adresse e-mail, ni compte. Ton nom n’est demandé que si tu prépares un bilan pour ton professeur ; il reste sur cet appareil et figure seulement dans le bilan que tu choisis d’envoyer.</p>
     <p>Ce qui est enregistré, uniquement dans le stockage de ton navigateur sur cet appareil : l’état de chaque carte (date de prochaine révision, stabilité, difficulté, nombre d’oublis), l’historique de tes réponses, tes réglages et ta dernière sélection de chapitres.</p>
     <p>L’application n’utilise ni cookie, ni outil de mesure d’audience, ni publicité. Le serveur qui héberge l’application ne fait que fournir ses fichiers ; il ne reçoit pas tes réponses.</p>
     <p>Pour tout effacer : Réglages, puis « Effacer toute ma progression », ou supprime l’application. Une sauvegarde exportée est un fichier qui t’appartient : tu choisis où il va.</p>
