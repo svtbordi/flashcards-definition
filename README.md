@@ -37,7 +37,7 @@ Un élève qui change de téléphone doit exporter puis restaurer sa sauvegarde.
 2. Remplacer `definitions_SVT.xlsx` par la nouvelle version (« Add file » puis « Upload files », même nom de fichier).
 3. Valider. La publication se refait seule en une à deux minutes. Les élèves reçoivent la nouvelle version à la prochaine ouverture avec connexion, ou via Réglages, « Vérifier s'il existe une nouvelle version ».
 
-Format attendu : onglet « Toutes » (sinon le premier onglet), sans ligne d'en-tête ; colonne A le terme, B le ou les codes de partie séparés par des virgules (ex. `SV-G-1, SV-H`), C la définition.
+Format attendu : onglet « Toutes » (sinon le premier onglet), sans ligne d'en-tête ; colonne A le terme, B le ou les codes de partie séparés par des virgules (ex. `SV-G-1, SV-H`), C la définition. Une définition sans code en colonne B n'est pas proposée dans l'application.
 
 Le terme sert d'identifiant : corriger une définition garde la progression des élèves, renommer un terme crée une nouvelle carte. Les majuscules, accents, « œ » et apostrophes typographiques sont ignorés dans cette comparaison.
 
@@ -69,4 +69,3 @@ Réglages de l'algorithme (dans `app.js`) : rétention cible 90 % (modifiable pa
 
 - Pas de vraie notification push : une web app ne peut pas programmer seule une alerte « tu n'as pas fait tes cartes ». La prochaine étape prévue est d'emballer ce même code en application native (Capacitor) avec des notifications locales.
 - Sur iPhone, une page non installée peut voir ses données effacées par Safari après plusieurs semaines sans visite. Il faut l'installer sur l'écran d'accueil.
-- 444 définitions n'ont pas encore de code de partie ; elles sont regroupées dans « Définitions sans chapitre ».

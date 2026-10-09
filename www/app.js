@@ -164,6 +164,7 @@ async function loadDeck() {
   chapterOrder[NO_CODE] = 9998;
   const imported = loadJSON(DECK_KEY, null);
   deck = imported && imported.version >= bundled.version ? imported : bundled;
+  deck.cards = deck.cards.filter(c => c.codes.length); // une définition sans chapitre n'est pas proposée
   bundledVersion = bundled.version;
 }
 let bundledVersion = '';
@@ -987,20 +988,23 @@ async function importXlsx(file) {
     const rows = window.XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { header: 1, raw: false, defval: '' });
     const seen = new Set();
     const cards = [];
+    let noCode = 0;
     for (const row of rows) {
       const term = String(row[0] || '').trim();
       const def = String(row[2] || '').trim();
       if (!term || !def) continue;
       if (/^terme$/i.test(term) && /^d[ée]finition$/i.test(def)) continue; // ligne d'en-tête éventuelle
+      const codes = String(row[1] || '').split(/[,;]/).map(x => x.trim().toUpperCase()).filter(Boolean);
+      if (!codes.length) { noCode += 1; continue; }
       const id = normTerm(term);
       if (seen.has(id)) continue;
       seen.add(id);
-      const codes = String(row[1] || '').split(/[,;]/).map(x => x.trim().toUpperCase()).filter(Boolean);
       cards.push({ id, term, def, codes });
     }
-    if (!cards.length) return toast('Aucune définition trouvée dans ce fichier.');
+    if (!cards.length) return toast('Aucune définition avec un code de chapitre dans ce fichier.');
     const stamp = new Date().toISOString().slice(0, 19).replace('T', ' ');
-    applyDeck({ version: stamp, source: file.name, cards }, `Fichier « ${file.name} », onglet « ${sheetName} ».`);
+    const skipped = noCode ? ` ${plural(noCode, 'définition sans code de chapitre est ignorée', 'définitions sans code de chapitre sont ignorées')}.` : '';
+    applyDeck({ version: stamp, source: file.name, cards }, `Fichier « ${file.name} », onglet « ${sheetName} ».${skipped}`);
   } catch (e) {
     toast('Lecture du fichier impossible : ' + (e.message || e));
   }
