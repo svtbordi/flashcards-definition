@@ -13,16 +13,19 @@ def norm(term):
 
 wb = openpyxl.load_workbook(XLSX, read_only=True)
 ws = wb['Toutes']
-cards, seen = [], collections.Counter()
+cards, seen, skipped = [], collections.Counter(), 0
 for row in ws.iter_rows(values_only=True):
     term, codes, definition = (row + (None, None, None))[:3]
     if not term or not definition:
+        continue
+    cl = [c.strip() for c in re.split(r'[,;]', str(codes or '')) if c.strip()]
+    if not cl:  # sans chapitre : la définition n'est pas proposée dans l'application
+        skipped += 1
         continue
     cid = norm(str(term))
     seen[cid] += 1
     if seen[cid] > 1:
         cid = f'{cid}#{seen[cid]}'
-    cl = [c.strip() for c in re.split(r'[,;]', str(codes or '')) if c.strip()]
     cards.append({'id': cid, 'term': str(term).strip(), 'def': str(definition).strip(), 'codes': cl})
 
 chapters = []
@@ -43,4 +46,4 @@ json.dump({'version': stamp, 'source': 'definitions_SVT.xlsx', 'cards': cards},
           open(f'{OUT}/definitions.json', 'w', encoding='utf8'), ensure_ascii=False)
 if chapters:
     json.dump(chapters, open(f'{OUT}/chapters.json', 'w', encoding='utf8'), ensure_ascii=False, indent=0)
-print(len(cards), 'cartes', sum(1 for c in cards if not c['codes']), 'sans code', sum(v > 1 for v in seen.values()), 'termes en double;', len(chapters), 'chapitres')
+print(len(cards), 'cartes,', skipped, 'sans chapitre ignorées,', sum(v > 1 for v in seen.values()), 'termes en double;', len(chapters), 'chapitres')
