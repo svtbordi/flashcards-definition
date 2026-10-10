@@ -9,6 +9,7 @@ const DECK_KEY = 'fc-bcpst-deck-v1';
 const DAY_START_HOUR = 4; // une « journée » de révision commence à 4 h, comme dans Anki
 const MASTERED_DAYS = 21; // carte considérée comme acquise au-delà de 21 jours de stabilité
 const NO_CODE = 'NC';
+const QCM_SIZE = 10; // questions de l'échauffement
 
 const DEFAULT_SETTINGS = {
   newPerDay: 20,
@@ -40,7 +41,7 @@ function saveJSON(key, value) {
 }
 
 const store = Object.assign(
-  { cards: {}, log: [], days: {}, settings: {}, selection: [] },
+  { cards: {}, log: [], days: {}, settings: {}, selection: [], qcmLog: [], pendingReports: [] },
   loadJSON(STORE_KEY, {})
 );
 store.settings = Object.assign({}, DEFAULT_SETTINGS, store.settings);
@@ -151,10 +152,12 @@ function cardOrderKey(c) {
 }
 
 async function loadDeck() {
-  const [bundled, chaps] = await Promise.all([
+  const [bundled, chaps, conf] = await Promise.all([
     fetch('data/definitions.json').then(r => r.json()),
     fetch('data/chapters.json').then(r => r.json()),
+    fetch('config.json').then(r => r.json()).catch(() => ({})),
   ]);
+  config = conf || {};
   chapters = chaps;
   chapters.forEach((c, i) => {
     chapterTitle[c.code] = c.title;
@@ -168,6 +171,7 @@ async function loadDeck() {
   bundledVersion = bundled.version;
 }
 let bundledVersion = '';
+let config = {};
 
 function setDeck(newDeck, persistIt) {
   deck = newDeck;
@@ -245,7 +249,7 @@ function buildSession(selected, { ahead = false, label = '' } = {}) {
   }
   return {
     selected, label, ahead,
-    queue,
+    pool, queue,
     relearn: [], // cartes ratées, à revoir dans la séance
     done: 0, again: 0,
     current: null, revealed: false, undo: null,
@@ -422,7 +426,7 @@ function renderHome() {
       <button id="go-install">Installer l’application et les rappels</button>
     </div>
     <p class="muted small">${deck.cards.length} définitions · version ${esc(deck.version)}</p>`;
-  document.getElementById('go-all').onclick = () => startSession(['SV', 'BG', 'ST', NO_CODE], 'Tout le programme');
+  document.getElementById('go-all').onclick = () => startSession(['SV', 'BG', 'ST', NO_CODE], 'Tout le programme', false, false);
   document.getElementById('go-started').onclick = () => startSession(started, 'Mes chapitres commencés');
   document.getElementById('go-choose').onclick = () => go('choose');
   const last = document.getElementById('go-last');
@@ -521,10 +525,158 @@ function renderChoose() {
   if (clear) clear.onclick = () => { chooseSel.clear(); render(); };
 }
 
-function startSession(selected, label, ahead = false) {
+function startSession(selected, label, ahead = false, offerWarmup = !ahead) {
   session = buildSession(selected, { label, ahead });
-  session.current = nextCard();
+  // l'échauffement précède toujours des flashcards : proposé seulement s'il y a des cartes à faire ensuite
+  if (offerWarmup && session.queue.length && session.pool.length >= 4) session.phase = 'intro';
+  else session.current = nextCard();
   go('session', view !== 'session');
+}
+
+/* ---------- Échauffement par QCM ---------- */
+
+// Définitions interrogées : celles de la séance qui suit, jamais vues ou ratées d'abord, puis le reste du thème.
+function pickQcmCards(s, n = QCM_SIZE) {
+  const inQueue = new Set(s.queue.map(c => c.id));
+  const weak = c => {
+    const st = stateOf(c.id);
+    return !st || st.state !== State.Review || st.lapses > 0;
+  };
+  const rank = c => (inQueue.has(c.id) ? 0 : 2) + (weak(c) ? 0 : 1);
+  return QCM.shuffle(s.pool).sort((a, b) => rank(a) - rank(b)).slice(0, n);
+}
+
+function firstTimeOn(s) {
+  const ids = new Set(s.pool.map(c => c.id));
+  return !s.pool.some(c => store.cards[c.id] && store.cards[c.id].reps > 0) && !store.qcmLog.some(x => ids.has(x.id));
+}
+
+function startQcm() {
+  const s = session;
+  s.qcm = { items: pickQcmCards(s).map(c => QCM.makeQuestion(c, deck.cards)), i: 0, ok: 0, failed: [], chosen: null };
+  s.phase = 'qcm';
+  render();
+}
+
+// Une erreur au QCM compte comme « Raté » pour l'algorithme ; une bonne réponse ne compte pas comme « Su » :
+// reconnaître un terme parmi quatre ne prouve pas qu'on saurait retrouver la définition.
+function qcmChoose(k) {
+  const s = session;
+  const Q = s.qcm;
+  const q = Q.items[Q.i];
+  if (Q.chosen !== null) return;
+  Q.chosen = k;
+  const ok = q.options[k].id === q.card.id;
+  const now = new Date();
+  store.qcmLog.push({ id: q.card.id, t: now.toISOString(), ok: ok ? 1 : 0, pick: q.options[k].id });
+  if (store.qcmLog.length > 5000) store.qcmLog.splice(0, store.qcmLog.length - 5000);
+  if (ok) Q.ok += 1;
+  else {
+    Q.failed.push(q.card);
+    const card = stateOf(q.card.id) || createEmptyCard(now);
+    if (card.state === State.New) today().newCards += 1;
+    store.cards[q.card.id] = fromCard(scheduler.next(card, now, Rating.Again).card);
+  }
+  persist();
+  updateBadge();
+  render();
+}
+
+function qcmNext() {
+  const Q = session.qcm;
+  Q.i += 1;
+  Q.chosen = null;
+  if (Q.i >= Q.items.length) session.phase = 'qcmEnd';
+  render();
+  window.scrollTo(0, 0);
+}
+
+function qcmToCards() {
+  const old = session;
+  const failed = old.qcm.failed;
+  const failedIds = new Set(failed.map(c => c.id));
+  session = buildSession(old.selected, { label: old.label });
+  // les définitions ratées au QCM reviennent après leur délai de 10 minutes, comme une carte ratée en séance
+  session.queue = session.queue.filter(c => !failedIds.has(c.id));
+  for (const c of failed) session.relearn.push({ card: c, due: stateOf(c.id).due.getTime() });
+  session.phase = 'cards';
+  session.current = nextCard();
+  render();
+  window.scrollTo(0, 0);
+}
+
+function renderWarmupIntro(s) {
+  const first = firstTimeOn(s);
+  const n = Math.min(QCM_SIZE, s.pool.length);
+  const qcmBtn = `<button class="${first ? 'primary' : ''}" id="qcm-go">S’échauffer avec ${n} QCM, puis les flashcards</button>`;
+  const cardsBtn = `<button class="${first ? '' : 'primary'}" id="cards-go">Commencer directement les flashcards</button>`;
+  app.innerHTML = `
+    <section class="card hero">
+      <p class="big">${first ? 'Première fois sur ce thème' : 'Avant les flashcards'}</p>
+      <p>${first
+        ? 'Nous te conseillons de commencer par un échauffement : pour chaque définition, retrouve le terme parmi quatre propositions.'
+        : 'Tu peux t’échauffer : pour chaque définition, retrouve le terme parmi quatre propositions.'}</p>
+    </section>
+    <div class="actions">${first ? qcmBtn + cardsBtn : cardsBtn + qcmBtn}</div>
+    <p class="muted small">Le QCM ne remplace pas les flashcards : elles suivent toujours l’échauffement.</p>`;
+  document.getElementById('qcm-go').onclick = startQcm;
+  document.getElementById('cards-go').onclick = () => {
+    s.phase = 'cards';
+    s.current = nextCard();
+    render();
+  };
+}
+
+function renderQcm(s) {
+  const Q = s.qcm;
+  const q = Q.items[Q.i];
+  const answered = Q.chosen !== null;
+  const picked = answered ? q.options[Q.chosen] : null;
+  const ok = answered && picked.id === q.card.id;
+  const last = Q.i + 1 >= Q.items.length;
+  app.innerHTML = `
+    <div class="progress-line"><span>Échauffement${s.label ? ' · ' + esc(s.label) : ''}</span><span>Question ${Q.i + 1} / ${Q.items.length}</span></div>
+    <article class="flash qcm">
+      ${answered && canReport() ? reportButton() : ''}
+      <p class="hint muted">${answered ? esc(q.card.term) : 'Quel terme correspond à cette définition ?'}</p>
+      <p class="def">${esc(answered ? q.card.def : q.def)}</p>
+    </article>
+    <div class="options">${q.options.map((o, k) => {
+      const cls = !answered ? '' : o.id === q.card.id ? 'right' : k === Q.chosen ? 'wrong' : 'dim';
+      return `<button class="opt ${cls}" data-k="${k}" ${answered ? 'disabled' : ''}><small>${k + 1}</small>${esc(o.term)}</button>`;
+    }).join('')}</div>
+    ${answered ? `<div class="feedback ${ok ? 'ok' : 'ko'}">
+      ${ok ? '<p><b>Bonne réponse.</b></p>'
+        : `<p><b>La bonne réponse est « ${esc(q.card.term)} ».</b></p><p>Tu as choisi « ${esc(picked.term)} » : ${esc(picked.def)}</p>`}
+    </div>
+    <button class="primary wide" id="qcm-next">${last ? 'Voir mon score' : 'Question suivante'} <small>Entrée</small></button>` : ''}`;
+  app.querySelectorAll('.opt').forEach(b => { b.onclick = () => qcmChoose(Number(b.dataset.k)); });
+  const next = document.getElementById('qcm-next');
+  if (next) { next.onclick = qcmNext; next.focus({ preventScroll: true }); }
+  const rep = app.querySelector('.report-btn');
+  if (rep) rep.onclick = () => openReport(q.card, 'qcm', { propositions: q.options.map(o => o.term), choisi: picked.term });
+}
+
+function renderQcmEnd(s) {
+  const Q = s.qcm;
+  const n = Q.items.length;
+  const nf = Q.failed.length;
+  const verdict = Q.ok >= 0.8 * n ? 'Plutôt réussi.'
+    : Q.ok >= 0.5 * n ? 'Résultat moyen : plusieurs définitions sont encore fragiles.'
+      : 'Ces définitions ne sont pas encore connues. C’est normal au début d’un thème.';
+  app.innerHTML = `
+    <section class="card hero">
+      <p class="big">${Q.ok} / ${n} bonnes réponses</p>
+      <p>${verdict}</p>
+    </section>
+    <section class="card">
+      <p>Reconnaître le bon terme parmi quatre est plus facile que retrouver une définition de mémoire : <b>ce score ne suffit pas à dire que tu sais ces définitions.</b> Les flashcards du thème vont le vérifier.</p>
+      ${nf ? `<p class="muted">${nf > 1 ? `Les ${nf} définitions ratées reviendront` : 'La définition ratée reviendra'} en flashcard dans une dizaine de minutes.</p>` : ''}
+    </section>
+    <button class="primary wide" id="to-cards">Passer aux flashcards <small>Entrée</small></button>`;
+  const b = document.getElementById('to-cards');
+  b.onclick = qcmToCards;
+  b.focus();
 }
 
 function ratingButtons() {
@@ -543,6 +695,9 @@ function ratingButtons() {
 function renderSession() {
   const s = session;
   if (!s) return go('home', false);
+  if (s.phase === 'intro') return renderWarmupIntro(s);
+  if (s.phase === 'qcm') return renderQcm(s);
+  if (s.phase === 'qcmEnd') return renderQcmEnd(s);
   if (!s.current) {
     const ahead = s.ahead;
     const endDay = endOfStudyDay();
@@ -574,6 +729,7 @@ function renderSession() {
   app.innerHTML = `
     <div class="progress-line"><span>${s.label ? esc(s.label) : ''}${s.ahead ? ' · en avance' : ''}</span><span>${left} restantes</span></div>
     <article class="flash ${s.revealed ? 'revealed' : ''}">
+      ${s.revealed && canReport() ? reportButton() : ''}
       <div class="codes">${cardCodes(c).map(x => `<span>${esc(x === NO_CODE ? 'sans chapitre' : x)}</span>`).join('')} ${tag}</div>
       <h2 class="term">${esc(c.term)}</h2>
       ${s.revealed ? `<p class="def">${esc(c.def)}</p>` : '<p class="hint muted">Formule la définition dans ta tête (ou à l’écrit), puis retourne la carte.</p>'}
@@ -585,10 +741,20 @@ function renderSession() {
   app.querySelectorAll('[data-r]').forEach(b => { b.onclick = () => answer(Number(b.dataset.r)); });
   const u = document.getElementById('undo');
   if (u) u.onclick = undoLast;
+  const rep = app.querySelector('.report-btn');
+  if (rep) rep.onclick = () => openReport(c, 'flashcard');
 }
 
 document.addEventListener('keydown', e => {
-  if (view !== 'session' || !session || !session.current || e.target.tagName === 'INPUT') return;
+  if (view !== 'session' || !session || e.target.tagName === 'INPUT' || document.querySelector('.modal')) return;
+  if (session.phase === 'qcm') {
+    const Q = session.qcm;
+    if (Q.chosen === null && /^[1-4]$/.test(e.key) && Number(e.key) <= Q.items[Q.i].options.length) { e.preventDefault(); qcmChoose(Number(e.key) - 1); }
+    else if (Q.chosen !== null && e.key === 'Enter') { e.preventDefault(); qcmNext(); }
+    return;
+  }
+  if (session.phase === 'qcmEnd' && e.key === 'Enter') { e.preventDefault(); qcmToCards(); return; }
+  if (!session.current) return;
   if (!session.revealed && (e.key === ' ' || e.key === 'Enter')) {
     e.preventDefault();
     session.revealed = true;
@@ -641,6 +807,90 @@ function renderProgress() {
   document.getElementById('go-bilan').onclick = () => go('bilan');
 }
 
+/* ---------- Signalement d'une erreur ---------- */
+
+// Le signalement part vers l'adresse configurée dans config.json (script Google de l'enseignant, qui envoie le mail).
+// L'élève ne voit pas le destinataire. Hors connexion, il est gardé et envoyé plus tard.
+const canReport = () => !!config.signalement;
+const reportButton = () => '<button class="report-btn" aria-label="Signaler une erreur" title="Signaler une erreur">&#9888;&#xFE0E;</button>';
+
+const REPORT_TYPES = {
+  definition: 'Erreur dans la définition',
+  coquille: 'Coquille (orthographe, formulation)',
+  qcm: 'Question ambiguë (plusieurs bonnes réponses)',
+  autre: 'Autre',
+};
+
+function openReport(card, context, extra = {}) {
+  const types = Object.keys(REPORT_TYPES).filter(k => k !== 'qcm' || context === 'qcm');
+  const box = document.createElement('div');
+  box.className = 'modal';
+  box.innerHTML = `<form class="modal-box report-box" role="dialog" aria-modal="true" aria-labelledby="rep-title">
+    <h2 id="rep-title">Signaler un problème</h2>
+    <p class="muted">Définition de <b>${esc(card.term)}</b></p>
+    <fieldset>${types.map(k => `<label class="radio"><input type="radio" name="rep-type" value="${k}"> ${esc(REPORT_TYPES[k])}</label>`).join('')}</fieldset>
+    <label><span id="rep-label">Précise si tu veux (facultatif)</span><input type="text" id="rep-text" maxlength="300" autocomplete="off"></label>
+    <div class="modal-actions"><button type="button" id="rep-cancel">Annuler</button><button class="primary" id="rep-send" disabled>Envoyer</button></div>
+  </form>`;
+  document.body.appendChild(box);
+  const form = box.querySelector('form');
+  const text = box.querySelector('#rep-text');
+  const send = box.querySelector('#rep-send');
+  const type = () => (form.querySelector('input[name=rep-type]:checked') || {}).value;
+  const check = () => {
+    const autre = type() === 'autre';
+    box.querySelector('#rep-label').textContent = autre ? 'Précise ce qui ne va pas' : 'Précise si tu veux (facultatif)';
+    send.disabled = !type() || (autre && !text.value.trim());
+  };
+  form.addEventListener('change', check);
+  text.addEventListener('input', check);
+  const before = document.activeElement;
+  const close = () => { box.remove(); document.removeEventListener('keydown', onKey); if (before && before.isConnected) before.focus(); };
+  const onKey = e => { if (e.key === 'Escape') close(); };
+  document.addEventListener('keydown', onKey);
+  box.querySelector('#rep-cancel').onclick = close;
+  form.onsubmit = async e => {
+    e.preventDefault();
+    if (send.disabled) return;
+    store.pendingReports.push(Object.assign({
+      terme: card.term,
+      id: card.id,
+      definition: card.def,
+      codes: card.codes.join(', '),
+      type: REPORT_TYPES[type()],
+      precision: text.value.trim(),
+      contexte: { flashcard: 'flashcard', qcm: 'QCM d’échauffement', lexique: 'lexique' }[context] || context,
+      version: deck.version,
+      date: new Date().toISOString(),
+    }, extra));
+    persist();
+    close();
+    toast(await flushReports() ? 'Merci, ton signalement a été transmis.' : 'Pas de connexion : ton signalement sera transmis dès que possible.');
+  };
+}
+
+let flushing = null;
+function flushReports() {
+  if (!flushing) {
+    flushing = (async () => {
+      while (store.pendingReports.length && canReport()) {
+        try {
+          // no-cors : la réponse du script n'est pas lisible, seule une panne réseau est détectée
+          await fetch(config.signalement, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(store.pendingReports[0]) });
+        } catch (e) {
+          return false;
+        }
+        store.pendingReports.shift();
+        persist();
+      }
+      return true;
+    })().finally(() => { flushing = null; });
+  }
+  return flushing;
+}
+
+window.addEventListener('online', () => flushReports());
+
 /* ---------- Lexique ---------- */
 
 let lexQuery = '';
@@ -672,14 +922,17 @@ function showDefinition(card) {
     <h2 id="def-term">${esc(card.term)}</h2>
     <p>${esc(card.def).replace(/\n/g, '<br>')}</p>
     <ul class="def-codes muted small">${codes}</ul>
+    ${canReport() ? reportButton() : ''}
     <button class="primary wide" id="def-close">Fermer</button></div>`;
   document.body.appendChild(box);
   const close = () => { box.remove(); document.removeEventListener('keydown', onKey); };
-  const onKey = e => { if (e.key === 'Escape') close(); };
+  const onKey = e => { if (e.key === 'Escape' && !document.querySelector('.report-box')) close(); };
   document.addEventListener('keydown', onKey);
   box.addEventListener('click', e => { if (e.target === box) close(); });
   box.querySelector('#def-close').onclick = close;
   box.querySelector('#def-close').focus();
+  const rep = box.querySelector('.report-btn');
+  if (rep) rep.onclick = () => openReport(card, 'lexique');
 }
 
 function termList(code) {
@@ -986,7 +1239,7 @@ async function importXlsx(file) {
     const wb = window.XLSX.read(await file.arrayBuffer(), { type: 'array' });
     const sheetName = wb.SheetNames.includes('Toutes') ? 'Toutes' : wb.SheetNames[0];
     const rows = window.XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { header: 1, raw: false, defval: '' });
-    const seen = new Set();
+    const seen = new Map();
     const cards = [];
     let noCode = 0;
     for (const row of rows) {
@@ -996,10 +1249,10 @@ async function importXlsx(file) {
       if (/^terme$/i.test(term) && /^d[ée]finition$/i.test(def)) continue; // ligne d'en-tête éventuelle
       const codes = String(row[1] || '').split(/[,;]/).map(x => x.trim().toUpperCase()).filter(Boolean);
       if (!codes.length) { noCode += 1; continue; }
-      const id = normTerm(term);
-      if (seen.has(id)) continue;
-      seen.add(id);
-      cards.push({ id, term, def, codes });
+      const base = normTerm(term);
+      const n = (seen.get(base) || 0) + 1;
+      seen.set(base, n);
+      cards.push({ id: n > 1 ? `${base}#${n}` : base, term, def, codes });
     }
     if (!cards.length) return toast('Aucune définition avec un code de chapitre dans ce fichier.');
     const stamp = new Date().toISOString().slice(0, 19).replace('T', ' ');
@@ -1102,6 +1355,7 @@ function renderPrivacy() {
     <p><b>Aucune donnée personnelle ne quitte ton appareil sans ton action.</b> L’application ne demande ni adresse e-mail, ni compte. Ton nom n’est demandé que si tu prépares un bilan pour ton professeur ; il reste sur cet appareil et figure seulement dans le bilan que tu choisis d’envoyer.</p>
     <p>Ce qui est enregistré, uniquement dans le stockage de ton navigateur sur cet appareil : l’état de chaque carte (date de prochaine révision, stabilité, difficulté, nombre d’oublis), l’historique de tes réponses, tes réglages et ta dernière sélection de chapitres.</p>
     <p>L’application n’utilise ni cookie, ni outil de mesure d’audience, ni publicité. Le serveur qui héberge l’application ne fait que fournir ses fichiers ; il ne reçoit pas tes réponses.</p>
+    <p>Si tu signales une erreur (bouton &#9888;&#xFE0E;), ton professeur reçoit le terme, sa définition, le type de problème et ce que tu as écrit. Ton nom n’est pas envoyé.</p>
     <p>Pour tout effacer : Réglages, puis « Effacer toute ma progression », ou supprime l’application. Une sauvegarde exportée est un fichier qui t’appartient : tu choisis où il va.</p>
   </section>`;
 }
@@ -1117,6 +1371,7 @@ async function main() {
   }
   render();
   updateBadge();
+  flushReports();
   if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
   if ('serviceWorker' in navigator && location.protocol !== 'file:') {
     navigator.serviceWorker.register('sw.js').catch(() => {});

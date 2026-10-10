@@ -17,6 +17,7 @@ await page.check('input[data-code="SV-G-1"]');
 await page.check('input[data-code="SV-G-3"]');
 await page.screenshot({ path: `${shots}/2-choix.png`, fullPage: false });
 await page.click('#start');
+await page.click('#cards-go'); // pas d'échauffement : directement les flashcards
 await page.waitForSelector('.flash');
 await page.screenshot({ path: `${shots}/3-recto.png` });
 await page.click('#reveal');

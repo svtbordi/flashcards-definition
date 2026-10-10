@@ -203,3 +203,33 @@ button.term { display: block; background: none; border: 0; padding: 8px 4px; min
 .def-box { max-height: 85vh; overflow-y: auto; }
 .def-box h2 { margin: 0 0 10px; }
 .def-codes { list-style: none; padding: 0; margin: 0 0 16px; }
+
+/* QCM d'échauffement */
+.qcm .hint { margin: 0 0 12px; font-weight: 600; }
+.qcm .def { border-top: 0; padding-top: 0; }
+.options { display: grid; gap: 8px; margin-bottom: 16px; }
+.opt { display: flex; align-items: center; gap: 12px; width: 100%; overflow-wrap: anywhere; }
+.opt small { flex: none; display: inline-grid; place-items: center; width: 24px; height: 24px; border: 1px solid var(--line); border-radius: 6px; }
+.opt:disabled { opacity: 1; }
+.opt.right { border: 2px solid var(--good); font-weight: 600; }
+.opt.wrong { border: 2px solid var(--again); text-decoration: line-through; }
+.opt.dim { color: var(--muted); }
+.feedback { border-left: 4px solid var(--good); padding: 4px 12px; margin-bottom: 16px; }
+.feedback.ko { border-left-color: var(--again); }
+.feedback p { margin: 0 0 8px; }
+
+/* Signalement d'une erreur */
+.flash, .def-box { position: relative; }
+.flash .codes, .flash .hint, .def-box h2 { padding-right: 44px; }
+.report-btn {
+  position: absolute; top: 8px; right: 8px; min-height: 0; width: 40px; height: 40px; padding: 0;
+  display: grid; place-items: center; font-size: 20px; line-height: 1;
+  color: var(--hard); background: none; border: 0; border-radius: 8px;
+}
+.report-btn:hover { background: var(--bg); }
+.report-box h2 { margin: 0 0 8px; }
+.report-box fieldset { border: 0; padding: 0; margin: 0 0 12px; display: grid; gap: 4px; }
+.report-box .radio { display: flex; align-items: center; gap: 10px; min-height: 40px; }
+.report-box .radio input { width: 20px; height: 20px; margin: 0; accent-color: var(--accent); }
+.report-box label:not(.radio) { display: grid; gap: 4px; margin-bottom: 16px; }
+.report-box input[type=text] { font: inherit; padding: 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--text); width: 100%; min-width: 0; }

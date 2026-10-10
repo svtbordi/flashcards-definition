@@ -7,6 +7,8 @@ Application installable (téléphone Android ou iPhone, ordinateur) pour apprend
 - Entraînement sur un chapitre, plusieurs, tout le programme, ou « Mes chapitres commencés » (les chapitres où l'élève a déjà répondu au moins une fois).
 - Ordre d'une séance : cartes ratées dans la séance, puis cartes à revoir (les plus menacées d'oubli d'abord), puis nouvelles cartes (20 par jour par défaut, dans l'ordre du programme).
 - Révision en avance avant une colle, sans fausser le calendrier.
+- Échauffement par QCM, proposé au début d'une séance sur un ou plusieurs chapitres (et conseillé la première fois qu'un thème est abordé) : 10 définitions, le terme masqué, à retrouver parmi quatre termes. Les trois leurres sont les termes les plus proches par le sens (mots communs aux définitions) et par la forme (anémogamie, entomogamie, anémochorie), de préférence du même chapitre ; les cas particuliers (synapse / synapse chimique) et les quasi-synonymes sont écartés. Correction après chaque question, score à la fin, puis les flashcards du thème, toujours. Une erreur au QCM compte comme « Raté » pour le calendrier ; une bonne réponse ne compte pas comme « Su », car reconnaître un terme ne prouve pas qu'on saurait retrouver sa définition. Les définitions ratées reviennent en flashcard dix minutes plus tard. Pas d'échauffement pour les révisions du jour sur tout le programme.
+- Signalement d'une erreur (icône ⚠ sur une flashcard retournée, une question de QCM corrigée ou une définition du lexique) : erreur de définition, coquille, question ambiguë (QCM) ou autre avec une précision. L'enseignant reçoit un mail ; l'élève ne voit pas l'adresse. Hors connexion, le signalement part plus tard.
 - Objectif quotidien, jours d'affilée, avertissement le soir si l'objectif n'est pas atteint.
 - Rappel quotidien ajouté au calendrier du téléphone (fichier .ics) et nombre de cartes à revoir sur l'icône (Android et ordinateur).
 - Lexique (loupe en haut de l'écran) : recherche d'un terme avec complétion, accents facultatifs, ou sommaire des parties et sous-parties avec leurs termes par ordre alphabétique ; la définition s'ouvre dans une bulle. Le lexique n'est pas accessible pendant une séance.
@@ -27,7 +29,7 @@ Les bilans sont déclarés par les élèves (un élève peut modifier son fichie
 
 ## Données personnelles
 
-Aucune donnée ne quitte l'appareil sans action de l'élève : pas de compte, pas d'e-mail, pas de cookie ni de mesure d'audience. La progression est stockée dans le navigateur de l'élève. Le nom n'est demandé que pour le bilan ; il reste sur l'appareil et ne figure que dans le bilan que l'élève choisit d'envoyer. L'hébergeur sert seulement les fichiers de l'application.
+Aucune donnée ne quitte l'appareil sans action de l'élève : pas de compte, pas d'e-mail, pas de cookie ni de mesure d'audience. Un signalement d'erreur envoie seulement le terme, sa définition, le type de problème et la précision écrite par l'élève, sans son nom. La progression est stockée dans le navigateur de l'élève. Le nom n'est demandé que pour le bilan ; il reste sur l'appareil et ne figure que dans le bilan que l'élève choisit d'envoyer. L'hébergeur sert seulement les fichiers de l'application.
 
 Un élève qui change de téléphone doit exporter puis restaurer sa sauvegarde.
 
@@ -40,6 +42,17 @@ Un élève qui change de téléphone doit exporter puis restaurer sa sauvegarde.
 Format attendu : onglet « Toutes » (sinon le premier onglet), sans ligne d'en-tête ; colonne A le terme, B le ou les codes de partie séparés par des virgules (ex. `SV-G-1, SV-H`), C la définition. Une définition sans code en colonne B n'est pas proposée dans l'application.
 
 Le terme sert d'identifiant : corriger une définition garde la progression des élèves, renommer un terme crée une nouvelle carte. Les majuscules, accents, « œ » et apostrophes typographiques sont ignorés dans cette comparaison.
+
+## Recevoir les signalements (une seule fois)
+
+Le bouton ⚠ n'apparaît que lorsque `www/config.json` contient une adresse. Les mails sont envoyés par un petit script Google qui tourne sur ton compte : ton adresse n'est jamais visible dans l'application.
+
+1. Ouvrir [script.google.com](https://script.google.com) avec le compte Google qui doit recevoir les mails, puis « Nouveau projet ».
+2. Remplacer le contenu par celui de `tools/signalement.gs`, puis enregistrer.
+3. « Déployer », « Nouveau déploiement », type « Application Web ». Exécuter en tant que : « Moi ». Qui a accès : « Tout le monde ». Autoriser l'accès demandé (envoi de mails en ton nom).
+4. Copier l'adresse de l'application Web (elle finit par `/exec`) et la coller dans `www/config.json` sur GitHub : `{ "signalement": "https://script.google.com/macros/s/…/exec" }`.
+
+Le script limite les envois à 60 mails par jour, pour le cas où quelqu'un utiliserait l'adresse pour t'envoyer des messages en masse. Pour arrêter les signalements, vide l'adresse dans `config.json` ou archive le déploiement.
 
 ## Mise en ligne (une seule fois)
 
@@ -55,12 +68,15 @@ npm install          # bibliothèques et Playwright pour les tests
 npm run serve        # http://localhost:8765
 npm test             # parcours complet dans un navigateur de téléphone simulé
 node tools/bilan_test.mjs /tmp   # bilans de trois élèves simulés, regroupement et export Excel
+node tools/qcm_test.mjs          # masquage et leurres sur toute la base, puis un échauffement complet et un signalement
 ```
 
 - `www/` : l'application (HTML, CSS, JavaScript sans étape de compilation).
 - `www/vendor/` : ts-fsrs 5.4.2 (FSRS-6) et SheetJS 0.18.5, copiés depuis npm.
 - `www/data/chapters.json` : titres des parties et sous-parties du programme 2021.
 - `tools/build_data.py` : convertit le tableur en `www/data/definitions.json`.
+- `www/qcm.js` : masquage du terme dans sa définition et choix des leurres du QCM (testé par `node tools/qcm_test.mjs`).
+- `tools/signalement.gs` : script Google qui transforme un signalement en mail.
 - `tools/build_artifact.py` : assemble la version d'aperçu publiée sur claude.ai.
 
 Réglages de l'algorithme (dans `app.js`) : rétention cible 90 % (modifiable par l'élève : 85 ou 95 %), étape d'apprentissage et de réapprentissage 10 minutes, intervalle maximal 365 jours, légère variation aléatoire des dates. Une carte est comptée « acquise » au-delà de 21 jours de stabilité.

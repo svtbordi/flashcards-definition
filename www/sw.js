@@ -1,6 +1,6 @@
 // Service worker : l'application marche hors connexion ; les définitions sont mises à jour dès qu'il y a du réseau.
 const CACHE = 'fc-bcpst-__BUILD__';
-const SHELL = ['./', 'index.html', 'styles.css', 'app.js', 'manifest.webmanifest',
+const SHELL = ['./', 'index.html', 'styles.css', 'qcm.js', 'app.js', 'config.json', 'manifest.webmanifest',
   'vendor/ts-fsrs.umd.js', 'vendor/xlsx.full.min.js',
   'data/definitions.json', 'data/chapters.json',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png',
