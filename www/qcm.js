@@ -73,46 +73,103 @@
   }
 
   const baseOf = term => normMap(term.replace(/\s*\([^)]*\)/g, ' ').trim()).s;
-  // Premier mot de la définition (« Roche », « Protéine », « Division »…) : la catégorie du terme.
-  const genusOf = def => (normMap(def).s.match(/[a-z]{3,}/) || [''])[0];
   const partOf = code => code.split('-').slice(0, 2).join('-');
 
-  // Trois leurres pris en priorité dans la même sous-partie, puis la même partie, puis le même domaine
-  // (SV, BG, ST). Sont exclus les homonymes et les termes cités dans la définition affichée.
+  /* ---------- Proximité entre deux termes ----------
+     Sens : mots communs aux définitions (pondérés par leur rareté dans la base, TF-IDF).
+     Forme : morceaux de trois lettres communs aux termes (anémo-gamie, entomo-gamie, anémo-chorie). */
+
+  const STOP = new Set(('dans avec pour sans sous entre chez leur leurs cette ces celle celui ceux elle elles '
+    + 'sont etre fait font plus moins tres ainsi aussi donc dont mais selon lors certains certaines '
+    + 'notamment exemple generalement souvent permet permettant partir lieu ensemble type forme').split(' '));
+
+  const stem = w => w.slice(0, 6); // racine grossière : pollinisation et polliniser se rejoignent
+  const words = text => (normMap(text).s.match(/[a-z]{4,}/g) || []).filter(w => !STOP.has(w)).map(stem);
+
+  function trigrams(term) {
+    const t = ` ${baseOf(term).replace(/[^a-z0-9]+/g, ' ').trim()} `;
+    const out = new Set();
+    for (let i = 0; i + 3 <= t.length; i++) out.add(t.slice(i, i + 3));
+    return out;
+  }
+
+  const indexes = new WeakMap();
+  function indexOf(cards) {
+    let ix = indexes.get(cards);
+    if (ix) return ix;
+    const df = new Map();
+    const toks = cards.map(c => {
+      const ws = words(c.def + ' ' + c.term.replace(/[()]/g, ' '));
+      new Set(ws).forEach(w => df.set(w, (df.get(w) || 0) + 1));
+      return ws;
+    });
+    const n = cards.length;
+    ix = new Map();
+    cards.forEach((c, i) => {
+      const vec = new Map();
+      toks[i].forEach(w => vec.set(w, (vec.get(w) || 0) + Math.log(n / df.get(w))));
+      let norm = 0;
+      vec.forEach(v => { norm += v * v; });
+      ix.set(c.id, { vec, norm: Math.sqrt(norm) || 1, tri: trigrams(c.term) });
+    });
+    indexes.set(cards, ix);
+    return ix;
+  }
+
+  function cosine(a, b) {
+    let dot = 0;
+    const [small, big] = a.vec.size < b.vec.size ? [a.vec, b.vec] : [b.vec, a.vec];
+    small.forEach((v, w) => { if (big.has(w)) dot += v * big.get(w); });
+    return dot / (a.norm * b.norm);
+  }
+
+  function jaccard(a, b) {
+    let inter = 0;
+    a.forEach(x => { if (b.has(x)) inter += 1; });
+    return inter / ((a.size + b.size - inter) || 1);
+  }
+
+  // Trois leurres parmi les termes les plus proches par le sens et par la forme, de préférence dans le même
+  // chapitre. Sont exclus les homonymes et cas particuliers, les termes cités dans la définition affichée et
+  // les définitions presque identiques (probables synonymes : la question aurait deux bonnes réponses).
   function pickDistractors(card, cards, shownDef, n = 3, rnd = Math.random) {
+    const ok = candidates(card, cards, shownDef, n + 2);
+    // le plus proche est toujours proposé ; les autres sont tirés parmi les suivants, pour varier d'une fois à l'autre
+    return ok.length <= n ? ok : [ok[0], ...shuffle(ok.slice(1), rnd).slice(0, n - 1)];
+  }
+
+  // Les termes les plus proches, du plus au moins proche.
+  function candidates(card, cards, shownDef, max) {
+    const ix = indexOf(cards);
+    const me = ix.get(card.id) || { vec: new Map(), norm: 1, tri: trigrams(card.term) };
     const codes = card.codes;
     const parts = new Set(codes.map(partOf));
     const groups = new Set(codes.map(c => c.slice(0, 2)));
-    const tier = c => (c.codes.some(x => codes.includes(x)) ? 0
-      : c.codes.some(x => parts.has(partOf(x))) ? 1
-        : c.codes.some(x => groups.has(x.slice(0, 2))) ? 2 : 3);
     const base = baseOf(card.term);
-    const genus = genusOf(card.def);
-    const nWords = base.split(/\s+/).length;
-    const seen = new Set([base]);
-    const pool = [];
+    const scored = [];
     for (const c of cards) {
       if (c.id === card.id || c.def === card.def) continue;
-      const b = baseOf(c.term);
-      if (seen.has(b)) continue;
-      pool.push({ c, b, t: tier(c) });
+      // un terme qui contient l'autre (synapse / synapse chimique, zoochorie / endozoochorie) en est souvent
+      // un cas particulier : la question risquerait d'avoir deux réponses défendables
+      const cb = baseOf(c.term);
+      if (cb.includes(base) || base.includes(cb)) continue;
+      if (!c.codes.some(x => groups.has(x.slice(0, 2)))) continue; // même domaine : SV, BG ou ST
+      const o = ix.get(c.id);
+      const sense = cosine(me, o);
+      if (sense > 0.9) continue;
+      const near = c.codes.some(x => codes.includes(x)) ? 0.15 : c.codes.some(x => parts.has(partOf(x))) ? 0.07 : 0;
+      scored.push({ c, b: cb, k: sense + 0.6 * jaccard(me.tri, o.tri) + near });
     }
-    pool.sort((x, y) => x.t - y.t || rnd() - 0.5);
-    const out = [];
-    for (let t = 0; t <= 3 && out.length < n; t++) {
-      // dans un même niveau : même catégorie et longueur proche d'abord, avec une part de hasard
-      const level = pool.filter(x => x.t === t)
-        .map(x => ({ ...x, k: Math.abs(x.b.split(/\s+/).length - nWords) + Math.abs(x.b.length - base.length) / Math.max(8, base.length)
-          - (genusOf(x.c.def) === genus ? 1.5 : 0) + rnd() }))
-        .sort((x, y) => x.k - y.k);
-      for (const x of level) {
-        if (out.length >= n) break;
-        if (seen.has(x.b) || mentions(shownDef, x.c.term)) continue;
-        seen.add(x.b);
-        out.push(x.c);
-      }
+    scored.sort((x, y) => y.k - x.k);
+    const ok = [];
+    const seen = new Set([base]);
+    for (const x of scored) {
+      if (ok.length >= max) break;
+      if (seen.has(x.b) || mentions(shownDef, x.c.term)) continue;
+      seen.add(x.b);
+      ok.push(x.c);
     }
-    return out;
+    return ok;
   }
 
   function shuffle(arr, rnd = Math.random) {
@@ -131,7 +188,7 @@
     return { card, def: shown, options };
   }
 
-  const api = { normMap, variants, maskTerm, mentions, pickDistractors, makeQuestion, shuffle };
+  const api = { normMap, variants, maskTerm, mentions, candidates, pickDistractors, makeQuestion, shuffle, indexOf, cosine };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.QCM = api;
 })(typeof window !== 'undefined' ? window : globalThis);
