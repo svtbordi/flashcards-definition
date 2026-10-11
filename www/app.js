@@ -882,7 +882,7 @@ function renderProgress() {
 
 /* ---------- Signalement d'une erreur ---------- */
 
-// Le signalement part vers l'adresse configurée dans config.json (script Google de l'enseignant, qui envoie le mail).
+// Le signalement part vers l'adresse configurée dans config.json (script Google de l'enseignant, qui range le signalement dans son tableur).
 // L'élève ne voit pas le destinataire. Hors connexion, il est gardé et envoyé plus tard.
 const canReport = () => !!config.signalement;
 const reportButton = () => '<button class="report-btn" aria-label="Signaler une erreur" title="Signaler une erreur">&#9888;&#xFE0E;</button>';
