@@ -1,14 +1,19 @@
 /**
- * Flashcards BCPST : réception des signalements d'erreur et envoi par mail.
+ * Flashcards BCPST : réception des signalements d'erreur.
+ *
+ * Chaque signalement devient une ligne d'un tableur Google (onglet « Signalements »), à consulter quand on veut,
+ * sur ordinateur ou dans l'application Google Sheets. L'envoi d'un mail en plus est facultatif (ENVOYER_MAIL).
  *
  * À installer une fois par l'enseignant (voir README, « Recevoir les signalements ») :
- * script.google.com, Nouveau projet, coller ce fichier, puis Déployer > Nouveau déploiement > Application Web,
- * « Exécuter en tant que : moi », « Qui a accès : tout le monde ». L'adresse obtenue (…/exec) va dans www/config.json.
- *
- * Le mail part vers le compte Google qui a déployé le script : son adresse n'apparaît jamais dans l'application.
+ * créer un tableur Google, Extensions > Apps Script, coller ce fichier, puis Déployer > Nouveau déploiement >
+ * Application Web, « Exécuter en tant que : moi », « Qui a accès : tout le monde ».
+ * L'adresse obtenue (…/exec) va dans www/config.json. Elle n'apparaît jamais dans l'application.
  */
 
+const ENVOYER_MAIL = false; // true : un mail par signalement, en plus de la ligne du tableur
 const MAX_PAR_JOUR = 60; // au-delà, les signalements du jour sont ignorés (protection contre les envois en masse)
+const COLONNES = ['Reçu le', 'Terme', 'Problème', 'Précision de l\'élève', 'Définition affichée', 'Partie(s)',
+  'Signalé depuis', 'Propositions du QCM', 'Réponse choisie', 'Version des définitions', 'Traité'];
 
 function doPost(e) {
   const p = JSON.parse(e.postData.contents);
@@ -18,27 +23,30 @@ function doPost(e) {
   if (n >= MAX_PAR_JOUR) return ContentService.createTextOutput('limite');
   props.setProperty('n-' + jour, String(n + 1));
 
-  const cut = (s, max) => String(s == null ? '' : s).slice(0, max);
-  const lignes = [
-    'Terme : ' + cut(p.terme, 200),
-    'Problème : ' + cut(p.type, 100),
-    'Précision de l\'élève : ' + (cut(p.precision, 500) || '(aucune)'),
-    '',
-    'Définition affichée : ' + cut(p.definition, 2000),
-    'Partie(s) du programme : ' + cut(p.codes, 200),
-    'Signalé depuis : ' + cut(p.contexte, 50),
-  ];
-  if (p.propositions) {
-    lignes.push('Propositions du QCM : ' + cut([].concat(p.propositions).join(' | '), 800));
-    lignes.push('Réponse choisie : ' + cut(p.choisi, 200));
-  }
-  lignes.push('', 'Version des définitions : ' + cut(p.version, 40), 'Date : ' + cut(p.date, 40));
+  // une cellule qui commence par = + - @ serait lue comme une formule : on la neutralise
+  const cut = (s, max) => String(s == null ? '' : s).slice(0, max).replace(/^[=+\-@]/, '\'$&');
+  const ligne = [new Date(), cut(p.terme, 200), cut(p.type, 100), cut(p.precision, 500), cut(p.definition, 2000),
+    cut(p.codes, 200), cut(p.contexte, 50), cut([].concat(p.propositions || []).join(' | '), 800),
+    cut(p.choisi, 200), cut(p.version, 40), false];
 
-  MailApp.sendEmail({
-    to: Session.getEffectiveUser().getEmail(),
-    subject: '[Flashcards BCPST] ' + cut(p.type, 60) + ' : ' + cut(p.terme, 80),
-    body: lignes.join('\n'),
-    name: 'Flashcards BCPST',
-  });
+  const classeur = SpreadsheetApp.getActiveSpreadsheet();
+  let feuille = classeur.getSheetByName('Signalements');
+  if (!feuille) {
+    feuille = classeur.insertSheet('Signalements', 0);
+    feuille.appendRow(COLONNES);
+    feuille.setFrozenRows(1);
+    feuille.getRange(1, 1, 1, COLONNES.length).setFontWeight('bold');
+  }
+  feuille.appendRow(ligne);
+  feuille.getRange(feuille.getLastRow(), COLONNES.length).insertCheckboxes();
+
+  if (ENVOYER_MAIL) {
+    MailApp.sendEmail({
+      to: Session.getEffectiveUser().getEmail(),
+      subject: '[Flashcards BCPST] ' + ligne[2] + ' : ' + ligne[1],
+      body: COLONNES.slice(1, -1).map((c, i) => c + ' : ' + ligne[i + 1]).join('\n') + '\n\nTableur : ' + classeur.getUrl(),
+      name: 'Flashcards BCPST',
+    });
+  }
   return ContentService.createTextOutput('ok');
 }
