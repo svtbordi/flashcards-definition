@@ -233,3 +233,15 @@ button.term { display: block; background: none; border: 0; padding: 8px 4px; min
 .report-box .radio input { width: 20px; height: 20px; margin: 0; accent-color: var(--accent); }
 .report-box label:not(.radio) { display: grid; gap: 4px; margin-bottom: 16px; }
 .report-box input[type=text] { font: inherit; padding: 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--text); width: 100%; min-width: 0; }
+
+/* Chapitres vus en cours */
+h2.section { font-size: 17px; margin: 8px 0 4px; }
+.tag-open { font-size: 12px; font-weight: 600; color: var(--accent); white-space: nowrap; }
+
+/* Mots-clés à vérifier au verso */
+.def mark { background: none; color: inherit; font-weight: 700; text-decoration: underline; text-decoration-color: var(--due); text-decoration-thickness: 2px; text-underline-offset: 3px; }
+.keys { border: 0; border-top: 1px solid var(--line); margin: 16px 0 0; padding: 12px 0 0; display: grid; gap: 2px; }
+.keys legend { padding: 0; font-size: 14px; color: var(--muted); }
+.keys label { display: flex; align-items: center; gap: 10px; min-height: 40px; }
+.keys input { width: 22px; height: 22px; margin: 0; flex: none; accent-color: var(--accent); }
+.center { text-align: center; }

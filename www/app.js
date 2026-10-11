@@ -141,7 +141,11 @@ function cardCodes(c) {
   return c.codes.length ? c.codes : [NO_CODE];
 }
 
+// METHODS dans une sélection : les définitions de méthodes et techniques (colonne E du tableur), tous chapitres confondus
+const METHODS = '@methodes';
+
 function matchesSelection(card, selected) {
+  if (card.method && selected.includes(METHODS)) return true;
   return cardCodes(card).some(code => selected.some(sel => code === sel || code.startsWith(sel + '-')));
 }
 
@@ -152,12 +156,14 @@ function cardOrderKey(c) {
 }
 
 async function loadDeck() {
-  const [bundled, chaps, conf] = await Promise.all([
+  const [bundled, chaps, conf, open] = await Promise.all([
     fetch('data/definitions.json').then(r => r.json()),
     fetch('data/chapters.json').then(r => r.json()),
     fetch('config.json').then(r => r.json()).catch(() => ({})),
+    fetch('data/ouverts.json').then(r => r.json()).catch(() => null),
   ]);
   config = conf || {};
+  opened = open && Array.isArray(open.chapitres) ? open : null;
   chapters = chaps;
   chapters.forEach((c, i) => {
     chapterTitle[c.code] = c.title;
@@ -172,6 +178,18 @@ async function loadDeck() {
 }
 let bundledVersion = '';
 let config = {};
+let opened = null; // chapitres vus en cours, cochés par l'enseignant (data/ouverts.json) ; null : tout le programme
+
+// Les révisions espacées prennent leurs nouvelles cartes dans les chapitres vus en cours,
+// et dans les méthodes et techniques, qui servent partout, sauf si l'enseignant les a exclues.
+function openChapters() {
+  if (!opened) return ['SV', 'BG', 'ST'];
+  return opened.methodes === false ? opened.chapitres : [...opened.chapitres, METHODS];
+}
+
+const methodCards = () => deck.cards.filter(c => c.method);
+
+const isStarted = c => { const st = store.cards[c.id]; return !!st && st.state !== State.New; };
 
 function setDeck(newDeck, persistIt) {
   deck = newDeck;
@@ -221,10 +239,16 @@ function updateBadge() {
 
 let session = null;
 
-function buildSession(selected, { ahead = false, label = '' } = {}) {
+// Cartes d'une séance. En révisions espacées : les chapitres vus en cours, plus toute carte déjà commencée
+// ailleurs (en entraînement libre), qui continue d'être révisée selon son calendrier.
+function inScope(c, selected, reviews) {
+  return matchesSelection(c, selected) || (reviews && isStarted(c));
+}
+
+function buildSession(selected, { ahead = false, label = '', reviews = false } = {}) {
   const now = new Date();
   const endDay = endOfStudyDay(now);
-  const pool = deck.cards.filter(c => matchesSelection(c, selected));
+  const pool = deck.cards.filter(c => inScope(c, selected, reviews));
   const due = [];
   const fresh = [];
   const notDue = [];
@@ -248,7 +272,7 @@ function buildSession(selected, { ahead = false, label = '' } = {}) {
     queue = due.map(x => x.c).concat(fresh.slice(0, newLeft));
   }
   return {
-    selected, label, ahead,
+    selected, label, ahead, reviews,
     pool, queue,
     relearn: [], // cartes ratées, à revoir dans la séance
     done: 0, again: 0,
@@ -398,27 +422,35 @@ function render() {
 
 function renderHome() {
   const all = statsFor(deck.cards);
+  const openList = openChapters();
+  const revs = statsFor(deck.cards.filter(c => inScope(c, openList, true)));
   const started = startedCodes();
   const startedStats = started.length ? statsFor(deck.cards.filter(c => matchesSelection(c, started))) : null;
   const d = today();
   const goal = store.settings.dailyGoal;
   const pct = Math.min(100, Math.round(100 * d.reviews / goal));
   const st = streak();
-  const newToday = Math.min(all.new, Math.max(0, store.settings.newPerDay - d.newCards));
+  const newToday = Math.min(revs.new, Math.max(0, store.settings.newPerDay - d.newCards));
   const lateWarning = d.reviews < goal && new Date().getHours() >= 18;
   app.innerHTML = `
     <section class="card hero">
-      <p class="big">${plural(all.due, 'carte à revoir', 'cartes à revoir')} aujourd’hui</p>
+      <p class="big">${plural(revs.due, 'carte à revoir', 'cartes à revoir')} aujourd’hui</p>
       <p class="muted">${newToday ? `+ ${plural(newToday, 'nouvelle carte disponible', 'nouvelles cartes disponibles')}` : 'Limite de nouvelles cartes atteinte pour aujourd’hui'}</p>
       <div class="goal"><div class="goal-fill" style="width:${pct}%"></div></div>
       <p class="muted">Objectif du jour : ${Math.min(d.reviews, goal)} / ${goal} cartes${st ? ` · ${plural(st, 'jour', 'jours')} d’affilée` : ''}</p>
       ${lateWarning ? `<p class="warn">Il te reste ${goal - d.reviews} cartes pour atteindre ton objectif du jour.</p>` : ''}
     </section>
     <div class="actions">
-      <button class="primary" id="go-all" ${all.due + newToday ? '' : 'disabled'}>Révisions du jour, tout le programme</button>
-      <button id="go-started" ${startedStats ? '' : 'disabled'}>Mes chapitres commencés${startedStats ? ` <small>(${startedStats.due} à revoir)</small>` : ''}</button>
+      <button class="primary" id="go-all" ${revs.due + newToday ? '' : 'disabled'}>Révisions espacées du jour
+        <small>${opened ? `chapitres vus en cours (${plural(opened.chapitres.length, 'partie ou sous-partie', 'parties ou sous-parties')})${openList.includes(METHODS) && methodCards().length ? ' et méthodes' : ''}` : 'tout le programme'}</small></button>
+    </div>
+    <h2 class="section">Entraînement libre</h2>
+    <p class="muted small">N’importe quel chapitre, par exemple pour anticiper une révision. Les cartes commencées ici entrent ensuite dans tes révisions espacées.</p>
+    <div class="actions">
       <button id="go-choose">Choisir un ou plusieurs chapitres</button>
       ${store.selection.length ? `<button id="go-last">Reprendre ma dernière sélection <small>(${esc(store.selection.slice(0, 3).join(', '))}${store.selection.length > 3 ? '…' : ''})</small></button>` : ''}
+      ${methodCards().length ? `<button id="go-methods">Méthodes et techniques <small>(principe et objectif de ${plural(methodCards().length, 'méthode', 'méthodes')}, tous chapitres)</small></button>` : ''}
+      <button id="go-started" ${startedStats ? '' : 'disabled'}>Mes chapitres commencés${startedStats ? ` <small>(${startedStats.due} à revoir)</small>` : ''}</button>
     </div>
     <div class="actions secondary">
       <button id="go-progress">Ma progression</button>
@@ -426,11 +458,13 @@ function renderHome() {
       <button id="go-install">Installer l’application et les rappels</button>
     </div>
     <p class="muted small">${deck.cards.length} définitions · version ${esc(deck.version)}</p>`;
-  document.getElementById('go-all').onclick = () => startSession(['SV', 'BG', 'ST', NO_CODE], 'Tout le programme', false, false);
+  document.getElementById('go-all').onclick = () => startSession(openList, 'Révisions espacées', { reviews: true });
   document.getElementById('go-started').onclick = () => startSession(started, 'Mes chapitres commencés');
   document.getElementById('go-choose').onclick = () => go('choose');
   const last = document.getElementById('go-last');
   if (last) last.onclick = () => startSession(store.selection, 'Dernière sélection');
+  const methods = document.getElementById('go-methods');
+  if (methods) methods.onclick = () => startSession([METHODS], 'Méthodes et techniques');
   document.getElementById('go-progress').onclick = () => go('progress');
   document.getElementById('go-lexicon').onclick = () => go('lexicon');
   document.getElementById('go-install').onclick = () => go('install');
@@ -463,6 +497,13 @@ function chapterTree() {
 
 let chooseSel = new Set();
 
+function openTag(code) {
+  if (!opened) return '';
+  const list = opened.chapitres;
+  if (matchesAny(code, list)) return ' <span class="tag-open">vu en cours</span>';
+  return list.some(o => o.startsWith(code + '-')) ? ' <span class="tag-open">en partie vu</span>' : '';
+}
+
 function renderChoose() {
   if (!chooseSel.size && store.selection.length) chooseSel = new Set(store.selection);
   const tree = chapterTree();
@@ -478,14 +519,14 @@ function renderChoose() {
     const open = expanded.has(p.code);
     html += `<div class="chap">
       <label class="row"><input type="checkbox" data-code="${p.code}" ${checked ? 'checked' : ''}>
-        <span class="chap-name"><b>${p.code === NO_CODE ? '' : esc(p.code) + ' '}</b>${esc(chapterTitle[p.code] || '')}</span>
+        <span class="chap-name"><b>${p.code === NO_CODE ? '' : esc(p.code) + ' '}</b>${esc(chapterTitle[p.code] || '')}${openTag(p.code)}</span>
         <span class="count">${s.due ? `<em>${s.due}</em> / ` : ''}${s.total}</span></label>
       ${p.subs.length ? `<button class="link toggle" data-toggle="${p.code}">${open ? 'Masquer' : 'Voir'} les sous-parties (${p.subs.length})</button>` : ''}
       ${bar(s)}
       ${open ? '<div class="subs">' + p.subs.map(code => {
         const sc = statsFor(deck.cards.filter(c => matchesSelection(c, [code])));
         return `<label class="row sub"><input type="checkbox" data-code="${code}" ${checked || chooseSel.has(code) ? 'checked' : ''} ${checked ? 'disabled' : ''}>
-          <span class="chap-name"><b>${esc(code)}</b> ${esc(chapterTitle[code] || '')}</span>
+          <span class="chap-name"><b>${esc(code)}</b> ${esc(chapterTitle[code] || '')}${openTag(code)}</span>
           <span class="count">${sc.due ? `<em>${sc.due}</em> / ` : ''}${sc.total}</span></label>`;
       }).join('') + '</div>' : ''}
     </div>`;
@@ -525,8 +566,8 @@ function renderChoose() {
   if (clear) clear.onclick = () => { chooseSel.clear(); render(); };
 }
 
-function startSession(selected, label, ahead = false, offerWarmup = !ahead) {
-  session = buildSession(selected, { label, ahead });
+function startSession(selected, label, { ahead = false, reviews = false, offerWarmup = !ahead && !reviews } = {}) {
+  session = buildSession(selected, { label, ahead, reviews });
   // l'échauffement précède toujours des flashcards : proposé seulement s'il y a des cartes à faire ensuite
   if (offerWarmup && session.queue.length && session.pool.length >= 4) session.phase = 'intro';
   else session.current = nextCard();
@@ -595,7 +636,7 @@ function qcmToCards() {
   const old = session;
   const failed = old.qcm.failed;
   const failedIds = new Set(failed.map(c => c.id));
-  session = buildSession(old.selected, { label: old.label });
+  session = buildSession(old.selected, { label: old.label, reviews: old.reviews });
   // les définitions ratées au QCM reviennent après leur délai de 10 minutes, comme une carte ratée en séance
   session.queue = session.queue.filter(c => !failedIds.has(c.id));
   for (const c of failed) session.relearn.push({ card: c, due: stateOf(c.id).due.getTime() });
@@ -679,17 +720,19 @@ function renderQcmEnd(s) {
   b.focus();
 }
 
-function ratingButtons() {
+function ratingButtons(keysOk = true) {
+  const off = keysOk ? '' : 'disabled title="Coche d’abord tous les éléments-clés"';
   if (store.settings.buttons === 4) {
     return `<div class="grade four">
       <button class="again" data-r="${Rating.Again}">Raté<small>1</small></button>
-      <button class="hard" data-r="${Rating.Hard}">Difficile<small>2</small></button>
-      <button class="good" data-r="${Rating.Good}">Su<small>3</small></button>
-      <button class="easy" data-r="${Rating.Easy}">Facile<small>4</small></button></div>`;
+      <button class="hard" data-r="${Rating.Hard}" ${off}>Difficile<small>2</small></button>
+      <button class="good" data-r="${Rating.Good}" ${off}>Su<small>3</small></button>
+      <button class="easy" data-r="${Rating.Easy}" ${off}>Facile<small>4</small></button></div>`;
   }
   return `<div class="grade">
     <button class="again" data-r="${Rating.Again}">Raté<small>1</small></button>
-    <button class="good" data-r="${Rating.Good}">Su<small>2</small></button></div>`;
+    <button class="good" data-r="${Rating.Good}" ${off}>Su<small>2</small></button></div>
+    ${keysOk ? '' : '<p class="muted small center">« Su » s’active quand tous les éléments-clés sont cochés.</p>'}`;
 }
 
 function renderSession() {
@@ -703,7 +746,7 @@ function renderSession() {
     const endDay = endOfStudyDay();
     const notDue = deck.cards.filter(c => {
       const st = stateOf(c.id);
-      return st && st.state !== State.New && st.due > endDay && matchesSelection(c, s.selected);
+      return st && st.state !== State.New && st.due > endDay && inScope(c, s.selected, s.reviews);
     }).length;
     s.poolStats.notDue = notDue;
     app.innerHTML = `<section class="card hero">
@@ -717,7 +760,7 @@ function renderSession() {
     </div>
     ${s.poolStats.notDue ? '<p class="muted small">Réviser en avance ne fausse pas le calendrier : une carte revue trop tôt est simplement moins repoussée.</p>' : ''}`;
     const a = document.getElementById('ahead');
-    if (a) a.onclick = () => startSession(s.selected, s.label, true);
+    if (a) a.onclick = () => startSession(s.selected, s.label, { ahead: true, reviews: s.reviews });
     document.getElementById('home').onclick = () => { session = null; viewStack = []; go('home', false); };
     return;
   }
@@ -730,11 +773,11 @@ function renderSession() {
     <div class="progress-line"><span>${s.label ? esc(s.label) : ''}${s.ahead ? ' · en avance' : ''}</span><span>${left} restantes</span></div>
     <article class="flash ${s.revealed ? 'revealed' : ''}">
       ${s.revealed && canReport() ? reportButton() : ''}
-      <div class="codes">${cardCodes(c).map(x => `<span>${esc(x === NO_CODE ? 'sans chapitre' : x)}</span>`).join('')} ${tag}</div>
+      <div class="codes">${cardCodes(c).map(x => `<span>${esc(x === NO_CODE ? 'sans chapitre' : x)}</span>`).join('')}${c.method ? '<span>méthode</span>' : ''} ${tag}</div>
       <h2 class="term">${esc(c.term)}</h2>
-      ${s.revealed ? `<p class="def">${esc(c.def)}</p>` : '<p class="hint muted">Formule la définition dans ta tête (ou à l’écrit), puis retourne la carte.</p>'}
+      ${s.revealed ? `<p class="def">${defWithKeys(c)}</p>${keyChecklist(c, s)}` : '<p class="hint muted">Formule la définition dans ta tête (ou à l’écrit), puis retourne la carte.</p>'}
     </article>
-    ${s.revealed ? ratingButtons() : '<button class="primary reveal" id="reveal">Voir la définition <small>Espace</small></button>'}
+    ${s.revealed ? ratingButtons(keysDone(c, s)) : '<button class="primary reveal" id="reveal">Voir la définition <small>Espace</small></button>'}
     ${s.undo ? '<button class="link undo" id="undo">Annuler la dernière réponse</button>' : ''}`;
   const r = document.getElementById('reveal');
   if (r) r.onclick = () => { s.revealed = true; render(); };
@@ -743,6 +786,36 @@ function renderSession() {
   if (u) u.onclick = undoLast;
   const rep = app.querySelector('.report-btn');
   if (rep) rep.onclick = () => openReport(c, 'flashcard');
+  app.querySelectorAll('[data-key]').forEach(cb => {
+    cb.onchange = () => { s.keysOk[Number(cb.dataset.key)] = cb.checked; render(); };
+  });
+}
+
+/* ---------- Mots-clés à vérifier au verso ----------
+   L'élève coche les éléments-clés qu'il a cités ; « Su » n'est possible que s'il les a tous.
+   Comparer sa réponse à des éléments précis corrige la tendance à se juger trop vite (Dunlosky et Rawson, 2012). */
+
+function defWithKeys(c) {
+  if (!c.keys) return esc(c.def);
+  let html = '';
+  let pos = 0;
+  for (const [a, b] of QCM.findSpans(c.def, c.keys)) {
+    html += esc(c.def.slice(pos, a)) + '<mark>' + esc(c.def.slice(a, b)) + '</mark>';
+    pos = b;
+  }
+  return html + esc(c.def.slice(pos));
+}
+
+function keyChecklist(c, s) {
+  if (!c.keys) return '';
+  if (s.keysFor !== c.id) { s.keysFor = c.id; s.keysOk = []; }
+  return `<fieldset class="keys"><legend>Coche ce que tu avais cité :</legend>
+    ${c.keys.map((k, i) => `<label><input type="checkbox" data-key="${i}" ${s.keysOk[i] ? 'checked' : ''}> ${esc(k)}</label>`).join('')}
+  </fieldset>`;
+}
+
+function keysDone(c, s) {
+  return !c.keys || (s.keysFor === c.id && c.keys.every((k, i) => s.keysOk[i]));
 }
 
 document.addEventListener('keydown', e => {
@@ -765,7 +838,7 @@ document.addEventListener('keydown', e => {
     const map = store.settings.buttons === 4
       ? { 1: Rating.Again, 2: Rating.Hard, 3: Rating.Good, 4: Rating.Easy }
       : { 1: Rating.Again, 2: Rating.Good };
-    if (map[e.key]) { e.preventDefault(); answer(map[e.key]); }
+    if (map[e.key] && (map[e.key] === Rating.Again || keysDone(session.current, session))) { e.preventDefault(); answer(map[e.key]); }
   }
 });
 
@@ -1156,7 +1229,8 @@ function renderSettings() {
       <button class="danger" id="reset">Effacer toute ma progression</button>
     </section>
     <button class="link" id="privacy">Données et confidentialité</button>
-    <p><a class="link" href="prof.html">Espace enseignant : regrouper les bilans des élèves</a></p>`;
+    <p><a class="link" href="prof.html">Espace enseignant : regrouper les bilans des élèves</a></p>
+    <p><a class="link" href="chapitres.html">Espace enseignant : chapitres vus en cours</a></p>`;
   const num = (id, min, max) => {
     const el = document.getElementById(id);
     el.onchange = () => {
@@ -1195,7 +1269,7 @@ function describeChange(oldCards, newCards) {
   for (const c of newCards) {
     const o = oldIds.get(c.id);
     if (!o) added += 1;
-    else if (o.def !== c.def || o.codes.join() !== c.codes.join()) changed += 1;
+    else if (o.def !== c.def || o.codes.join() !== c.codes.join() || (o.keys || []).join() !== (c.keys || []).join() || !o.method !== !c.method) changed += 1;
   }
   const removed = oldCards.filter(c => !newIds.has(c.id)).length;
   return { added, changed, removed };
@@ -1252,7 +1326,11 @@ async function importXlsx(file) {
       const base = normTerm(term);
       const n = (seen.get(base) || 0) + 1;
       seen.set(base, n);
-      cards.push({ id: n > 1 ? `${base}#${n}` : base, term, def, codes });
+      const keys = String(row[3] || '').split(';').map(x => x.trim()).filter(Boolean);
+      const card = { id: n > 1 ? `${base}#${n}` : base, term, def, codes };
+      if (keys.length) card.keys = keys;
+      if (/^m/i.test(String(row[4] || '').trim())) card.method = true; // colonne E : « M » pour une méthode ou technique
+      cards.push(card);
     }
     if (!cards.length) return toast('Aucune définition avec un code de chapitre dans ce fichier.');
     const stamp = new Date().toISOString().slice(0, 19).replace('T', ' ');

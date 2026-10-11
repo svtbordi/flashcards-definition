@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Chapitres vus en cours</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#1f6f5c">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="styles.css">
+<style>
+  .tree { list-style: none; margin: 0; padding: 0; }
+  .tree .tree { padding-left: 22px; border-left: 2px solid var(--line); margin-left: 9px; }
+  .node { display: flex; align-items: center; gap: 8px; min-height: 44px; }
+  .node input { width: 20px; height: 20px; flex: none; margin: 0; accent-color: var(--accent); }
+  .node label { flex: 1; min-width: 0; cursor: pointer; }
+  .node .count { color: var(--muted); font-size: 13px; white-space: nowrap; }
+  .node button.toggle { min-height: 0; padding: 4px 8px; border: 0; background: none; color: var(--accent); }
+  .year h2 { margin: 0 0 8px; }
+  .publish { position: sticky; bottom: 0; background: var(--bg); padding: 12px 0 calc(12px + env(safe-area-inset-bottom)); border-top: 1px solid var(--line); display: grid; gap: 8px; }
+  .publish p { margin: 0; font-size: 14px; }
+  .publish button.primary { text-align: center; }
+  details.token[open] { max-height: 50vh; overflow-y: auto; }
+  details.token { margin-top: 8px; }
+  details.token input { font: inherit; padding: 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--text); width: 100%; min-width: 0; margin: 6px 0; }
+  .dirty { color: var(--hard); font-weight: 600; }
+</style>
+</head>
+<body>
+<header class="top">
+  <a class="icon-btn" href="./" aria-label="Retour à l’application" style="text-decoration:none;display:grid;place-items:center">&#8592;</a>
+  <h1>Chapitres vus en cours</h1>
+</header>
+<main id="chap">
+  <section class="card">
+    <p>Coche les parties ou sous-parties déjà traitées en cours. Leurs définitions entrent dans les <b>révisions espacées</b> des étudiants. Les autres chapitres restent accessibles en <b>entraînement libre</b>.</p>
+    <p class="muted small">Une définition codée seulement au niveau d’une partie (par exemple « ST-A ») n’entre que si la partie entière est cochée.</p>
+  </section>
+  <section class="card" id="methods-box" hidden>
+    <div class="node"><input type="checkbox" id="methods"><label for="methods"><b>Méthodes et techniques</b> : toujours dans les révisions espacées, quels que soient les chapitres cochés</label><span class="count" id="methods-count"></span></div>
+    <p class="muted small">Ce sont les définitions marquées « M » en colonne E du tableur. Elles restent aussi dans leur chapitre et ont leur propre bouton en entraînement libre.</p>
+  </section>
+  <div id="years"><p class="muted">Chargement…</p></div>
+  <div class="publish">
+    <p id="summary"></p>
+    <button class="primary" id="publish">Publier pour les étudiants</button>
+    <details class="token" id="token-box">
+      <summary>Clé d’accès GitHub <span id="token-state" class="muted small"></span></summary>
+      <button id="download">Ou télécharger le fichier, à déposer à la main sur GitHub</button>
+      <p class="small">La publication directe utilise une clé personnelle GitHub, enregistrée seulement dans ce navigateur. Pour la créer : GitHub, Settings, Developer settings, Personal access tokens, « Fine-grained tokens », « Generate new token ». Repository access : seulement le dépôt de l’application. Permissions : « Contents », « Read and write ».</p>
+      <input type="password" id="token" autocomplete="off" placeholder="github_pat_…" aria-label="Clé d’accès GitHub">
+      <button id="token-save">Enregistrer la clé sur cet appareil</button>
+      <button class="link" id="token-forget">Oublier la clé</button>
+    </details>
+  </div>
+</main>
+<div id="toast" role="status" hidden></div>
+<script src="chapitres.js"></script>
+</body>
+</html>
