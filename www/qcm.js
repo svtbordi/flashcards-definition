@@ -67,6 +67,21 @@
     return { text: text + def.slice(pos), masked };
   }
 
+  // Positions (dans le texte d'origine) des expressions données, pour les mettre en évidence.
+  function findSpans(text, forms) {
+    const { s, map } = normMap(text);
+    const spans = [];
+    for (const f of forms) {
+      if (!normMap(f).s.trim()) continue;
+      for (const m of s.matchAll(formRe(f))) {
+        const a = m.index + m[1].length;
+        spans.push([map[a], map[a + m[2].length]]);
+      }
+    }
+    spans.sort((x, y) => x[0] - y[0] || y[1] - x[1]);
+    return spans.filter((sp, i) => !spans.slice(0, i).some(o => sp[0] < o[1]));
+  }
+
   function mentions(text, term) {
     const { s } = normMap(text);
     return variants(term).some(v => formRe(v).test(s));
@@ -188,7 +203,7 @@
     return { card, def: shown, options };
   }
 
-  const api = { normMap, variants, maskTerm, mentions, candidates, pickDistractors, makeQuestion, shuffle, indexOf, cosine };
+  const api = { normMap, variants, maskTerm, mentions, findSpans, candidates, pickDistractors, makeQuestion, shuffle, indexOf, cosine };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.QCM = api;
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -4,7 +4,9 @@ Application installable (téléphone Android ou iPhone, ordinateur) pour apprend
 
 ## Ce que fait l'application
 
-- Entraînement sur un chapitre, plusieurs, tout le programme, ou « Mes chapitres commencés » (les chapitres où l'élève a déjà répondu au moins une fois).
+- Révisions espacées du jour : les nouvelles cartes viennent seulement des chapitres vus en cours, cochés par l'enseignant (voir « Chapitres vus en cours »). Les cartes déjà commencées ailleurs continuent d'être révisées selon leur calendrier.
+- Entraînement libre sur un chapitre, plusieurs (BCPST 1 compris, par exemple pendant les vacances), ou « Mes chapitres commencés ». Les chapitres vus en cours y sont signalés.
+- Mots-clés à vérifier : quand une définition a des éléments-clés (colonne D du tableur), ils sont soulignés au verso et l'élève coche ceux qu'il avait cités ; « Su » ne s'active que s'il les a tous. Comparer sa réponse à des éléments précis corrige la tendance à se juger trop vite (Dunlosky et Rawson, 2012).
 - Ordre d'une séance : cartes ratées dans la séance, puis cartes à revoir (les plus menacées d'oubli d'abord), puis nouvelles cartes (20 par jour par défaut, dans l'ordre du programme).
 - Révision en avance avant une colle, sans fausser le calendrier.
 - Échauffement par QCM, proposé au début d'une séance sur un ou plusieurs chapitres (et conseillé la première fois qu'un thème est abordé) : 10 définitions, le terme masqué, à retrouver parmi quatre termes. Les trois leurres sont les termes les plus proches par le sens (mots communs aux définitions) et par la forme (anémogamie, entomogamie, anémochorie), de préférence du même chapitre ; les cas particuliers (synapse / synapse chimique) et les quasi-synonymes sont écartés. Correction après chaque question, score à la fin, puis les flashcards du thème, toujours. Une erreur au QCM compte comme « Raté » pour le calendrier ; une bonne réponse ne compte pas comme « Su », car reconnaître un terme ne prouve pas qu'on saurait retrouver sa définition. Les définitions ratées reviennent en flashcard dix minutes plus tard. Pas d'échauffement pour les révisions du jour sur tout le programme.
@@ -39,9 +41,17 @@ Un élève qui change de téléphone doit exporter puis restaurer sa sauvegarde.
 2. Remplacer `definitions_SVT.xlsx` par la nouvelle version (« Add file » puis « Upload files », même nom de fichier).
 3. Valider. La publication se refait seule en une à deux minutes. Les élèves reçoivent la nouvelle version à la prochaine ouverture avec connexion, ou via Réglages, « Vérifier s'il existe une nouvelle version ».
 
-Format attendu : onglet « Toutes » (sinon le premier onglet), sans ligne d'en-tête ; colonne A le terme, B le ou les codes de partie séparés par des virgules (ex. `SV-G-1, SV-H`), C la définition. Une définition sans code en colonne B n'est pas proposée dans l'application.
+Format attendu : onglet « Toutes » (sinon le premier onglet), sans ligne d'en-tête ; colonne A le terme, B le ou les codes de partie séparés par des virgules (ex. `SV-G-1, SV-H`), C la définition, D (facultative) les éléments-clés séparés par des points-virgules (ex. `pollinisation ; vent`), tels qu'ils apparaissent dans la définition. Une définition sans code en colonne B n'est pas proposée dans l'application.
 
 Le terme sert d'identifiant : corriger une définition garde la progression des élèves, renommer un terme crée une nouvelle carte. Les majuscules, accents, « œ » et apostrophes typographiques sont ignorés dans cette comparaison.
+
+## Chapitres vus en cours (enseignant)
+
+Ouvrir `chapitres.html` (lien « Espace enseignant : chapitres vus en cours » en bas des Réglages), cocher les parties ou sous-parties traitées, puis « Publier pour les étudiants ». La liste est enregistrée dans `www/data/ouverts.json` ; les élèves la reçoivent à la prochaine ouverture avec connexion, après la republication automatique (une à deux minutes). Tant que la liste n'a jamais été publiée (`"chapitres": null`), les révisions couvrent tout le programme.
+
+La publication directe demande une fois une clé GitHub personnelle (« Fine-grained token », accès limité à ce dépôt, permission « Contents : Read and write »), enregistrée seulement dans le navigateur de l'enseignant. Sans clé, la page fait télécharger `ouverts.json`, à déposer à la main dans `www/data/` sur GitHub.
+
+Une définition codée seulement au niveau d'une partie (par exemple « ST-A ») n'entre dans les révisions que si la partie entière est cochée.
 
 ## Recevoir les signalements (une seule fois)
 
@@ -69,6 +79,7 @@ npm run serve        # http://localhost:8765
 npm test             # parcours complet dans un navigateur de téléphone simulé
 node tools/bilan_test.mjs /tmp   # bilans de trois élèves simulés, regroupement et export Excel
 node tools/qcm_test.mjs          # masquage et leurres sur toute la base, puis un échauffement complet et un signalement
+node tools/revisions_test.mjs    # révisions limitées aux chapitres ouverts, mots-clés à cocher, page enseignant
 ```
 
 - `www/` : l'application (HTML, CSS, JavaScript sans étape de compilation).

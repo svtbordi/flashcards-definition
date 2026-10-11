@@ -15,7 +15,7 @@ wb = openpyxl.load_workbook(XLSX, read_only=True)
 ws = wb['Toutes']
 cards, seen, skipped = [], collections.Counter(), 0
 for row in ws.iter_rows(values_only=True):
-    term, codes, definition = (row + (None, None, None))[:3]
+    term, codes, definition, keys = (tuple(row) + (None, None, None, None))[:4]
     if not term or not definition:
         continue
     cl = [c.strip() for c in re.split(r'[,;]', str(codes or '')) if c.strip()]
@@ -26,7 +26,11 @@ for row in ws.iter_rows(values_only=True):
     seen[cid] += 1
     if seen[cid] > 1:
         cid = f'{cid}#{seen[cid]}'
-    cards.append({'id': cid, 'term': str(term).strip(), 'def': str(definition).strip(), 'codes': cl})
+    card = {'id': cid, 'term': str(term).strip(), 'def': str(definition).strip(), 'codes': cl}
+    kl = [k.strip() for k in str(keys or '').split(';') if k.strip()]  # mots-clés à vérifier au verso
+    if kl:
+        card['keys'] = kl
+    cards.append(card)
 
 chapters = []
 part_re = re.compile(r'^\| ((?:SV|BG|ST)-[A-K]) \| (.+?) \| (.+?) \|')
