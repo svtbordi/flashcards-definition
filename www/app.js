@@ -159,8 +159,8 @@ async function loadDeck() {
   const [bundled, chaps, conf, open] = await Promise.all([
     fetch('data/definitions.json').then(r => r.json()),
     fetch('data/chapters.json').then(r => r.json()),
-    fetch('config.json').then(r => r.json()).catch(() => ({})),
-    fetch('data/ouverts.json').then(r => r.json()).catch(() => null),
+    fetch('config.json', { cache: 'no-cache' }).then(r => r.json()).catch(() => ({})),
+    fetch('data/ouverts.json', { cache: 'no-cache' }).then(r => r.json()).catch(() => null),
   ]);
   config = conf || {};
   opened = open && Array.isArray(open.chapitres) ? open : null;

@@ -121,7 +121,7 @@ check(await t.evaluate(() => document.getElementById('token-box').open), 'pas de
 await t.fill('#token', 'github_pat_test');
 await t.click('#token-save');
 await t.click('#publish');
-await t.waitForSelector('#toast:not([hidden])');
+await t.waitForFunction(() => /^Publi/.test(document.getElementById('toast').textContent)); // le toast « Clé enregistrée » est encore affiché
 console.log('toast :', await t.textContent('#toast'));
 const sent = put && JSON.parse(Buffer.from(put.content, 'base64').toString('utf8'));
 check(put && put.sha === 'abc' && put.branch === 'main', 'requête GitHub incorrecte');
