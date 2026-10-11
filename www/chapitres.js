@@ -10,6 +10,7 @@ let checked = new Set();
 let published = '';
 let expanded = new Set();
 let repo = '';
+let methods = true; // méthodes et techniques toujours dans les révisions espacées
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
@@ -37,7 +38,8 @@ function selection() {
 }
 
 const count = code => cards.filter(c => c.codes.some(k => covers(code, k))).length;
-const inReviews = () => cards.filter(c => c.codes.some(k => selection().some(sel => covers(sel, k)))).length;
+const inReviews = () => cards.filter(c => (methods && c.method) || c.codes.some(k => selection().some(sel => covers(sel, k)))).length;
+const state = () => JSON.stringify({ chapitres: selection(), methodes: methods });
 
 function node(c) {
   const kids = chapters.filter(x => parentOf(x.code) === c.code);
@@ -61,8 +63,8 @@ function render() {
     return list.length ? `<section class="card year"><h2>${esc(y)}</h2><ul class="tree">${list.map(node).join('')}</ul></section>` : '';
   }).join('');
   const sel = selection();
-  const dirty = JSON.stringify(sel) !== published;
-  $('summary').innerHTML = `${sel.length ? `${sel.length} ${sel.length > 1 ? 'parties ou sous-parties cochées' : 'partie ou sous-partie cochée'}, ${inReviews()} définitions dans les révisions espacées.` : 'Aucun chapitre coché : les révisions espacées ne proposeront aucune nouvelle définition.'}
+  const dirty = state() !== published;
+  $('summary').innerHTML = `${sel.length ? `${sel.length} ${sel.length > 1 ? 'parties ou sous-parties cochées' : 'partie ou sous-partie cochée'}, ${inReviews()} définitions dans les révisions espacées.` : `Aucun chapitre coché : les révisions espacées ne proposeront ${methods && cards.some(c => c.method) ? 'que les méthodes et techniques' : 'aucune nouvelle définition'}.`}
     ${dirty ? '<span class="dirty">Modifications non publiées.</span>' : ''}`;
   $('token-state').textContent = getToken() ? '(enregistrée)' : '(absente)';
   document.querySelectorAll('[data-code]').forEach(cb => {
@@ -82,7 +84,7 @@ function render() {
 
 function fileContent() {
   const now = new Date().toISOString();
-  return JSON.stringify({ version: now, chapitres: selection() }, null, 1) + '\n';
+  return JSON.stringify({ version: now, chapitres: selection(), methodes: methods }, null, 1) + '\n';
 }
 
 const b64 = text => btoa(String.fromCharCode(...new TextEncoder().encode(text)));
@@ -108,7 +110,7 @@ async function publish() {
       body: JSON.stringify({ message: 'Chapitres vus en cours : ' + (selection().join(', ') || 'aucun'), content: b64(fileContent()), sha, branch: 'main' }),
     });
     if (!res.ok) throw new Error(`GitHub a répondu ${res.status}`);
-    published = JSON.stringify(selection());
+    published = state();
     render();
     toast('Publié. Les étudiants recevront la liste dans quelques minutes, à l’ouverture de l’application.');
   } catch (e) {
@@ -140,7 +142,13 @@ async function main() {
   repo = conf.depot || 'svtbordi/flashcards-definition';
   const list = open && Array.isArray(open.chapitres) ? open.chapitres : [];
   checked = new Set(list);
-  published = JSON.stringify(selection());
+  methods = !(open && open.methodes === false);
+  published = state();
+  const nm = cards.filter(c => c.method).length;
+  $('methods-box').hidden = !nm;
+  $('methods').checked = methods;
+  $('methods-count').textContent = nm;
+  $('methods').onchange = () => { methods = $('methods').checked; render(); };
   list.forEach(code => { for (let p = parentOf(code); p.includes('-'); p = parentOf(p)) expanded.add(p); });
   render();
   $('publish').onclick = publish;
@@ -154,7 +162,7 @@ async function main() {
     toast('Clé enregistrée sur cet appareil.');
   };
   $('token-forget').onclick = () => { try { localStorage.removeItem(TOKEN_KEY); } catch (e) { /* rien */ } render(); toast('Clé oubliée.'); };
-  window.addEventListener('beforeunload', e => { if (JSON.stringify(selection()) !== published) e.preventDefault(); });
+  window.addEventListener('beforeunload', e => { if (state() !== published) e.preventDefault(); });
 }
 
 main().catch(() => { $('years').innerHTML = '<p class="warn">Impossible de charger les chapitres. Vérifie ta connexion.</p>'; });

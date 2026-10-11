@@ -15,7 +15,7 @@ wb = openpyxl.load_workbook(XLSX, read_only=True)
 ws = wb['Toutes']
 cards, seen, skipped = [], collections.Counter(), 0
 for row in ws.iter_rows(values_only=True):
-    term, codes, definition, keys = (tuple(row) + (None, None, None, None))[:4]
+    term, codes, definition, keys, kind = (tuple(row) + (None,) * 5)[:5]
     if not term or not definition:
         continue
     cl = [c.strip() for c in re.split(r'[,;]', str(codes or '')) if c.strip()]
@@ -30,6 +30,8 @@ for row in ws.iter_rows(values_only=True):
     kl = [k.strip() for k in str(keys or '').split(';') if k.strip()]  # mots-clés à vérifier au verso
     if kl:
         card['keys'] = kl
+    if str(kind or '').strip().upper().startswith('M'):  # colonne E : méthode ou technique, révisée hors chapitre
+        card['method'] = True
     cards.append(card)
 
 chapters = []

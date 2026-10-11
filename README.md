@@ -6,6 +6,7 @@ Application installable (téléphone Android ou iPhone, ordinateur) pour apprend
 
 - Révisions espacées du jour : les nouvelles cartes viennent seulement des chapitres vus en cours, cochés par l'enseignant (voir « Chapitres vus en cours »). Les cartes déjà commencées ailleurs continuent d'être révisées selon leur calendrier.
 - Entraînement libre sur un chapitre, plusieurs (BCPST 1 compris, par exemple pendant les vacances), ou « Mes chapitres commencés ». Les chapitres vus en cours y sont signalés.
+- Méthodes et techniques : les définitions marquées « M » en colonne E du tableur (principe et objectif d'une méthode du programme) ont leur bouton en entraînement libre, tous chapitres confondus. Elles restent aussi dans leur chapitre et, sauf si l'enseignant décoche l'option sur la page « Chapitres vus en cours », entrent toujours dans les révisions espacées, car elles servent dans toutes les parties.
 - Mots-clés à vérifier : quand une définition a des éléments-clés (colonne D du tableur), ils sont soulignés au verso et l'élève coche ceux qu'il avait cités ; « Su » ne s'active que s'il les a tous. Comparer sa réponse à des éléments précis corrige la tendance à se juger trop vite (Dunlosky et Rawson, 2012).
 - Ordre d'une séance : cartes ratées dans la séance, puis cartes à revoir (les plus menacées d'oubli d'abord), puis nouvelles cartes (20 par jour par défaut, dans l'ordre du programme).
 - Révision en avance avant une colle, sans fausser le calendrier.
@@ -47,7 +48,7 @@ Le terme sert d'identifiant : corriger une définition garde la progression des 
 
 ## Chapitres vus en cours (enseignant)
 
-Ouvrir `chapitres.html` (lien « Espace enseignant : chapitres vus en cours » en bas des Réglages), cocher les parties ou sous-parties traitées, puis « Publier pour les étudiants ». La liste est enregistrée dans `www/data/ouverts.json` ; les élèves la reçoivent à la prochaine ouverture avec connexion, après la republication automatique (une à deux minutes). Tant que la liste n'a jamais été publiée (`"chapitres": null`), les révisions couvrent tout le programme.
+Ouvrir `chapitres.html` (lien « Espace enseignant : chapitres vus en cours » en bas des Réglages), cocher les parties ou sous-parties traitées, puis « Publier pour les étudiants ». La liste est enregistrée dans `www/data/ouverts.json` ; les élèves la reçoivent à la prochaine ouverture avec connexion, après la republication automatique (une à deux minutes). Tant que la liste n'a jamais été publiée (`"chapitres": null`), les révisions couvrent tout le programme. Une case « Méthodes et techniques » (cochée par défaut, publiée avec la liste sous `"methodes"`) les garde toujours dans les révisions espacées.
 
 La publication directe demande une fois une clé GitHub personnelle (« Fine-grained token », accès limité à ce dépôt, permission « Contents : Read and write »), enregistrée seulement dans le navigateur de l'enseignant. Sans clé, la page fait télécharger `ouverts.json`, à déposer à la main dans `www/data/` sur GitHub.
 

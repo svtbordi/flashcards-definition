@@ -141,7 +141,11 @@ function cardCodes(c) {
   return c.codes.length ? c.codes : [NO_CODE];
 }
 
+// METHODS dans une sélection : les définitions de méthodes et techniques (colonne E du tableur), tous chapitres confondus
+const METHODS = '@methodes';
+
 function matchesSelection(card, selected) {
+  if (card.method && selected.includes(METHODS)) return true;
   return cardCodes(card).some(code => selected.some(sel => code === sel || code.startsWith(sel + '-')));
 }
 
@@ -176,10 +180,14 @@ let bundledVersion = '';
 let config = {};
 let opened = null; // chapitres vus en cours, cochés par l'enseignant (data/ouverts.json) ; null : tout le programme
 
-// Les révisions espacées prennent leurs nouvelles cartes dans les chapitres vus en cours.
+// Les révisions espacées prennent leurs nouvelles cartes dans les chapitres vus en cours,
+// et dans les méthodes et techniques, qui servent partout, sauf si l'enseignant les a exclues.
 function openChapters() {
-  return opened ? opened.chapitres : ['SV', 'BG', 'ST'];
+  if (!opened) return ['SV', 'BG', 'ST'];
+  return opened.methodes === false ? opened.chapitres : [...opened.chapitres, METHODS];
 }
+
+const methodCards = () => deck.cards.filter(c => c.method);
 
 const isStarted = c => { const st = store.cards[c.id]; return !!st && st.state !== State.New; };
 
@@ -434,13 +442,14 @@ function renderHome() {
     </section>
     <div class="actions">
       <button class="primary" id="go-all" ${revs.due + newToday ? '' : 'disabled'}>Révisions espacées du jour
-        <small>${opened ? `chapitres vus en cours (${plural(openList.length, 'partie ou sous-partie', 'parties ou sous-parties')})` : 'tout le programme'}</small></button>
+        <small>${opened ? `chapitres vus en cours (${plural(opened.chapitres.length, 'partie ou sous-partie', 'parties ou sous-parties')})${openList.includes(METHODS) && methodCards().length ? ' et méthodes' : ''}` : 'tout le programme'}</small></button>
     </div>
     <h2 class="section">Entraînement libre</h2>
     <p class="muted small">N’importe quel chapitre, par exemple pour anticiper une révision. Les cartes commencées ici entrent ensuite dans tes révisions espacées.</p>
     <div class="actions">
       <button id="go-choose">Choisir un ou plusieurs chapitres</button>
       ${store.selection.length ? `<button id="go-last">Reprendre ma dernière sélection <small>(${esc(store.selection.slice(0, 3).join(', '))}${store.selection.length > 3 ? '…' : ''})</small></button>` : ''}
+      ${methodCards().length ? `<button id="go-methods">Méthodes et techniques <small>(principe et objectif de ${plural(methodCards().length, 'méthode', 'méthodes')}, tous chapitres)</small></button>` : ''}
       <button id="go-started" ${startedStats ? '' : 'disabled'}>Mes chapitres commencés${startedStats ? ` <small>(${startedStats.due} à revoir)</small>` : ''}</button>
     </div>
     <div class="actions secondary">
@@ -454,6 +463,8 @@ function renderHome() {
   document.getElementById('go-choose').onclick = () => go('choose');
   const last = document.getElementById('go-last');
   if (last) last.onclick = () => startSession(store.selection, 'Dernière sélection');
+  const methods = document.getElementById('go-methods');
+  if (methods) methods.onclick = () => startSession([METHODS], 'Méthodes et techniques');
   document.getElementById('go-progress').onclick = () => go('progress');
   document.getElementById('go-lexicon').onclick = () => go('lexicon');
   document.getElementById('go-install').onclick = () => go('install');
@@ -762,7 +773,7 @@ function renderSession() {
     <div class="progress-line"><span>${s.label ? esc(s.label) : ''}${s.ahead ? ' · en avance' : ''}</span><span>${left} restantes</span></div>
     <article class="flash ${s.revealed ? 'revealed' : ''}">
       ${s.revealed && canReport() ? reportButton() : ''}
-      <div class="codes">${cardCodes(c).map(x => `<span>${esc(x === NO_CODE ? 'sans chapitre' : x)}</span>`).join('')} ${tag}</div>
+      <div class="codes">${cardCodes(c).map(x => `<span>${esc(x === NO_CODE ? 'sans chapitre' : x)}</span>`).join('')}${c.method ? '<span>méthode</span>' : ''} ${tag}</div>
       <h2 class="term">${esc(c.term)}</h2>
       ${s.revealed ? `<p class="def">${defWithKeys(c)}</p>${keyChecklist(c, s)}` : '<p class="hint muted">Formule la définition dans ta tête (ou à l’écrit), puis retourne la carte.</p>'}
     </article>
@@ -1258,7 +1269,7 @@ function describeChange(oldCards, newCards) {
   for (const c of newCards) {
     const o = oldIds.get(c.id);
     if (!o) added += 1;
-    else if (o.def !== c.def || o.codes.join() !== c.codes.join() || (o.keys || []).join() !== (c.keys || []).join()) changed += 1;
+    else if (o.def !== c.def || o.codes.join() !== c.codes.join() || (o.keys || []).join() !== (c.keys || []).join() || !o.method !== !c.method) changed += 1;
   }
   const removed = oldCards.filter(c => !newIds.has(c.id)).length;
   return { added, changed, removed };
@@ -1318,6 +1329,7 @@ async function importXlsx(file) {
       const keys = String(row[3] || '').split(';').map(x => x.trim()).filter(Boolean);
       const card = { id: n > 1 ? `${base}#${n}` : base, term, def, codes };
       if (keys.length) card.keys = keys;
+      if (/^m/i.test(String(row[4] || '').trim())) card.method = true; // colonne E : « M » pour une méthode ou technique
       cards.push(card);
     }
     if (!cards.length) return toast('Aucune définition avec un code de chapitre dans ce fichier.');

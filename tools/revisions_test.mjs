@@ -11,7 +11,9 @@ const check = (ok, msg) => { if (!ok) fail.push(msg); };
 // mots-clés fictifs : les deux premiers mots longs de chaque définition
 for (const c of defs.cards) c.keys = (c.def.match(/[a-zà-ÿ]{7,}/gi) || []).slice(0, 2);
 const OPEN = ['SV-D-2-1', 'ST-A'];
-const inOpen = c => c.codes.some(k => OPEN.some(o => k === o || k.startsWith(o + '-')));
+const METHODS = ['western blot', 'patch-clamp', 'diagramme TAS', 'PCR (réaction de polymérisation en chaîne)', 'Southern blot'];
+for (const c of defs.cards) if (METHODS.includes(c.term)) c.method = true;
+const inOpen = c => c.method || c.codes.some(k => OPEN.some(o => k === o || k.startsWith(o + '-')));
 
 const browser = await chromium.launch();
 const ctx = await browser.newContext({ ...devices['iPhone 13'], serviceWorkers: 'block' }); // sinon le cache hors connexion contourne les réponses simulées
@@ -24,7 +26,25 @@ await p.route('**/data/ouverts.json', r => r.fulfill({ contentType: 'application
 // entraînement libre sur un chapitre non ouvert (SV-G-1), une carte réussie
 await p.goto(`${base}/`);
 await p.waitForSelector('#go-all');
-console.log('accueil :', (await p.textContent('#go-all')).replace(/\s+/g, ' ').trim());
+const home = (await p.textContent('#go-all')).replace(/\s+/g, ' ').trim();
+console.log('accueil :', home);
+check(home.includes('et méthodes'), 'méthodes absentes du bouton des révisions espacées');
+
+// bouton « Méthodes et techniques » : seulement les méthodes, tous chapitres
+await p.click('#go-methods');
+if (await p.$('#cards-go')) await p.click('#cards-go');
+const mseen = [];
+for (let i = 0; i < 12 && await p.$('.flash'); i++) {
+  mseen.push((await p.textContent('h2.term')).trim());
+  await p.click('#reveal');
+  await p.click('.grade .again');
+}
+check(mseen.length && mseen.every(t => METHODS.includes(t)), 'carte hors méthodes dans « Méthodes et techniques » : ' + mseen.join(', '));
+check(await p.$('.codes span:text("méthode")') !== null || mseen.length > 0, 'étiquette méthode absente');
+console.log('méthodes :', [...new Set(mseen)].join(', '));
+await p.evaluate(() => localStorage.removeItem('fc-bcpst-v1'));
+await p.goto(`${base}/`);
+await p.waitForSelector('#go-all');
 await p.screenshot({ path: `${out}/rev-1-accueil.png`, fullPage: true });
 await p.click('#go-choose');
 await p.screenshot({ path: `${out}/rev-2-choix.png` });
@@ -81,6 +101,7 @@ check((await p.textContent('h2.term')).trim() === freeTerm, `carte d'entraîneme
 const t = await ctx.newPage();
 t.on('pageerror', e => errors.push(e.message));
 let put = null;
+await t.route('**/data/definitions.json', r => r.fulfill({ contentType: 'application/json', body: JSON.stringify(defs) }));
 await t.route('**/data/ouverts.json', r => r.fulfill({ contentType: 'application/json', body: JSON.stringify({ version: 'x', chapitres: OPEN }) }));
 await t.route('https://api.github.com/**', r => {
   if (r.request().method() === 'GET') return r.fulfill({ contentType: 'application/json', body: '{"sha":"abc"}' });
@@ -91,6 +112,8 @@ await t.goto(`${base}/chapitres.html`);
 await t.waitForSelector('[data-code="SV-D"]');
 check(await t.isChecked('[data-code="SV-D-2-1"]'), 'chapitre publié non coché au chargement');
 await t.check('[data-code="SV-F"]');
+check(await t.isChecked('#methods'), 'méthodes non cochées par défaut');
+await t.uncheck('#methods');
 console.log('résumé :', (await t.textContent('#summary')).replace(/\s+/g, ' ').trim());
 await t.screenshot({ path: `${out}/rev-5-enseignant.png` });
 await t.click('#publish');
@@ -102,6 +125,7 @@ await t.waitForSelector('#toast:not([hidden])');
 console.log('toast :', await t.textContent('#toast'));
 const sent = put && JSON.parse(Buffer.from(put.content, 'base64').toString('utf8'));
 check(put && put.sha === 'abc' && put.branch === 'main', 'requête GitHub incorrecte');
+check(sent && sent.methodes === false, 'option méthodes non publiée');
 check(sent && JSON.stringify(sent.chapitres) === JSON.stringify(['SV-D-2-1', 'SV-F', 'ST-A']), 'liste publiée : ' + JSON.stringify(sent && sent.chapitres));
 const wide = await t.evaluate(() => document.documentElement.scrollWidth > innerWidth);
 check(!wide, 'défilement horizontal sur la page enseignant');
