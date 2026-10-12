@@ -50,3 +50,9 @@ function doPost(e) {
   }
   return ContentService.createTextOutput('ok');
 }
+
+// Essai : ouvrir l'adresse …/exec dans un navigateur ajoute une ligne « TEST » au tableur.
+function doGet() {
+  doPost({ postData: { contents: JSON.stringify({ terme: 'TEST', type: 'Essai depuis un navigateur', precision: 'Ligne à supprimer' }) } });
+  return ContentService.createTextOutput('Essai réussi : une ligne TEST a été ajoutée à l\'onglet « Signalements » du tableur.');
+}
