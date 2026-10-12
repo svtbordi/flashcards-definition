@@ -981,6 +981,7 @@ function openSuggestion() {
       nature: 'suggestion',
       type: SUGGESTION_TYPES[type()],
       message: text.value.trim(),
+      terme: 'Suggestion', precision: text.value.trim(), // lisibles aussi par un script pas encore mis à jour
       version: deck.version,
       date: new Date().toISOString(),
     });
