@@ -232,7 +232,7 @@ button.term { display: block; background: none; border: 0; padding: 8px 4px; min
 .report-box .radio { display: flex; align-items: center; gap: 10px; min-height: 40px; }
 .report-box .radio input { width: 20px; height: 20px; margin: 0; accent-color: var(--accent); }
 .report-box label:not(.radio) { display: grid; gap: 4px; margin-bottom: 16px; }
-.report-box input[type=text] { font: inherit; padding: 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--text); width: 100%; min-width: 0; }
+.report-box input[type=text], .report-box textarea { font: inherit; padding: 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--text); width: 100%; min-width: 0; }
 
 /* Chapitres vus en cours */
 h2.section { font-size: 17px; margin: 8px 0 4px; }
