@@ -456,6 +456,7 @@ function renderHome() {
       <button id="go-progress">Ma progression</button>
       <button id="go-lexicon">Lexique : chercher une définition</button>
       <button id="go-install">Installer l’application et les rappels</button>
+      ${canReport() ? '<button id="go-suggest">Suggérer une amélioration ou faire une demande</button>' : ''}
     </div>
     <p class="muted small">${deck.cards.length} définitions · version ${esc(deck.version)}</p>`;
   document.getElementById('go-all').onclick = () => startSession(openList, 'Révisions espacées', { reviews: true });
@@ -468,6 +469,8 @@ function renderHome() {
   document.getElementById('go-progress').onclick = () => go('progress');
   document.getElementById('go-lexicon').onclick = () => go('lexicon');
   document.getElementById('go-install').onclick = () => go('install');
+  const suggest = document.getElementById('go-suggest');
+  if (suggest) suggest.onclick = openSuggestion;
 }
 
 function matchesAny(code, selected) {
@@ -939,6 +942,52 @@ function openReport(card, context, extra = {}) {
     persist();
     close();
     toast(await flushReports() ? 'Merci, ton signalement a été transmis.' : 'Pas de connexion : ton signalement sera transmis dès que possible.');
+  };
+}
+
+const SUGGESTION_TYPES = {
+  amelioration: 'Amélioration de l’application',
+  demande: 'Demande (définition ou chapitre à ajouter, autre)',
+  bug: 'Problème technique',
+};
+
+// Suggestion ou demande sur l'application : même circuit que les signalements, rangée à part dans le tableur.
+function openSuggestion() {
+  const box = document.createElement('div');
+  box.className = 'modal';
+  box.innerHTML = `<form class="modal-box report-box" role="dialog" aria-modal="true" aria-labelledby="sug-title">
+    <h2 id="sug-title">Suggestion ou demande</h2>
+    <fieldset>${Object.keys(SUGGESTION_TYPES).map(k => `<label class="radio"><input type="radio" name="sug-type" value="${k}"> ${esc(SUGGESTION_TYPES[k])}</label>`).join('')}</fieldset>
+    <label>Ton message<textarea id="sug-text" rows="5" maxlength="1000"></textarea></label>
+    <div class="modal-actions"><button type="button" id="sug-cancel">Annuler</button><button class="primary" id="sug-send" disabled>Envoyer</button></div>
+  </form>`;
+  document.body.appendChild(box);
+  const form = box.querySelector('form');
+  const text = box.querySelector('#sug-text');
+  const send = box.querySelector('#sug-send');
+  const type = () => (form.querySelector('input[name=sug-type]:checked') || {}).value;
+  const check = () => { send.disabled = !type() || !text.value.trim(); };
+  form.addEventListener('change', check);
+  text.addEventListener('input', check);
+  const before = document.activeElement;
+  const close = () => { box.remove(); document.removeEventListener('keydown', onKey); if (before && before.isConnected) before.focus(); };
+  const onKey = e => { if (e.key === 'Escape') close(); };
+  document.addEventListener('keydown', onKey);
+  box.querySelector('#sug-cancel').onclick = close;
+  form.onsubmit = async e => {
+    e.preventDefault();
+    if (send.disabled) return;
+    store.pendingReports.push({
+      nature: 'suggestion',
+      type: SUGGESTION_TYPES[type()],
+      message: text.value.trim(),
+      terme: 'Suggestion', precision: text.value.trim(), // lisibles aussi par un script pas encore mis à jour
+      version: deck.version,
+      date: new Date().toISOString(),
+    });
+    persist();
+    close();
+    toast(await flushReports() ? 'Merci, ton message a été transmis.' : 'Pas de connexion : ton message sera transmis dès que possible.');
   };
 }
 

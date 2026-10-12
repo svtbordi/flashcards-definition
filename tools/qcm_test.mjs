@@ -108,6 +108,18 @@ await p.waitForSelector('.def-box .report-btn');
 await p.screenshot({ path: `${out}/qcm-7-lexique.png` });
 console.log('signalements reçus :', reports.map(r => `${r.contexte} / ${r.type} / ${r.terme}${r.precision ? ' / ' + r.precision : ''}`));
 check(reports.length === 2 && reports[0].propositions.length === 4, 'signalements : ' + reports.length);
+
+// suggestion depuis l'accueil
+await p.goto(`${base}/`);
+await p.click('#go-suggest');
+check(await p.isDisabled('#sug-send'), 'envoi possible sans message');
+await p.check('input[name=sug-type][value=demande]');
+await p.fill('#sug-text', 'Ajouter le chapitre ST-I');
+await p.screenshot({ path: `${out}/qcm-8-suggestion.png` });
+await p.click('#sug-send');
+await p.waitForFunction(() => /transmis/.test(document.getElementById('toast').textContent));
+const sug = reports[reports.length - 1];
+check(sug.nature === 'suggestion' && sug.message === 'Ajouter le chapitre ST-I' && /^Demande/.test(sug.type), 'suggestion reçue : ' + JSON.stringify(sug));
 const wide = await p.evaluate(() => document.documentElement.scrollWidth > innerWidth);
 check(!wide, 'défilement horizontal');
 await browser.close();
