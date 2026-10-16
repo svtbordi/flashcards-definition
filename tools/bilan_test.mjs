@@ -18,6 +18,7 @@ for (const [name, n, fail] of [['Alice Martin', 25, 3], ['Bastien Roux', 12, 2],
     for (let i = 0; i < n; i++) {
       if (!(await p.$('#reveal'))) break;
       await p.click('#reveal');
+      if (i % fail) for (let cb; (cb = await p.$('.keys input:not(:checked)'));) await cb.click(); // « Su » exige les éléments-clés cochés
       await p.click(i % fail === 0 ? '.grade .again' : '.grade .good');
     }
     await p.click('#btn-back');

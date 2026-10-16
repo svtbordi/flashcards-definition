@@ -11,8 +11,8 @@ const check = (ok, msg) => { if (!ok) fail.push(msg); };
 // mots-clés fictifs : les deux premiers mots longs de chaque définition
 for (const c of defs.cards) c.keys = (c.def.match(/[a-zà-ÿ]{7,}/gi) || []).slice(0, 2);
 const OPEN = ['SV-D-2-1', 'ST-A'];
-const METHODS = ['western blot', 'patch-clamp', 'diagramme TAS', 'PCR (réaction de polymérisation en chaîne)', 'Southern blot'];
-for (const c of defs.cards) if (METHODS.includes(c.term)) c.method = true;
+const METHODS = ['western blot (principe)', 'patch-clamp (objectifs)', 'diagramme TAS (principe)', 'PCR (réaction de polymérisation en chaîne) (objectifs)', 'Southern blot (principe)'];
+for (const c of defs.cards) c.method = METHODS.includes(c.term); // jeu de méthodes réduit et connu
 const inOpen = c => c.method || c.codes.some(k => OPEN.some(o => k === o || k.startsWith(o + '-')));
 
 const browser = await chromium.launch();

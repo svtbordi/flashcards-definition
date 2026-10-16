@@ -9,6 +9,8 @@ const DECK_KEY = 'fc-bcpst-deck-v1';
 const DAY_START_HOUR = 4; // une « journée » de révision commence à 4 h, comme dans Anki
 const MASTERED_DAYS = 21; // carte considérée comme acquise au-delà de 21 jours de stabilité
 const NO_CODE = 'NC';
+// « (principe) » ou « (objectifs) » d'une méthode : caché dans les propositions du QCM, où il trahirait la bonne réponse
+const FACET = /\s*\((principe|objectifs)\)$/i;
 const QCM_SIZE = 10; // questions de l'échauffement
 
 const DEFAULT_SETTINGS = {
@@ -687,7 +689,7 @@ function renderQcm(s) {
     </article>
     <div class="options">${q.options.map((o, k) => {
       const cls = !answered ? '' : o.id === q.card.id ? 'right' : k === Q.chosen ? 'wrong' : 'dim';
-      return `<button class="opt ${cls}" data-k="${k}" ${answered ? 'disabled' : ''}><small>${k + 1}</small>${esc(o.term)}</button>`;
+      return `<button class="opt ${cls}" data-k="${k}" ${answered ? 'disabled' : ''}><small>${k + 1}</small>${esc(o.term.replace(FACET, ''))}</button>`;
     }).join('')}</div>
     ${answered ? `<div class="feedback ${ok ? 'ok' : 'ko'}">
       ${ok ? '<p><b>Bonne réponse.</b></p>'
