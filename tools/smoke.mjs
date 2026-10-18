@@ -25,6 +25,7 @@ await page.screenshot({ path: `${shots}/4-verso.png` });
 // 20 réponses : une sur trois ratée
 for (let i = 0; i < 20; i++) {
   if (await page.$('#reveal')) await page.click('#reveal');
+  if (i % 3) for (let cb; (cb = await page.$('.keys input:not(:checked)'));) await cb.click(); // « Su » exige les éléments-clés cochés
   const btn = await page.$(i % 3 === 0 ? '.grade .again' : '.grade .good');
   if (!btn) break;
   await btn.click();

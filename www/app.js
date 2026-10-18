@@ -423,6 +423,7 @@ function render() {
 }
 
 function renderHome() {
+  queueSuivi();
   const all = statsFor(deck.cards);
   const openList = openChapters();
   const revs = statsFor(deck.cards.filter(c => inScope(c, openList, true)));
@@ -859,7 +860,7 @@ function renderProgress() {
   const revs = k => (store.days[k] ? store.days[k].reviews : 0);
   const maxRev = Math.max(1, ...days.map(revs));
   const anyDay = days.some(k => revs(k) > 0);
-  let html = `<button class="primary wide" id="go-bilan">Préparer mon bilan pour le professeur</button>
+  let html = `${suiviCard()}<button class="${store.settings.suiviCode ? '' : 'primary '}wide" id="go-bilan">Préparer mon bilan pour le professeur</button>
   <section class="card">
     <div class="legend"><span class="l-mastered">acquises</span><span class="l-learning">en cours</span><span class="l-due">à revoir</span><span class="l-new">jamais vues</span></div>
     <p><b>Tout le programme</b> : ${all.mastered} acquises, ${all.learning} en cours, ${all.due} à revoir, ${all.new} jamais vues.</p>
@@ -882,6 +883,7 @@ function renderProgress() {
     html += `<section class="card"><h2>Les définitions que tu rates le plus</h2><ol class="hard">${hard.map(x => `<li><b>${esc(x.c.term)}</b> <span class="muted">(${plural(x.n, 'fois', 'fois')})</span></li>`).join('')}</ol></section>`;
   }
   app.innerHTML = html;
+  bindSuivi(renderProgress);
   document.getElementById('go-bilan').onclick = () => go('bilan');
 }
 
@@ -998,13 +1000,17 @@ function flushReports() {
   if (!flushing) {
     flushing = (async () => {
       while (store.pendingReports.length && canReport()) {
+        const item = store.pendingReports[0];
         try {
-          // no-cors : la réponse du script n'est pas lisible, seule une panne réseau est détectée
-          await fetch(config.signalement, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(store.pendingReports[0]) });
+          // no-cors : la réponse du script n'est pas lisible, seule une panne réseau est détectée ;
+          // keepalive : l'envoi aboutit même si l'élève ferme l'application juste après
+          await fetch(config.signalement, { method: 'POST', mode: 'no-cors', keepalive: true, headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(item) });
         } catch (e) {
           return false;
         }
-        store.pendingReports.shift();
+        // la file a pu changer pendant l'envoi (bilan de suivi remplacé) : on retire l'élément envoyé, pas le premier
+        const k = store.pendingReports.indexOf(item);
+        if (k >= 0) store.pendingReports.splice(k, 1);
         persist();
       }
       return true;
@@ -1014,6 +1020,75 @@ function flushReports() {
 }
 
 window.addEventListener('online', () => flushReports());
+
+/* ---------- Suivi par l'enseignant ----------
+   Avec un code de suivi (donné par l'enseignant), le bilan part automatiquement vers son tableur, sous ce code et
+   sans le nom de l'élève : seul l'enseignant sait à qui correspond chaque code, et cette liste ne va jamais en ligne. */
+
+const SUIVI_CODE = /^[A-Z0-9-]{4,20}$/;
+const SUIVI_GAP = 10 * 60e3; // au plus un envoi toutes les 10 minutes
+// config.json « suivi »: true une fois le script de l'enseignant à jour (il range les bilans dans l'onglet « Suivi »)
+const canSuivi = () => canReport() && config.suivi === true;
+const suiviOn = () => !!store.settings.suiviCode && canSuivi();
+
+function queueSuivi(force = false) {
+  if (!suiviOn()) return;
+  const last = store.suivi || {};
+  if (!force && (last.n === store.log.length || Date.now() - (last.t ? Date.parse(last.t) : 0) < SUIVI_GAP)) return;
+  // un seul bilan en attente : le plus récent remplace le précédent
+  store.pendingReports = store.pendingReports.filter(x => x.nature !== 'suivi');
+  store.pendingReports.push({ nature: 'suivi', code: store.settings.suiviCode, bilan: buildBilan(store.settings.suiviCode) });
+  store.suivi = { t: new Date().toISOString(), n: store.log.length };
+  persist();
+  flushReports();
+}
+
+function suiviCard() {
+  if (!canSuivi()) return '';
+  const code = store.settings.suiviCode;
+  if (code) {
+    const t = store.suivi && store.suivi.t;
+    return `<section class="card form" id="suivi">
+      <h2>Suivi par ton professeur : activé</h2>
+      <p>Ton bilan est envoyé automatiquement à ton professeur après tes séances, sous le code <b>${esc(code)}</b>, <b>sans ton nom</b>.${t ? ` Dernier envoi : ${esc(new Date(t).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' }))}.` : ''}</p>
+      <div class="actions"><button id="suivi-now">Envoyer mon bilan maintenant</button><button id="suivi-stop">Arrêter le suivi</button></div>
+    </section>`;
+  }
+  return `<section class="card form" id="suivi">
+    <h2>Suivi par ton professeur</h2>
+    <p>Si ton professeur t’a donné un code de suivi, saisis-le : ton bilan lui sera envoyé automatiquement après tes séances, sous ce code et <b>sans ton nom</b>.</p>
+    <label>Code de suivi <input type="text" id="suivi-code" maxlength="20" autocomplete="off" autocapitalize="characters" spellcheck="false"></label>
+    <button class="primary" id="suivi-start">Activer le suivi</button>
+  </section>`;
+}
+
+function bindSuivi(rerender) {
+  const start = document.getElementById('suivi-start');
+  if (start) start.onclick = () => {
+    const input = document.getElementById('suivi-code');
+    const code = input.value.trim().toUpperCase().replace(/\s+/g, '');
+    if (!SUIVI_CODE.test(code)) { toast('Code de suivi non valide : 4 à 20 lettres ou chiffres, comme ton professeur te l’a donné.'); input.focus(); return; }
+    store.settings.suiviCode = code;
+    persist();
+    queueSuivi(true);
+    toast('Suivi activé : ton bilan part vers ton professeur.');
+    rerender();
+  };
+  const now = document.getElementById('suivi-now');
+  if (now) now.onclick = async () => {
+    queueSuivi(true);
+    toast(await flushReports() ? 'Bilan envoyé.' : 'Pas de connexion : ton bilan partira dès que possible.');
+    rerender();
+  };
+  const stop = document.getElementById('suivi-stop');
+  if (stop) stop.onclick = () => {
+    if (!confirm('Arrêter l’envoi automatique de ton bilan ? Ton professeur garde le dernier bilan reçu.')) return;
+    store.settings.suiviCode = '';
+    store.pendingReports = store.pendingReports.filter(x => x.nature !== 'suivi');
+    persist();
+    rerender();
+  };
+}
 
 /* ---------- Lexique ---------- */
 
@@ -1485,6 +1560,7 @@ function renderPrivacy() {
     <p>Ce qui est enregistré, uniquement dans le stockage de ton navigateur sur cet appareil : l’état de chaque carte (date de prochaine révision, stabilité, difficulté, nombre d’oublis), l’historique de tes réponses, tes réglages et ta dernière sélection de chapitres.</p>
     <p>L’application n’utilise ni cookie, ni outil de mesure d’audience, ni publicité. Le serveur qui héberge l’application ne fait que fournir ses fichiers ; il ne reçoit pas tes réponses.</p>
     <p>Si tu signales une erreur (bouton &#9888;&#xFE0E;), ton professeur reçoit le terme, sa définition, le type de problème et ce que tu as écrit. Ton nom n’est pas envoyé.</p>
+    <p>Si tu actives le suivi par ton professeur (Ma progression), ton bilan part automatiquement vers le tableur de ton professeur après tes séances : le code de suivi, tes nombres de réponses et de jours de travail, tes définitions vues, acquises et à revoir par partie du programme et celles que tu rates le plus. Ton nom n’est pas envoyé : seul ton professeur sait à qui correspond ton code. « Arrêter le suivi » stoppe les envois.</p>
     <p>Pour tout effacer : Réglages, puis « Effacer toute ma progression », ou supprime l’application. Une sauvegarde exportée est un fichier qui t’appartient : tu choisis où il va.</p>
   </section>`;
 }
@@ -1509,6 +1585,7 @@ async function main() {
 
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible' && view === 'home') render();
+  if (document.visibilityState === 'hidden') queueSuivi(); // l'élève quitte l'application : on envoie la séance
 });
 
 main();

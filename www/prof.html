@@ -31,6 +31,26 @@
   <h1>Bilans de la classe</h1>
 </header>
 <main class="wide-main" id="prof">
+  <section class="card form" id="suivi">
+    <h2>Suivi automatique</h2>
+    <p>Les élèves qui ont saisi un code de suivi envoient leur bilan à votre tableur, sous ce code et sans leur nom. Chargez ici ces bilans, puis votre fichier de correspondance (code, nom) : les noms ne sont ajoutés que dans ce navigateur et ne partent jamais en ligne.</p>
+    <div class="row-actions">
+      <label>Clé enseignant <input type="password" id="cle" autocomplete="current-password" placeholder="la phrase choisie dans le script"></label>
+      <button class="primary" id="load-suivi">Charger les bilans du suivi</button>
+    </div>
+    <div class="row-actions">
+      <label class="file">Fichier de correspondance (code, nom)<input type="file" id="names" accept=".xlsx,.xls,.csv,.txt"></label>
+      <span class="muted small" id="names-info">Aucun fichier de correspondance : les élèves apparaissent sous leur code.</span>
+    </div>
+    <details>
+      <summary>Créer des codes de suivi pour la classe</summary>
+      <p>Chaque code est tiré au hasard. Le fichier téléchargé contient les codes et une colonne « Nom » à remplir : c'est votre fichier de correspondance, à garder sur votre ordinateur. Collez seulement la liste des codes dans la colonne A d'un onglet « Codes » du tableur : les autres codes seront refusés.</p>
+      <div class="row-actions">
+        <label>Nombre de codes <input type="number" id="ncodes" min="1" max="200" value="40"></label>
+        <button id="make-codes">Télécharger les codes (.xlsx)</button>
+      </div>
+    </details>
+  </section>
   <section class="card">
     <p>Dépose ici les bilans envoyés par les élèves (fichiers <code>bilan-….json</code>) ou colle le texte qu’ils t’ont copié. Rien n’est envoyé sur internet : les bilans sont lus dans ce navigateur et oubliés quand tu fermes la page.</p>
     <div class="drop" id="drop">
