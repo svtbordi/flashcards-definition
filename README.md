@@ -66,6 +66,18 @@ Le bouton ⚠ n'apparaît que lorsque `www/config.json` contient une adresse. Ch
 
 Le script limite les envois à 60 par jour, pour le cas où quelqu'un utiliserait l'adresse pour remplir le tableur en masse. Pour arrêter les signalements, vide l'adresse dans `config.json` ou archive le déploiement.
 
+## Suivi des élèves par l'enseignant (sous code, sans nom)
+
+Un élève qui saisit un code de suivi (Ma progression) envoie automatiquement son bilan au même tableur, après ses séances et au plus toutes les 10 minutes. Le bilan ne contient jamais son nom : seulement le code, ses nombres de réponses et de jours de travail, ses définitions vues, acquises et à revoir par partie, et celles qu'il rate le plus. L'onglet « Suivi » garde une ligne par code (le dernier bilan).
+
+1. Page enseignant (`prof.html`), « Créer des codes de suivi » : télécharger le fichier de codes, compléter la colonne « Nom ». Ce fichier de correspondance reste sur ton ordinateur ; il ne doit jamais aller dans le tableur.
+2. Dans le tableur, créer un onglet « Codes » et coller les codes (sans les noms) en colonne A : les autres codes sont refusés.
+3. Dans le script, choisir une phrase secrète pour `CLE_ENSEIGNANT`, enregistrer, puis « Déployer », « Gérer les déploiements », modifier, « Nouvelle version » (l'adresse ne change pas).
+4. Passer `"suivi": true` dans `www/config.json` : la carte « Suivi par ton professeur » apparaît alors chez les élèves.
+5. Pour consulter : page enseignant, saisir la clé, « Charger les bilans du suivi », puis le fichier de correspondance. Les noms ne sont ajoutés que dans ce navigateur. Sans la clé : télécharger l'onglet « Suivi » en .csv et le déposer dans la page.
+
+Des données sous code restent des données personnelles au sens du RGPD (données pseudonymisées) : informer les élèves et le référent RGPD de l'établissement.
+
 ## Mise en ligne (une seule fois)
 
 1. Pousser ce dossier dans un dépôt GitHub (branche `main`).
@@ -82,6 +94,7 @@ npm test             # parcours complet dans un navigateur de téléphone simul�
 node tools/bilan_test.mjs /tmp   # bilans de trois élèves simulés, regroupement et export Excel
 node tools/qcm_test.mjs          # masquage et leurres sur toute la base, puis un échauffement complet et un signalement
 node tools/revisions_test.mjs    # révisions limitées aux chapitres ouverts, mots-clés à cocher, page enseignant
+node tools/suivi_test.mjs /tmp   # suivi sous code : script du tableur, envois de l'élève, lecture et noms dans la page enseignant
 ```
 
 - `www/` : l'application (HTML, CSS, JavaScript sans étape de compilation).
@@ -89,7 +102,7 @@ node tools/revisions_test.mjs    # révisions limitées aux chapitres ouverts, m
 - `www/data/chapters.json` : titres des parties et sous-parties du programme 2021.
 - `tools/build_data.py` : convertit le tableur en `www/data/definitions.json`.
 - `www/qcm.js` : masquage du terme dans sa définition et choix des leurres du QCM (testé par `node tools/qcm_test.mjs`).
-- `tools/signalement.gs` : script Google qui range chaque signalement dans un tableur (et l'envoie par mail si activé).
+- `tools/signalement.gs` : script Google qui range chaque signalement, suggestion et bilan de suivi dans un tableur (et envoie un mail par signalement si activé).
 - `tools/build_artifact.py` : assemble la version d'aperçu publiée sur claude.ai.
 
 Réglages de l'algorithme (dans `app.js`) : rétention cible 90 % (modifiable par l'élève : 85 ou 95 %), étape d'apprentissage et de réapprentissage 10 minutes, intervalle maximal 365 jours, légère variation aléatoire des dates. Une carte est comptée « acquise » au-delà de 21 jours de stabilité.

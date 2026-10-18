@@ -2,6 +2,8 @@
 /* Espace enseignant : regroupe les bilans envoyés par les élèves. Tout reste dans ce navigateur. */
 
 const bilans = new Map(); // nom normalisé -> bilan le plus récent
+const names = new Map(); // code de suivi -> nom, lu dans le fichier de correspondance de l'enseignant (jamais envoyé)
+const label = b => names.get(String(b.nom).trim().toUpperCase()) || b.nom;
 let chapterTitle = {};
 let chapterOrder = {};
 
@@ -53,14 +55,19 @@ function extractBilans(text) {
   return found;
 }
 
+function addBilan(b) {
+  const key = normName(b.nom);
+  const prev = bilans.get(key);
+  if (prev && prev.genere >= b.genere) return 0;
+  bilans.set(key, b);
+  return 1;
+}
+
 function addText(text, source) {
-  const list = extractBilans(text);
+  let list = extractBilans(text);
+  if (!list.length && text.includes('""')) list = extractBilans(text.replace(/""/g, '"')); // export .csv de l'onglet « Suivi »
   let added = 0;
-  for (const b of list) {
-    const key = normName(b.nom);
-    const prev = bilans.get(key);
-    if (!prev || prev.genere < b.genere) { bilans.set(key, b); added += 1; }
-  }
+  for (const b of list) added += addBilan(b);
   if (!list.length) toast(`Aucun bilan reconnu dans ${source}.`);
   return added;
 }
@@ -91,14 +98,14 @@ const fmtPct = v => (v === null ? '–' : `${v} %`);
 const fmtDate = iso => new Date(iso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
 
 function students() {
-  return [...bilans.values()].sort((a, b) => a.nom.localeCompare(b.nom, 'fr'));
+  return [...bilans.values()].sort((a, b) => label(a).localeCompare(label(b), 'fr'));
 }
 
 function studentRows() {
   return students().map(b => {
     const r = b.resume;
     return {
-      Élève: b.nom,
+      Élève: label(b),
       'Bilan du': fmtDate(b.genere),
       'Réponses 7 j': r.reponses_7j,
       'Réponses 30 j': r.reponses_30j,
@@ -168,7 +175,7 @@ function table(rows, opts = {}) {
 function render() {
   const loaded = document.getElementById('loaded');
   const list = students();
-  loaded.innerHTML = list.map(b => `<span>${esc(b.nom)}</span>`).join('');
+  loaded.innerHTML = list.map(b => `<span>${esc(label(b))}</span>`).join('');
   const out = document.getElementById('results');
   if (!list.length) {
     out.innerHTML = '<section class="card"><p class="muted">Aucun bilan pour l’instant. Les tableaux de la classe apparaîtront ici dès le premier bilan déposé.</p></section>';
@@ -212,7 +219,7 @@ async function exportXlsx() {
     const days = new Set();
     students().forEach(b => Object.keys(b.jours || {}).forEach(d => days.add(d)));
     const sortedDays = [...days].sort();
-    const daily = students().map(b => Object.assign({ Élève: b.nom }, Object.fromEntries(sortedDays.map(d => [d, (b.jours || {})[d] || 0]))));
+    const daily = students().map(b => Object.assign({ Élève: label(b) }, Object.fromEntries(sortedDays.map(d => [d, (b.jours || {})[d] || 0]))));
     X.utils.book_append_sheet(wb, X.utils.json_to_sheet(daily), 'Réponses par jour');
     const today = new Date().toISOString().slice(0, 10);
     X.writeFile(wb, `bilans-classe-${today}.xlsx`);
@@ -220,5 +227,70 @@ async function exportXlsx() {
     toast('Export impossible : ' + (e.message || e));
   }
 }
+
+/* ---------- Suivi automatique ---------- */
+
+const ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // sans 0/O ni 1/I, faciles à confondre
+
+function newCode() {
+  const r = crypto.getRandomValues(new Uint32Array(6));
+  return [...r].map(x => ALPHABET[x % ALPHABET.length]).join('');
+}
+
+try { document.getElementById('cle').value = sessionStorage.getItem('fc-cle') || ''; } catch (e) { /* stockage bloqué */ }
+
+document.getElementById('load-suivi').onclick = async () => {
+  const cle = document.getElementById('cle').value.trim();
+  if (!cle) { toast('Indiquez la clé enseignant choisie dans le script.'); return; }
+  try { sessionStorage.setItem('fc-cle', cle); } catch (e) { /* stockage bloqué */ }
+  try {
+    const conf = await fetch('config.json', { cache: 'no-cache' }).then(r => r.json());
+    if (!conf.signalement) throw new Error('adresse du script absente de config.json');
+    const data = await fetch(`${conf.signalement}?cle=${encodeURIComponent(cle)}`).then(r => r.json());
+    if (data.erreur) { toast(data.erreur); return; }
+    let added = 0;
+    for (const b of data.bilans || []) if (b && b.resume && b.nom) added += addBilan(b);
+    const n = (data.bilans || []).length;
+    toast(n ? `${n} bilan${n > 1 ? 's' : ''} reçu${n > 1 ? 's' : ''}, dont ${added} nouveau${added > 1 ? 'x' : ''} ou plus récent${added > 1 ? 's' : ''}.` : 'Aucun bilan dans l’onglet « Suivi » pour l’instant.');
+    render();
+  } catch (e) {
+    toast('Lecture impossible (' + (e.message || e) + '). Autre solution : dans le tableur, onglet « Suivi », Fichier > Télécharger > .csv, puis déposez ce fichier ci-dessous.');
+  }
+};
+
+document.getElementById('names').onchange = async e => {
+  const f = e.target.files[0];
+  e.target.value = '';
+  if (!f) return;
+  try {
+    if (!window.XLSX) await loadScript('vendor/xlsx.full.min.js');
+    const wb = window.XLSX.read(await f.arrayBuffer(), { type: 'array' });
+    const rows = window.XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, raw: false, defval: '' });
+    names.clear();
+    for (const [code, nom] of rows) {
+      const c = String(code).trim().toUpperCase();
+      if (c && String(nom).trim() && c !== 'CODE') names.set(c, String(nom).trim());
+    }
+    document.getElementById('names-info').textContent = `${names.size} correspondances lues dans « ${f.name} » (gardées seulement dans cette page).`;
+    render();
+  } catch (err) {
+    toast('Fichier de correspondance illisible : ' + (err.message || err));
+  }
+};
+
+document.getElementById('make-codes').onclick = async () => {
+  const n = Math.min(200, Math.max(1, Number(document.getElementById('ncodes').value) || 0));
+  const codes = new Set();
+  while (codes.size < n) codes.add(newCode());
+  try {
+    if (!window.XLSX) await loadScript('vendor/xlsx.full.min.js');
+    const X = window.XLSX;
+    const wb = X.utils.book_new();
+    X.utils.book_append_sheet(wb, X.utils.aoa_to_sheet([['Code', 'Nom'], ...[...codes].map(c => [c, ''])]), 'Correspondance');
+    X.writeFile(wb, `codes-suivi-${new Date().toISOString().slice(0, 10)}.xlsx`);
+  } catch (e) {
+    toast('Création impossible : ' + (e.message || e));
+  }
+};
 
 render();
