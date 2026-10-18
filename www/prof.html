@@ -19,7 +19,9 @@
   th:first-child, td:first-child, td.txt, th.txt { text-align: left; }
   td.txt { white-space: normal; min-width: 180px; }
   th { color: var(--muted); font-weight: 600; font-size: 13px; }
-  tr.alert td:first-child::after { content: " · inactif cette semaine"; color: var(--again); font-size: 12px; }
+  tr.alert td { color: var(--again); }
+  details.student { border-top: 1px solid var(--line); padding: 8px 0; }
+  details.student summary { cursor: pointer; }
   .pills { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 0; }
   .pills span { background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 2px 10px; font-size: 13px; }
   .row-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; }

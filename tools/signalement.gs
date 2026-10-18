@@ -25,8 +25,8 @@ const COLONNES_SUGGESTIONS = ['Reçu le', 'Type', 'Message', 'Version des défin
 // Laissée vide, la lecture depuis la page enseignant est désactivée (le tableur reste consultable directement).
 const CLE_ENSEIGNANT = '';
 const MAX_SUIVI_PAR_CODE = 100; // envois acceptés par code et par jour
-const COLONNES_SUIVI = ['Code', 'Dernier envoi', 'Réponses 7 j', 'Réponses 30 j', 'Réussite 30 j (%)', 'Jours actifs 7 j',
-  'Jours actifs 30 j', 'Série (jours)', 'Définitions vues', 'Acquises', 'À revoir', 'Les plus ratées', 'Bilan complet (lu par la page enseignant)'];
+const COLONNES_SUIVI = ['Code', 'Dernier envoi', 'Dernière utilisation', 'Réponses depuis le début', 'Su (%)', 'Raté (%)',
+  'Jours actifs 30 j', 'Définitions vues', 'Acquises', 'À revoir', 'Les plus ratées', 'Bilan complet (lu par la page enseignant)'];
 
 function doPost(e) {
   const p = JSON.parse(e.postData.contents);
@@ -92,10 +92,11 @@ function suivi(p, props, jour) {
   const r = b.resume;
   const nb = v => (typeof v === 'number' && isFinite(v) ? v : '');
   b.nom = code; // le bilan ne porte jamais de nom
-  const ratees = [].concat(b.plus_ratees || []).slice(0, 5).map(x => String(x && x.terme || '').slice(0, 80)).join(' ; ');
-  const ligne = [code, new Date(), nb(r.reponses_7j), nb(r.reponses_30j),
-    r.reponses_30j > 0 ? Math.round(100 * (r.reponses_30j - r.ratees_30j) / r.reponses_30j) : '',
-    nb(r.jours_actifs_7j), nb(r.jours_actifs_30j), nb(r.serie), nb(r.cartes_vues), nb(r.cartes_acquises), nb(r.cartes_a_revoir),
+  const ratees = [].concat(b.plus_ratees_total || b.plus_ratees || []).slice(0, 5).map(x => String(x && x.terme || '').slice(0, 80)).join(' ; ');
+  const tot = nb(r.reponses_total), rat = nb(r.ratees_total);
+  const derniere = r.derniere_utilisation && !isNaN(Date.parse(r.derniere_utilisation)) ? new Date(r.derniere_utilisation) : '';
+  const ligne = [code, new Date(), derniere, tot, tot ? Math.round(100 * (tot - rat) / tot) : '', tot ? Math.round(100 * rat / tot) : '',
+    nb(r.jours_actifs_30j), nb(r.cartes_vues), nb(r.cartes_acquises), nb(r.cartes_a_revoir),
     ratees.replace(/^[=+\-@]/, '\'$&'), JSON.stringify(b).slice(0, 45000)];
 
   const verrou = LockService.getScriptLock();
@@ -108,8 +109,8 @@ function suivi(p, props, jour) {
       feuille.setFrozenRows(1);
       feuille.getRange(1, 1, 1, COLONNES_SUIVI.length).setFontWeight('bold');
     }
-    const derniere = feuille.getLastRow();
-    const liste = derniere > 1 ? feuille.getRange(2, 1, derniere - 1, 1).getValues() : [];
+    const n = feuille.getLastRow();
+    const liste = n > 1 ? feuille.getRange(2, 1, n - 1, 1).getValues() : [];
     const i = liste.findIndex(x => String(x[0]) === code);
     if (i >= 0) feuille.getRange(i + 2, 1, 1, ligne.length).setValues([ligne]);
     else feuille.appendRow(ligne);
@@ -125,10 +126,11 @@ function lireSuivi(cle) {
   if (!CLE_ENSEIGNANT) return json({ erreur: 'La lecture est désactivée : renseignez CLE_ENSEIGNANT dans le script, puis déployez une nouvelle version.' });
   if (cle !== CLE_ENSEIGNANT) { Utilities.sleep(1500); return json({ erreur: 'Clé incorrecte.' }); }
   const feuille = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Suivi');
-  const lignes = feuille && feuille.getLastRow() > 1 ? feuille.getRange(2, 1, feuille.getLastRow() - 1, COLONNES_SUIVI.length).getValues() : [];
+  const lignes = feuille && feuille.getLastRow() > 1 ? feuille.getRange(2, 1, feuille.getLastRow() - 1, feuille.getLastColumn()).getValues() : [];
   const bilans = [];
   for (const l of lignes) {
-    try { bilans.push(JSON.parse(l[COLONNES_SUIVI.length - 1])); } catch (err) { /* ligne modifiée à la main */ }
+    const cellule = l.find(v => String(v).charAt(0) === '{'); // le bilan complet, quelle que soit sa colonne
+    try { if (cellule) bilans.push(JSON.parse(cellule)); } catch (err) { /* ligne modifiée à la main */ }
   }
   return json({ bilans });
 }

@@ -68,7 +68,7 @@ Le script limite les envois à 60 par jour, pour le cas où quelqu'un utiliserai
 
 ## Suivi des élèves par l'enseignant (sous code, sans nom)
 
-Un élève qui saisit un code de suivi (Ma progression) envoie automatiquement son bilan au même tableur, après ses séances et au plus toutes les 10 minutes. Le bilan ne contient jamais son nom : seulement le code, ses nombres de réponses et de jours de travail, ses définitions vues, acquises et à revoir par partie, et celles qu'il rate le plus. L'onglet « Suivi » garde une ligne par code (le dernier bilan).
+Un élève qui saisit un code de suivi (Ma progression) envoie automatiquement son bilan au même tableur, après ses séances et au plus toutes les 10 minutes. Le bilan ne contient jamais son nom : seulement le code, ses nombres de réponses et de jours de travail, ses définitions vues, acquises et à revoir par partie, et celles qu'il rate le plus. L'onglet « Suivi » garde une ligne par code (le dernier bilan). La page enseignant en tire, par élève : dernière utilisation, jours sans utilisation, réponses Su et Raté depuis le début, au total et pour chaque thème abordé ; pour la classe : Su et Raté par thème et les définitions les plus ratées.
 
 1. Page enseignant (`prof.html`), « Créer des codes de suivi » : télécharger le fichier de codes, compléter la colonne « Nom ». Ce fichier de correspondance reste sur ton ordinateur ; il ne doit jamais aller dans le tableur.
 2. Dans le tableur, créer un onglet « Codes » et coller les codes (sans les noms) en colonne A : les autres codes sont refusés.
