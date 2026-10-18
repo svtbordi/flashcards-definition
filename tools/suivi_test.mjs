@@ -18,7 +18,7 @@ function fakeSheets() {
     const s = {
       rows,
       appendRow: r => rows.push(r.slice()),
-      setFrozenRows() {}, getLastRow: () => rows.length,
+      setFrozenRows() {}, getLastRow: () => rows.length, getLastColumn: () => Math.max(0, ...rows.map(r => r.length)),
       getRange(a, c, nr, nc) {
         if (typeof a === 'string') return { getValues: () => rows.map(r => [r[0]]) };
         return {
@@ -49,13 +49,13 @@ const fk = fakeSheets();
 vm.createContext(fk.ctx);
 vm.runInContext(gs + '\nthis.doPost = doPost; this.doGet = doGet;', fk.ctx);
 const post = o => fk.ctx.doPost({ postData: { contents: JSON.stringify(o) } }).t;
-const bil = n => ({ app: 'flashcards-bcpst-bilan', nom: 'Alice', genere: new Date().toISOString(), resume: { reponses_7j: n, reponses_30j: n, ratees_30j: 1 }, plus_ratees: [{ terme: '=cmd', ratees: 2 }] });
+const bil = n => ({ app: 'flashcards-bcpst-bilan', nom: 'Alice', genere: new Date().toISOString(), resume: { reponses_7j: n, reponses_30j: n, ratees_30j: 1, reponses_total: n, ratees_total: 1, derniere_utilisation: new Date().toISOString() }, plus_ratees_total: [{ terme: '=cmd', ratees: 2 }] });
 check(post({ nature: 'suivi', code: 'K7QM4P', bilan: bil(5) }) === 'ok', 'script : premier envoi refusé');
 check(post({ nature: 'suivi', code: 'k7qm4p', bilan: bil(9) }) === 'ok', 'script : deuxième envoi refusé');
 const suivi = fk.sheets.Suivi.rows;
-check(suivi.length === 2 && suivi[1][0] === 'K7QM4P' && suivi[1][2] === 9, 'script : une ligne par code, mise à jour : ' + JSON.stringify(suivi.map(r => r.slice(0, 3))));
-check(suivi[1][11].startsWith("'="), 'script : formule non neutralisée');
-check(JSON.parse(suivi[1][12]).nom === 'K7QM4P', 'script : un nom est resté dans le bilan');
+check(suivi.length === 2 && suivi[1][0] === 'K7QM4P' && suivi[1][3] === 9 && suivi[1][5] === 11, 'script : une ligne par code, mise à jour : ' + JSON.stringify(suivi.map(r => r.slice(0, 3))));
+check(suivi[1][10].startsWith("'="), 'script : formule non neutralisée');
+check(JSON.parse(suivi[1][11]).nom === 'K7QM4P', 'script : un nom est resté dans le bilan');
 check(post({ nature: 'suivi', code: 'x', bilan: bil(1) }) === 'refusé', 'script : code invalide accepté');
 fk.sheets.Codes = fk.ctx.newSheet('Codes');
 fk.sheets.Codes.rows.push(['K7QM4P']);
@@ -162,6 +162,22 @@ fs.writeFileSync(csv, 'Code,Nom\nK7QM4P,Alice Martin\n');
 await q.setInputFiles('#names', csv);
 await q.waitForFunction(() => document.getElementById('results').textContent.includes('Alice Martin'));
 check(!(await q.textContent('#results')).includes('K7QM4P'), 'enseignant : le code reste affiché à la place du nom');
+// statistiques demandées : par élève (dernière utilisation, jours sans utilisation, Su et Raté depuis le début), par thème, classe
+const head = await q.$$eval('#results section:first-of-type th', ths => ths.map(t => t.textContent));
+check(['Dernière utilisation', 'Jours sans utilisation', 'Su (%)', 'Raté (%)'].every(h => head.includes(h)), 'enseignant : colonnes élève ' + head);
+const cells = await q.$$eval('#results section:first-of-type tbody td', tds => tds.map(t => t.textContent));
+check(cells[2] === '0' && cells[5] === '0 %' && cells[6] === '100 %', 'enseignant : valeurs élève ' + cells);
+await q.click('details.student summary');
+const themes = await q.$$eval('details.student tbody tr', trs => trs.map(t => t.cells[0].textContent));
+check(themes.length >= 1 && themes.every(t => /^(SV|BG|ST)-[A-K]$/.test(t)), 'enseignant : thèmes de l’élève ' + themes);
+const titles = await q.$$eval('#results h2', h => h.map(x => x.textContent));
+check(titles.some(t => t.includes('classe, par thème')) && titles.some(t => t.includes('plus ratées')), 'enseignant : sections classe ' + titles);
+const [xdl] = await Promise.all([q.waitForEvent('download'), q.click('#export')]);
+const xpath = `${out}/${xdl.suggestedFilename()}`;
+await xdl.saveAs(xpath);
+const XL = createRequire(import.meta.url)('../www/vendor/xlsx.full.min.js');
+const sheetsOut = XL.read(fs.readFileSync(xpath)).SheetNames;
+check(['Élèves', 'Élèves par thème', 'Classe par thème', 'Les plus ratées'].every(n => sheetsOut.includes(n)), 'enseignant : onglets exportés ' + sheetsOut);
 check(gets.every(s => !s.includes('Alice')), 'enseignant : le nom est parti en ligne');
 await q.screenshot({ path: `${out}/suivi-enseignant.png`, fullPage: true });
 // export .csv de l'onglet « Suivi » (guillemets doublés) déposé à la place de la lecture en ligne

@@ -1222,19 +1222,25 @@ function buildBilan(name) {
   for (const c of deck.cards) {
     const status = cardStatus(c, now, endDay);
     for (const code of partsOf(c)) {
-      const x = chap[code] || (chap[code] = { code, total: 0, vues: 0, acquises: 0, a_revoir: 0, reponses_30j: 0, ratees_30j: 0 });
+      const x = chap[code] || (chap[code] = { code, total: 0, vues: 0, acquises: 0, a_revoir: 0, reponses_30j: 0, ratees_30j: 0, reponses_total: 0, ratees_total: 0 });
       x.total += 1;
       if (status !== 'new') x.vues += 1;
       if (status === 'mastered') x.acquises += 1;
       if (status === 'due') x.a_revoir += 1;
     }
   }
-  for (const r of recent) {
+  const start30 = since(30);
+  for (const r of store.log) { // depuis le début (l'historique garde les 20 000 dernières réponses)
     const c = byId.get(r.id);
     if (!c) continue;
+    const in30 = Date.parse(r.t) >= start30;
     for (const code of partsOf(c)) {
-      chap[code].reponses_30j += 1;
-      if (r.g === Rating.Again) chap[code].ratees_30j += 1;
+      chap[code].reponses_total += 1;
+      if (r.g === Rating.Again) chap[code].ratees_total += 1;
+      if (in30) {
+        chap[code].reponses_30j += 1;
+        if (r.g === Rating.Again) chap[code].ratees_30j += 1;
+      }
     }
   }
   const all = statsFor(deck.cards);
@@ -1243,7 +1249,7 @@ function buildBilan(name) {
     .forEach(k => { jours[k] = store.days[k].reviews; });
   return {
     app: 'flashcards-bcpst-bilan',
-    v: 1,
+    v: 2,
     nom: name,
     genere: now.toISOString(),
     definitions: deck.version,
@@ -1254,6 +1260,11 @@ function buildBilan(name) {
       jours_actifs_7j: activeDays(7),
       jours_actifs_30j: activeDays(30),
       serie: streak(),
+      reponses_total: store.log.length,
+      ratees_total: store.log.filter(x => x.g === Rating.Again).length,
+      jours_actifs_total: Object.keys(store.days).filter(k => store.days[k].reviews > 0).length,
+      premiere_utilisation: store.log.length ? store.log[0].t : null,
+      derniere_utilisation: store.log.length ? store.log[store.log.length - 1].t : null,
       cartes_vues: all.seen,
       cartes_acquises: all.mastered,
       cartes_a_revoir: all.due,
@@ -1262,6 +1273,7 @@ function buildBilan(name) {
     chapitres: Object.values(chap).filter(x => x.vues > 0)
       .sort((a, b) => (chapterOrder[a.code] ?? 9999) - (chapterOrder[b.code] ?? 9999) || a.code.localeCompare(b.code)),
     plus_ratees: mostFailed(recent).slice(0, 20).map(x => ({ terme: x.c.term, ratees: x.n })),
+    plus_ratees_total: mostFailed(store.log).slice(0, 20).map(x => ({ terme: x.c.term, ratees: x.n })),
     jours,
   };
 }
@@ -1556,12 +1568,28 @@ function renderInstall() {
 
 function renderPrivacy() {
   app.innerHTML = `<section class="card prose">
-    <p><b>Aucune donnée personnelle ne quitte ton appareil sans ton action.</b> L’application ne demande ni adresse e-mail, ni compte. Ton nom n’est demandé que si tu prépares un bilan pour ton professeur ; il reste sur cet appareil et figure seulement dans le bilan que tu choisis d’envoyer.</p>
-    <p>Ce qui est enregistré, uniquement dans le stockage de ton navigateur sur cet appareil : l’état de chaque carte (date de prochaine révision, stabilité, difficulté, nombre d’oublis), l’historique de tes réponses, tes réglages et ta dernière sélection de chapitres.</p>
-    <p>L’application n’utilise ni cookie, ni outil de mesure d’audience, ni publicité. Le serveur qui héberge l’application ne fait que fournir ses fichiers ; il ne reçoit pas tes réponses.</p>
-    <p>Si tu signales une erreur (bouton &#9888;&#xFE0E;), ton professeur reçoit le terme, sa définition, le type de problème et ce que tu as écrit. Ton nom n’est pas envoyé.</p>
-    <p>Si tu actives le suivi par ton professeur (Ma progression), ton bilan part automatiquement vers le tableur de ton professeur après tes séances : le code de suivi, tes nombres de réponses et de jours de travail, tes définitions vues, acquises et à revoir par partie du programme et celles que tu rates le plus. Ton nom n’est pas envoyé : seul ton professeur sait à qui correspond ton code. « Arrêter le suivi » stoppe les envois.</p>
-    <p>Pour tout effacer : Réglages, puis « Effacer toute ma progression », ou supprime l’application. Une sauvegarde exportée est un fichier qui t’appartient : tu choisis où il va.</p>
+    <h2>En bref</h2>
+    <p><b>Ton travail reste sur ton appareil, sauf ce que tu choisis d’envoyer.</b> L’application ne demande ni compte, ni adresse e-mail, et n’utilise ni cookie, ni mesure d’audience, ni publicité. Ton nom n’est jamais envoyé en ligne.</p>
+
+    <h2>Sur ton appareil</h2>
+    <p>Le stockage de ton navigateur garde l’état de chaque carte (prochaine révision, stabilité, difficulté, oublis), l’historique de tes réponses, tes réglages, ta dernière sélection de chapitres et, si tu le saisis, ton nom pour le bilan manuel et ton code de suivi. Personne d’autre n’y a accès.</p>
+
+    <h2>Ce qui peut être envoyé à ton professeur</h2>
+    <p><b>Un signalement d’erreur</b> (bouton &#9888;&#xFE0E;) ou <b>une suggestion</b> : le terme et sa définition, le type de problème et ce que tu as écrit, sans ton nom.</p>
+    <p><b>Le suivi par ton professeur</b>, seulement si tu l’actives avec le code qu’il t’a donné (Ma progression). Ton bilan part alors après tes séances, au plus toutes les 10 minutes : ton code de suivi ; tes dates de première et de dernière utilisation ; tes nombres de réponses et de réponses « Raté » (7 jours, 30 jours, depuis le début) ; tes jours de travail ; tes définitions vues, acquises et à revoir, par partie du programme ; les définitions que tu rates le plus ; la version des définitions. <b>Ton nom n’est pas envoyé</b> : seul ton professeur sait à qui correspond ton code, et il garde cette liste hors ligne.</p>
+    <p>Un code n’est pas un anonymat complet : ton professeur peut te reconnaître. C’est le but du suivi.</p>
+
+    <h2>Pourquoi, et qui y a accès</h2>
+    <p>Ces données servent uniquement à ton professeur pour suivre ton travail et celui de la classe, et pour adapter son enseignement. Il est le seul à les consulter ; elles ne sont ni vendues, ni transmises à d’autres. Le suivi est mis en œuvre par ton professeur dans le cadre de sa mission d’enseignement ; le responsable du traitement est ton établissement.</p>
+    <p>Le suivi est facultatif : tu peux l’activer quand tu veux et l’arrêter à tout moment (« Arrêter le suivi »). Les envois cessent aussitôt.</p>
+
+    <h2>Où sont les données, et combien de temps</h2>
+    <p>Les envois sont rangés dans un tableur Google de ton professeur (Google peut héberger ces données hors de l’Union européenne). L’application elle-même est hébergée par GitHub, qui ne reçoit pas tes réponses. Le tableur n’enregistre pas ton adresse IP, mais, comme pour tout site, les serveurs de Google et de GitHub la voient passer.</p>
+    <p>Les bilans de suivi sont conservés jusqu’à la fin de l’année scolaire, puis effacés par ton professeur, avec la liste des codes.</p>
+
+    <h2>Tes droits</h2>
+    <p>Tu peux demander à consulter, corriger ou effacer les données envoyées sous ton code, ou t’opposer au suivi : adresse-toi à ton professeur, ou au délégué à la protection des données de ton académie. Tu peux aussi adresser une réclamation à la CNIL (cnil.fr).</p>
+    <p>Pour tout effacer sur ton appareil : Réglages, puis « Effacer toute ma progression », ou supprime l’application. Une sauvegarde exportée est un fichier qui t’appartient : tu choisis où il va.</p>
   </section>`;
 }
 

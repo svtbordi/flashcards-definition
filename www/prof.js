@@ -91,11 +91,31 @@ document.getElementById('read-paste').onclick = () => {
 ['dragleave', 'drop'].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.remove('over'); }));
 drop.addEventListener('drop', e => addFiles([...e.dataTransfer.files]));
 
-/* ---------- Calculs ---------- */
+/* ---------- Calculs ----------
+   « Su » : toute réponse autre que « Raté » (Difficile, Su, Facile). Les pourcentages portent sur les réponses
+   données depuis le début ; un bilan ancien (sans ces totaux) se rabat sur ses 30 derniers jours. */
 
+const INACTIF_JOURS = 7; // au-delà, l'élève est signalé dans le tableau
 const pct = (a, b) => (b ? Math.round(100 * a / b) : null);
 const fmtPct = v => (v === null ? '–' : `${v} %`);
-const fmtDate = iso => new Date(iso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+const fmtDate = iso => (iso ? new Date(iso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }) : '–');
+const partName = code => (code === 'NC' ? 'Sans chapitre' : code);
+const byPart = (a, b) => (chapterOrder[a] ?? 9999) - (chapterOrder[b] ?? 9999) || a.localeCompare(b);
+
+const total = r => (r.reponses_total ?? r.reponses_30j ?? 0);
+const failed = r => (r.ratees_total ?? r.ratees_30j ?? 0);
+const chapTotal = c => (c.reponses_total ?? c.reponses_30j ?? 0);
+const chapFailed = c => (c.ratees_total ?? c.ratees_30j ?? 0);
+const lastUse = b => b.resume.derniere_utilisation || null;
+
+function daysSince(iso) {
+  if (!iso) return null;
+  const d = new Date(iso);
+  const start = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  return Math.max(0, Math.round((today - start) / 864e5));
+}
 
 function students() {
   return [...bilans.values()].sort((a, b) => label(a).localeCompare(label(b), 'fr'));
@@ -104,21 +124,36 @@ function students() {
 function studentRows() {
   return students().map(b => {
     const r = b.resume;
+    const last = lastUse(b);
+    const idle = daysSince(last);
     return {
       Élève: label(b),
-      'Bilan du': fmtDate(b.genere),
-      'Réponses 7 j': r.reponses_7j,
-      'Réponses 30 j': r.reponses_30j,
-      'Réussite 30 j (%)': pct(r.reponses_30j - r.ratees_30j, r.reponses_30j),
-      'Jours actifs 7 j': r.jours_actifs_7j,
-      'Jours actifs 30 j': r.jours_actifs_30j,
-      Série: r.serie,
+      'Dernière utilisation': fmtDate(last),
+      'Jours sans utilisation': idle ?? '–',
+      'Jours actifs (30 j)': r.jours_actifs_30j,
+      'Réponses depuis le début': total(r),
+      'Su (%)': pct(total(r) - failed(r), total(r)),
+      'Raté (%)': pct(failed(r), total(r)),
       'Définitions vues': r.cartes_vues,
       Acquises: r.cartes_acquises,
       'À revoir': r.cartes_a_revoir,
-      _inactive: r.jours_actifs_7j === 0,
+      'Bilan reçu le': fmtDate(b.genere),
+      _inactive: idle === null || idle >= INACTIF_JOURS,
     };
   });
+}
+
+// Thèmes (parties du programme) abordés par un élève
+function themeRows(b) {
+  return (b.chapitres || []).filter(c => c.vues > 0).sort((x, y) => byPart(x.code, y.code)).map(c => ({
+    Partie: partName(c.code),
+    Intitulé: chapterTitle[c.code] || '',
+    'Définitions vues': `${c.vues} / ${c.total}`,
+    Réponses: chapTotal(c),
+    'Su (%)': pct(chapTotal(c) - chapFailed(c), chapTotal(c)),
+    'Raté (%)': pct(chapFailed(c), chapTotal(c)),
+    'Acquises (%)': pct(c.acquises, c.total),
+  }));
 }
 
 function chapterRows() {
@@ -126,49 +161,52 @@ function chapterRows() {
   const n = bilans.size;
   for (const b of bilans.values()) {
     for (const c of b.chapitres || []) {
+      if (!c.vues) continue;
       const x = agg[c.code] || (agg[c.code] = { code: c.code, eleves: 0, vues: 0, total: 0, acquises: 0, reps: 0, ratees: 0 });
       x.eleves += 1;
       x.vues += c.vues;
       x.total += c.total;
       x.acquises += c.acquises;
-      x.reps += c.reponses_30j;
-      x.ratees += c.ratees_30j;
+      x.reps += chapTotal(c);
+      x.ratees += chapFailed(c);
     }
   }
-  return Object.values(agg)
-    .sort((a, b) => (chapterOrder[a.code] ?? 9999) - (chapterOrder[b.code] ?? 9999) || a.code.localeCompare(b.code))
-    .map(x => ({
-      Partie: x.code === 'NC' ? 'Sans chapitre' : x.code,
-      Intitulé: chapterTitle[x.code] || '',
-      'Élèves qui l’ont commencée': `${x.eleves} / ${n}`,
-      'Vues, moyenne (%)': pct(x.vues, x.total),
-      'Acquises, moyenne (%)': pct(x.acquises, x.total),
-      'Réponses 30 j': x.reps,
-      'Échec 30 j (%)': pct(x.ratees, x.reps),
-    }));
+  return Object.values(agg).sort((a, b) => byPart(a.code, b.code)).map(x => ({
+    Partie: partName(x.code),
+    Intitulé: chapterTitle[x.code] || '',
+    'Élèves qui l’ont abordée': `${x.eleves} / ${n}`,
+    Réponses: x.reps,
+    'Su (%)': pct(x.reps - x.ratees, x.reps),
+    'Raté (%)': pct(x.ratees, x.reps),
+    'Vues, moyenne (%)': pct(x.vues, x.total),
+    'Acquises, moyenne (%)': pct(x.acquises, x.total),
+  }));
 }
 
 function hardRows() {
   const agg = {};
   for (const b of bilans.values()) {
-    for (const h of b.plus_ratees || []) {
+    for (const h of b.plus_ratees_total || b.plus_ratees || []) {
       const x = agg[h.terme] || (agg[h.terme] = { terme: h.terme, eleves: 0, ratees: 0 });
       x.eleves += 1;
       x.ratees += h.ratees || 0;
     }
   }
   return Object.values(agg).sort((a, b) => b.eleves - a.eleves || b.ratees - a.ratees).slice(0, 40)
-    .map(x => ({ Définition: x.terme, 'Élèves qui la ratent': x.eleves, 'Réponses « Raté » sur 30 j': x.ratees }));
+    .map(x => ({ Définition: x.terme, 'Élèves qui la ratent': x.eleves, 'Réponses « Raté » depuis le début': x.ratees }));
 }
 
 /* ---------- Affichage ---------- */
 
+const PCT_COLS = ['Su (%)', 'Raté (%)', 'Acquises (%)', 'Vues, moyenne (%)', 'Acquises, moyenne (%)'];
+
 function table(rows, opts = {}) {
   if (!rows.length) return '<p class="muted">Rien à afficher.</p>';
   const cols = Object.keys(rows[0]).filter(k => !k.startsWith('_'));
-  const fmt = (k, v) => (opts.pct && opts.pct.includes(k) ? fmtPct(v) : esc(v));
-  return `<div class="scroll"><table><thead><tr>${cols.map(k => `<th class="${opts.txt && opts.txt.includes(k) ? 'txt' : ''}">${esc(k)}</th>`).join('')}</tr></thead><tbody>${
-    rows.map(r => `<tr class="${r._inactive ? 'alert' : ''}">${cols.map(k => `<td class="${opts.txt && opts.txt.includes(k) ? 'txt' : ''}">${fmt(k, r[k])}</td>`).join('')}</tr>`).join('')
+  const txt = opts.txt || [];
+  const fmt = (k, v) => (PCT_COLS.includes(k) ? fmtPct(v) : esc(v ?? '–'));
+  return `<div class="scroll"><table><thead><tr>${cols.map(k => `<th class="${txt.includes(k) ? 'txt' : ''}">${esc(k)}</th>`).join('')}</tr></thead><tbody>${
+    rows.map(r => `<tr class="${r._inactive ? 'alert' : ''}">${cols.map(k => `<td class="${txt.includes(k) ? 'txt' : ''}">${fmt(k, r[k])}</td>`).join('')}</tr>`).join('')
   }</tbody></table></div>`;
 }
 
@@ -178,24 +216,32 @@ function render() {
   loaded.innerHTML = list.map(b => `<span>${esc(label(b))}</span>`).join('');
   const out = document.getElementById('results');
   if (!list.length) {
-    out.innerHTML = '<section class="card"><p class="muted">Aucun bilan pour l’instant. Les tableaux de la classe apparaîtront ici dès le premier bilan déposé.</p></section>';
+    out.innerHTML = '<section class="card"><p class="muted">Aucun bilan pour l’instant. Les tableaux de la classe apparaîtront ici dès le premier bilan chargé ou déposé.</p></section>';
     return;
   }
   const versions = [...new Set(list.map(b => b.definitions))];
+  const old = list.filter(b => b.resume.reponses_total === undefined).length;
   out.innerHTML = `
     <div class="row-actions">
       <button class="primary" id="export">Télécharger le tableur (.xlsx)</button>
       <button id="clear">Vider la liste</button>
     </div>
-    ${versions.length > 1 ? `<p class="warn">Les élèves n’ont pas tous la même version des définitions (${versions.map(esc).join(', ')}). Les totaux par chapitre peuvent légèrement différer.</p>` : ''}
-    <section class="card"><h2>Élèves (${list.length})</h2>${table(studentRows(), { pct: ['Réussite 30 j (%)'] })}</section>
-    <section class="card"><h2>Par partie du programme</h2>${table(chapterRows(), { pct: ['Vues, moyenne (%)', 'Acquises, moyenne (%)', 'Échec 30 j (%)'], txt: ['Intitulé'] })}
-      <p class="muted small">Moyennes calculées sur les élèves qui ont commencé la partie.</p></section>
+    ${versions.length > 1 ? `<p class="warn">Les élèves n’ont pas tous la même version des définitions (${versions.map(esc).join(', ')}). Les totaux par thème peuvent légèrement différer.</p>` : ''}
+    ${old ? `<p class="warn">${old} bilan${old > 1 ? 's' : ''} d’une ancienne version de l’application : pourcentages calculés sur 30 jours seulement.</p>` : ''}
+    <section class="card"><h2>Élèves (${list.length})</h2>${table(studentRows())}
+      <p class="muted small">Su et Raté : part des réponses données depuis le début (Difficile et Facile comptent comme Su). En rouge : aucune utilisation depuis ${INACTIF_JOURS} jours ou plus.</p></section>
+    <section class="card"><h2>Résultats par thème, élève par élève</h2>
+      ${list.map(b => `<details class="student"><summary><b>${esc(label(b))}</b> <span class="muted">· ${plural(themeRows(b).length, 'thème abordé', 'thèmes abordés')}</span></summary>${table(themeRows(b), { txt: ['Intitulé'] })}</details>`).join('')}
+    </section>
+    <section class="card"><h2>La classe, par thème</h2>${table(chapterRows(), { txt: ['Intitulé'] })}
+      <p class="muted small">Su et Raté : toutes les réponses des élèves sur le thème. Moyennes de vues et d’acquises : sur les élèves qui ont abordé le thème.</p></section>
     <section class="card"><h2>Définitions les plus ratées dans la classe</h2>${table(hardRows(), { txt: ['Définition'] })}</section>
-    <p class="muted small">Les bilans sont déclarés par les élèves : ils reflètent leur travail dans l’application, pas un contrôle.</p>`;
+    <p class="muted small">Les réponses Su ou Raté sont déclarées par les élèves : elles reflètent leur travail dans l’application, pas un contrôle.</p>`;
   document.getElementById('export').onclick = exportXlsx;
   document.getElementById('clear').onclick = () => { bilans.clear(); render(); };
 }
+
+const plural = (n, one, many) => `${n} ${n > 1 ? many : one}`;
 
 function loadScript(src) {
   return new Promise((resolve, reject) => {
@@ -214,13 +260,15 @@ async function exportXlsx() {
     const clean = rows => rows.map(r => Object.fromEntries(Object.entries(r).filter(([k]) => !k.startsWith('_'))));
     const wb = X.utils.book_new();
     X.utils.book_append_sheet(wb, X.utils.json_to_sheet(clean(studentRows())), 'Élèves');
-    X.utils.book_append_sheet(wb, X.utils.json_to_sheet(chapterRows()), 'Par partie');
+    const detail = students().flatMap(b => themeRows(b).map(r => Object.assign({ Élève: label(b) }, r)));
+    X.utils.book_append_sheet(wb, X.utils.json_to_sheet(detail.length ? detail : [{ Élève: '' }]), 'Élèves par thème');
+    X.utils.book_append_sheet(wb, X.utils.json_to_sheet(chapterRows()), 'Classe par thème');
     X.utils.book_append_sheet(wb, X.utils.json_to_sheet(hardRows()), 'Les plus ratées');
     const days = new Set();
     students().forEach(b => Object.keys(b.jours || {}).forEach(d => days.add(d)));
     const sortedDays = [...days].sort();
     const daily = students().map(b => Object.assign({ Élève: label(b) }, Object.fromEntries(sortedDays.map(d => [d, (b.jours || {})[d] || 0]))));
-    X.utils.book_append_sheet(wb, X.utils.json_to_sheet(daily), 'Réponses par jour');
+    X.utils.book_append_sheet(wb, X.utils.json_to_sheet(daily), 'Réponses par jour (30 j)');
     const today = new Date().toISOString().slice(0, 10);
     X.writeFile(wb, `bilans-classe-${today}.xlsx`);
   } catch (e) {
@@ -271,7 +319,7 @@ document.getElementById('names').onchange = async e => {
       const c = String(code).trim().toUpperCase();
       if (c && String(nom).trim() && c !== 'CODE') names.set(c, String(nom).trim());
     }
-    document.getElementById('names-info').textContent = `${names.size} correspondances lues dans « ${f.name} » (gardées seulement dans cette page).`;
+    document.getElementById('names-info').textContent = `${names.size} correspondance${names.size > 1 ? 's' : ''} lue${names.size > 1 ? 's' : ''} dans « ${f.name} » (gardée${names.size > 1 ? 's' : ''} seulement dans cette page).`;
     render();
   } catch (err) {
     toast('Fichier de correspondance illisible : ' + (err.message || err));
