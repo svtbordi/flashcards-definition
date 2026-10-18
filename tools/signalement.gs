@@ -26,13 +26,15 @@ const COLONNES_SUGGESTIONS = ['Reçu le', 'Type', 'Message', 'Version des défin
 const CLE_ENSEIGNANT = '';
 const MAX_SUIVI_PAR_CODE = 100; // envois acceptés par code et par jour
 const COLONNES_SUIVI = ['Code', 'Dernier envoi', 'Dernière utilisation', 'Cartes sues', 'Cartes ratées', 'Réponses depuis le début',
-  'Jours actifs 30 j', 'Définitions vues', 'Acquises', 'À revoir', 'Les plus ratées', 'Bilan complet (lu par la page enseignant)'];
+  'Jours actifs 30 j', 'Définitions vues', 'Acquises', 'À revoir', 'Les plus ratées', 'Bilan complet (lu par la page enseignant)', 'Statut'];
+const COULEUR_ARRET = '#fbd9bf'; // ligne d'un élève qui a arrêté le suivi
 
 function doPost(e) {
   const p = JSON.parse(e.postData.contents);
   const props = PropertiesService.getScriptProperties();
   const jour = Utilities.formatDate(new Date(), 'Europe/Paris', 'yyyy-MM-dd');
   if (p.nature === 'suivi') return suivi(p, props, jour);
+  if (p.nature === 'suivi-arret') return arretSuivi(p, props, jour);
   const n = Number(props.getProperty('n-' + jour) || 0);
   if (n >= MAX_PAR_JOUR) return ContentService.createTextOutput('limite');
   props.setProperty('n-' + jour, String(n + 1));
@@ -78,16 +80,9 @@ function ajouter(classeur, nom, colonnes, ligne) {
 function suivi(p, props, jour) {
   const code = String(p.code || '').trim().toUpperCase();
   const b = p.bilan;
-  if (!/^[A-Z0-9-]{4,20}$/.test(code) || !b || typeof b !== 'object' || !b.resume) return ContentService.createTextOutput('refusé');
-  const classeur = SpreadsheetApp.getActiveSpreadsheet();
-  const codes = classeur.getSheetByName('Codes');
-  if (codes && !codes.getRange('A:A').getValues().some(r => String(r[0]).trim().toUpperCase() === code)) {
-    return ContentService.createTextOutput('code inconnu');
-  }
-  const cle = 's-' + jour + '-' + code;
-  const n = Number(props.getProperty(cle) || 0);
-  if (n >= MAX_SUIVI_PAR_CODE) return ContentService.createTextOutput('limite');
-  props.setProperty(cle, String(n + 1));
+  if (!b || typeof b !== 'object' || !b.resume) return ContentService.createTextOutput('refusé');
+  const refus = controleCode(code, props, jour);
+  if (refus) return ContentService.createTextOutput(refus);
 
   const r = b.resume;
   const nb = v => (typeof v === 'number' && isFinite(v) ? v : '');
@@ -97,8 +92,47 @@ function suivi(p, props, jour) {
   const derniere = r.derniere_utilisation && !isNaN(Date.parse(r.derniere_utilisation)) ? new Date(r.derniere_utilisation) : '';
   const ligne = [code, new Date(), derniere, nb(r.cartes_sues), nb(r.cartes_ratees), tot,
     nb(r.jours_actifs_30j), nb(r.cartes_vues), nb(r.cartes_acquises), nb(r.cartes_a_revoir),
-    ratees.replace(/^[=+\-@]/, '\'$&'), JSON.stringify(b).slice(0, 45000)];
+    ratees.replace(/^[=+\-@]/, '\'$&'), JSON.stringify(b).slice(0, 45000), 'Actif'];
 
+  ecrireLigneSuivi(code, (feuille, i) => {
+    if (i < 0) { feuille.appendRow(ligne); i = feuille.getLastRow() - 2; }
+    const plage = feuille.getRange(i + 2, 1, 1, ligne.length);
+    plage.setValues([ligne]);
+    plage.setBackground(null); // le suivi reprend : la ligne perd la couleur d'arrêt
+  });
+  return ContentService.createTextOutput('ok');
+}
+
+// L'élève a touché « Arrêter le suivi » : sa ligne garde le dernier bilan, prend la couleur COULEUR_ARRET
+// et la colonne « Statut » indique la date de l'arrêt.
+function arretSuivi(p, props, jour) {
+  const code = String(p.code || '').trim().toUpperCase();
+  const refus = controleCode(code, props, jour);
+  if (refus) return ContentService.createTextOutput(refus);
+  const statut = 'Suivi arrêté le ' + Utilities.formatDate(new Date(), 'Europe/Paris', 'dd/MM/yyyy HH:mm');
+  ecrireLigneSuivi(code, (feuille, i) => {
+    if (i < 0) { feuille.appendRow([code, new Date()]); i = feuille.getLastRow() - 2; }
+    feuille.getRange(i + 2, COLONNES_SUIVI.length).setValue(statut);
+    feuille.getRange(i + 2, 1, 1, COLONNES_SUIVI.length).setBackground(COULEUR_ARRET);
+  });
+  return ContentService.createTextOutput('ok');
+}
+
+// Code bien formé, présent dans l'onglet « Codes » s'il existe, et pas plus de MAX_SUIVI_PAR_CODE envois par jour.
+function controleCode(code, props, jour) {
+  if (!/^[A-Z0-9-]{4,20}$/.test(code)) return 'refusé';
+  const codes = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Codes');
+  if (codes && !codes.getRange('A:A').getValues().some(r => String(r[0]).trim().toUpperCase() === code)) return 'code inconnu';
+  const cle = 's-' + jour + '-' + code;
+  const n = Number(props.getProperty(cle) || 0);
+  if (n >= MAX_SUIVI_PAR_CODE) return 'limite';
+  props.setProperty(cle, String(n + 1));
+  return '';
+}
+
+// Ouvre l'onglet « Suivi » (créé au besoin), trouve la ligne du code (-1 si absente) et la passe à ecrire.
+function ecrireLigneSuivi(code, ecrire) {
+  const classeur = SpreadsheetApp.getActiveSpreadsheet();
   const verrou = LockService.getScriptLock();
   verrou.waitLock(20000); // deux élèves en même temps : pas de ligne en double
   try {
@@ -107,17 +141,17 @@ function suivi(p, props, jour) {
       feuille = classeur.insertSheet('Suivi', 0);
       feuille.appendRow(COLONNES_SUIVI);
       feuille.setFrozenRows(1);
-      feuille.getRange(1, 1, 1, COLONNES_SUIVI.length).setFontWeight('bold');
     }
+    // onglet créé par une version précédente du script : on ajoute les en-têtes manquants (colonne « Statut »)
+    const entetes = feuille.getRange(1, 1, 1, COLONNES_SUIVI.length);
+    entetes.setValues([COLONNES_SUIVI]);
+    entetes.setFontWeight('bold');
     const n = feuille.getLastRow();
     const liste = n > 1 ? feuille.getRange(2, 1, n - 1, 1).getValues() : [];
-    const i = liste.findIndex(x => String(x[0]) === code);
-    if (i >= 0) feuille.getRange(i + 2, 1, 1, ligne.length).setValues([ligne]);
-    else feuille.appendRow(ligne);
+    ecrire(feuille, liste.findIndex(x => String(x[0]) === code));
   } finally {
     verrou.releaseLock();
   }
-  return ContentService.createTextOutput('ok');
 }
 
 // Lecture de l'onglet « Suivi » par la page enseignant (…/exec?cle=…) : les bilans, sans aucun nom.
@@ -130,7 +164,13 @@ function lireSuivi(cle) {
   const bilans = [];
   for (const l of lignes) {
     const cellule = l.find(v => String(v).charAt(0) === '{'); // le bilan complet, quelle que soit sa colonne
-    try { if (cellule) bilans.push(JSON.parse(cellule)); } catch (err) { /* ligne modifiée à la main */ }
+    try {
+      if (!cellule) continue;
+      const b = JSON.parse(cellule);
+      const statut = String(l[COLONNES_SUIVI.length - 1] || '');
+      if (statut.indexOf('Suivi arrêté') === 0) b.suivi_arrete = statut.replace('Suivi arrêté le ', '');
+      bilans.push(b);
+    } catch (err) { /* ligne modifiée à la main */ }
   }
   return json({ bilans });
 }

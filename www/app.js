@@ -441,14 +441,14 @@ function renderHome() {
       <p class="muted">${newToday ? `+ ${plural(newToday, 'nouvelle carte disponible', 'nouvelles cartes disponibles')}` : 'Limite de nouvelles cartes atteinte pour aujourd’hui'}</p>
       <div class="goal"><div class="goal-fill" style="width:${pct}%"></div></div>
       <p class="muted">Objectif du jour : ${Math.min(d.reviews, goal)} / ${goal} cartes${st ? ` · ${plural(st, 'jour', 'jours')} d’affilée` : ''}</p>
-      ${lateWarning ? `<p class="warn">Il te reste ${goal - d.reviews} cartes pour atteindre ton objectif du jour.</p>` : ''}
+      ${lateWarning ? `<p class="warn">Il vous reste ${goal - d.reviews} cartes pour atteindre votre objectif du jour.</p>` : ''}
     </section>
     <div class="actions">
       <button class="primary" id="go-all" ${revs.due + newToday ? '' : 'disabled'}>Révisions espacées du jour
         <small>${opened ? `chapitres vus en cours (${plural(opened.chapitres.length, 'partie ou sous-partie', 'parties ou sous-parties')})${openList.includes(METHODS) && methodCards().length ? ' et méthodes' : ''}` : 'tout le programme'}</small></button>
     </div>
     <h2 class="section">Entraînement libre</h2>
-    <p class="muted small">N’importe quel chapitre, par exemple pour anticiper une révision. Les cartes commencées ici entrent ensuite dans tes révisions espacées.</p>
+    <p class="muted small">N’importe quel chapitre, par exemple pour anticiper une révision. Les cartes commencées ici entrent ensuite dans vos révisions espacées.</p>
     <div class="actions">
       <button id="go-choose">Choisir un ou plusieurs chapitres</button>
       ${store.selection.length ? `<button id="go-last">Reprendre ma dernière sélection <small>(${esc(store.selection.slice(0, 3).join(', '))}${store.selection.length > 3 ? '…' : ''})</small></button>` : ''}
@@ -514,7 +514,7 @@ function renderChoose() {
   if (!chooseSel.size && store.selection.length) chooseSel = new Set(store.selection);
   const tree = chapterTree();
   const groups = { SV: 'Sciences de la vie', BG: 'Biogéosciences', ST: 'Sciences de la Terre', NC: 'Autres' };
-  let html = '<p class="muted">Coche une partie entière ou des sous-parties. Les nombres indiquent les cartes à revoir aujourd’hui et le total.</p>';
+  let html = '<p class="muted">Cochez une partie entière ou des sous-parties. Les nombres indiquent les cartes à revoir aujourd’hui et le total.</p>';
   let lastGroup = '';
   for (const p of tree) {
     const g = p.code.slice(0, 2);
@@ -661,8 +661,8 @@ function renderWarmupIntro(s) {
     <section class="card hero">
       <p class="big">${first ? 'Première fois sur ce thème' : 'Avant les flashcards'}</p>
       <p>${first
-        ? 'Nous te conseillons de commencer par un échauffement : pour chaque définition, retrouve le terme parmi quatre propositions.'
-        : 'Tu peux t’échauffer : pour chaque définition, retrouve le terme parmi quatre propositions.'}</p>
+        ? 'Nous vous conseillons de commencer par un échauffement : pour chaque définition, retrouvez le terme parmi quatre propositions.'
+        : 'Vous pouvez vous échauffer : pour chaque définition, retrouvez le terme parmi quatre propositions.'}</p>
     </section>
     <div class="actions">${first ? qcmBtn + cardsBtn : cardsBtn + qcmBtn}</div>
     <p class="muted small">Le QCM ne remplace pas les flashcards : elles suivent toujours l’échauffement.</p>`;
@@ -694,7 +694,7 @@ function renderQcm(s) {
     }).join('')}</div>
     ${answered ? `<div class="feedback ${ok ? 'ok' : 'ko'}">
       ${ok ? '<p><b>Bonne réponse.</b></p>'
-        : `<p><b>La bonne réponse est « ${esc(q.card.term)} ».</b></p><p>Tu as choisi « ${esc(picked.term)} » : ${esc(picked.def)}</p>`}
+        : `<p><b>La bonne réponse est « ${esc(q.card.term)} ».</b></p><p>Vous avez choisi « ${esc(picked.term)} » : ${esc(picked.def)}</p>`}
     </div>
     <button class="primary wide" id="qcm-next">${last ? 'Voir mon score' : 'Question suivante'} <small>Entrée</small></button>` : ''}`;
   app.querySelectorAll('.opt').forEach(b => { b.onclick = () => qcmChoose(Number(b.dataset.k)); });
@@ -717,7 +717,7 @@ function renderQcmEnd(s) {
       <p>${verdict}</p>
     </section>
     <section class="card">
-      <p>Reconnaître le bon terme parmi quatre est plus facile que retrouver une définition de mémoire : <b>ce score ne suffit pas à dire que tu sais ces définitions.</b> Les flashcards du thème vont le vérifier.</p>
+      <p>Reconnaître le bon terme parmi quatre est plus facile que retrouver une définition de mémoire : <b>ce score ne suffit pas à dire que vous savez ces définitions.</b> Les flashcards du thème vont le vérifier.</p>
       ${nf ? `<p class="muted">${nf > 1 ? `Les ${nf} définitions ratées reviendront` : 'La définition ratée reviendra'} en flashcard dans une dizaine de minutes.</p>` : ''}
     </section>
     <button class="primary wide" id="to-cards">Passer aux flashcards <small>Entrée</small></button>`;
@@ -727,7 +727,7 @@ function renderQcmEnd(s) {
 }
 
 function ratingButtons(keysOk = true) {
-  const off = keysOk ? '' : 'disabled title="Coche d’abord tous les éléments-clés"';
+  const off = keysOk ? '' : 'disabled title="Cochez d’abord tous les éléments-clés"';
   if (store.settings.buttons === 4) {
     return `<div class="grade four">
       <button class="again" data-r="${Rating.Again}">Raté<small>1</small></button>
@@ -781,7 +781,7 @@ function renderSession() {
       ${s.revealed && canReport() ? reportButton() : ''}
       <div class="codes">${cardCodes(c).map(x => `<span>${esc(x === NO_CODE ? 'sans chapitre' : x)}</span>`).join('')}${c.method ? '<span>méthode</span>' : ''} ${tag}</div>
       <h2 class="term">${esc(c.term)}</h2>
-      ${s.revealed ? `<p class="def">${defWithKeys(c)}</p>${keyChecklist(c, s)}` : '<p class="hint muted">Formule la définition dans ta tête (ou à l’écrit), puis retourne la carte.</p>'}
+      ${s.revealed ? `<p class="def">${defWithKeys(c)}</p>${keyChecklist(c, s)}` : '<p class="hint muted">Formulez la définition de tête (ou à l’écrit), puis retournez la carte.</p>'}
     </article>
     ${s.revealed ? ratingButtons(keysDone(c, s)) : '<button class="primary reveal" id="reveal">Voir la définition <small>Espace</small></button>'}
     ${s.undo ? '<button class="link undo" id="undo">Annuler la dernière réponse</button>' : ''}`;
@@ -815,7 +815,7 @@ function defWithKeys(c) {
 function keyChecklist(c, s) {
   if (!c.keys) return '';
   if (s.keysFor !== c.id) { s.keysFor = c.id; s.keysOk = []; }
-  return `<fieldset class="keys"><legend>Coche ce que tu avais cité :</legend>
+  return `<fieldset class="keys"><legend>Cochez ce que vous aviez cité :</legend>
     ${c.keys.map((k, i) => `<label><input type="checkbox" data-key="${i}" ${s.keysOk[i] ? 'checked' : ''}> ${esc(k)}</label>`).join('')}
   </fieldset>`;
 }
@@ -880,7 +880,7 @@ function renderProgress() {
   html += '</section>';
   const hard = mostFailed(store.log).slice(0, 10);
   if (hard.length) {
-    html += `<section class="card"><h2>Les définitions que tu rates le plus</h2><ol class="hard">${hard.map(x => `<li><b>${esc(x.c.term)}</b> <span class="muted">(${plural(x.n, 'fois', 'fois')})</span></li>`).join('')}</ol></section>`;
+    html += `<section class="card"><h2>Les définitions que vous ratez le plus</h2><ol class="hard">${hard.map(x => `<li><b>${esc(x.c.term)}</b> <span class="muted">(${plural(x.n, 'fois', 'fois')})</span></li>`).join('')}</ol></section>`;
   }
   app.innerHTML = html;
   bindSuivi(renderProgress);
@@ -909,7 +909,7 @@ function openReport(card, context, extra = {}) {
     <h2 id="rep-title">Signaler un problème</h2>
     <p class="muted">Définition de <b>${esc(card.term)}</b></p>
     <fieldset>${types.map(k => `<label class="radio"><input type="radio" name="rep-type" value="${k}"> ${esc(REPORT_TYPES[k])}</label>`).join('')}</fieldset>
-    <label><span id="rep-label">Précise si tu veux (facultatif)</span><input type="text" id="rep-text" maxlength="300" autocomplete="off"></label>
+    <label><span id="rep-label">Précisez si vous le souhaitez (facultatif)</span><input type="text" id="rep-text" maxlength="300" autocomplete="off"></label>
     <div class="modal-actions"><button type="button" id="rep-cancel">Annuler</button><button class="primary" id="rep-send" disabled>Envoyer</button></div>
   </form>`;
   document.body.appendChild(box);
@@ -919,7 +919,7 @@ function openReport(card, context, extra = {}) {
   const type = () => (form.querySelector('input[name=rep-type]:checked') || {}).value;
   const check = () => {
     const autre = type() === 'autre';
-    box.querySelector('#rep-label').textContent = autre ? 'Précise ce qui ne va pas' : 'Précise si tu veux (facultatif)';
+    box.querySelector('#rep-label').textContent = autre ? 'Précisez ce qui ne va pas' : 'Précisez si vous le souhaitez (facultatif)';
     send.disabled = !type() || (autre && !text.value.trim());
   };
   form.addEventListener('change', check);
@@ -945,7 +945,7 @@ function openReport(card, context, extra = {}) {
     }, extra));
     persist();
     close();
-    toast(await flushReports() ? 'Merci, ton signalement a été transmis.' : 'Pas de connexion : ton signalement sera transmis dès que possible.');
+    toast(await flushReports() ? 'Merci, votre signalement a été transmis.' : 'Pas de connexion : votre signalement sera transmis dès que possible.');
   };
 }
 
@@ -962,7 +962,7 @@ function openSuggestion() {
   box.innerHTML = `<form class="modal-box report-box" role="dialog" aria-modal="true" aria-labelledby="sug-title">
     <h2 id="sug-title">Suggestion ou demande</h2>
     <fieldset>${Object.keys(SUGGESTION_TYPES).map(k => `<label class="radio"><input type="radio" name="sug-type" value="${k}"> ${esc(SUGGESTION_TYPES[k])}</label>`).join('')}</fieldset>
-    <label>Ton message<textarea id="sug-text" rows="5" maxlength="1000"></textarea></label>
+    <label>Votre message<textarea id="sug-text" rows="5" maxlength="1000"></textarea></label>
     <div class="modal-actions"><button type="button" id="sug-cancel">Annuler</button><button class="primary" id="sug-send" disabled>Envoyer</button></div>
   </form>`;
   document.body.appendChild(box);
@@ -991,7 +991,7 @@ function openSuggestion() {
     });
     persist();
     close();
-    toast(await flushReports() ? 'Merci, ton message a été transmis.' : 'Pas de connexion : ton message sera transmis dès que possible.');
+    toast(await flushReports() ? 'Merci, votre message a été transmis.' : 'Pas de connexion : votre message sera transmis dès que possible.');
   };
 }
 
@@ -1054,14 +1054,14 @@ function suiviCard() {
   if (code) {
     const t = store.suivi && store.suivi.t;
     return `<section class="card form" id="suivi">
-      <h2>Suivi par ton professeur : activé</h2>
-      <p>Ton bilan est envoyé automatiquement à ton professeur après tes séances, sous le code <b>${esc(code)}</b>, <b>sans ton nom</b>.${t ? ` Dernier envoi : ${esc(new Date(t).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' }))}.` : ''}</p>
+      <h2>Suivi par votre professeur : activé</h2>
+      <p>Votre bilan est envoyé automatiquement à votre professeur après vos séances, sous le code <b>${esc(code)}</b>, <b>sans votre nom</b>.${t ? ` Dernier envoi : ${esc(new Date(t).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' }))}.` : ''}</p>
       <div class="actions"><button id="suivi-now">Envoyer mon bilan maintenant</button><button id="suivi-stop">Arrêter le suivi</button></div>
     </section>`;
   }
   return `<section class="card form" id="suivi">
-    <h2>Suivi par ton professeur</h2>
-    <p>Si ton professeur t’a donné un code de suivi, saisis-le : ton bilan lui sera envoyé automatiquement après tes séances, sous ce code et <b>sans ton nom</b>.</p>
+    <h2>Suivi par votre professeur (facultatif)</h2>
+    <p>Si votre professeur vous a remis un code de suivi, saisissez-le : votre bilan lui sera envoyé automatiquement après vos séances, sous ce code et <b>sans votre nom</b>. Le suivi est facultatif et peut être arrêté à tout moment.</p>
     <label>Code de suivi <input type="text" id="suivi-code" maxlength="20" autocomplete="off" autocapitalize="characters" spellcheck="false"></label>
     <button class="primary" id="suivi-start">Activer le suivi</button>
   </section>`;
@@ -1072,25 +1072,28 @@ function bindSuivi(rerender) {
   if (start) start.onclick = () => {
     const input = document.getElementById('suivi-code');
     const code = input.value.trim().toUpperCase().replace(/\s+/g, '');
-    if (!SUIVI_CODE.test(code)) { toast('Code de suivi non valide : 4 à 20 lettres ou chiffres, comme ton professeur te l’a donné.'); input.focus(); return; }
+    if (!SUIVI_CODE.test(code)) { toast('Code de suivi non valide : 4 à 20 lettres ou chiffres, comme votre professeur vous l’a remis.'); input.focus(); return; }
     store.settings.suiviCode = code;
     persist();
     queueSuivi(true);
-    toast('Suivi activé : ton bilan part vers ton professeur.');
+    toast('Suivi activé : votre bilan part vers votre professeur.');
     rerender();
   };
   const now = document.getElementById('suivi-now');
   if (now) now.onclick = async () => {
     queueSuivi(true);
-    toast(await flushReports() ? 'Bilan envoyé.' : 'Pas de connexion : ton bilan partira dès que possible.');
+    toast(await flushReports() ? 'Bilan envoyé.' : 'Pas de connexion : votre bilan partira dès que possible.');
     rerender();
   };
   const stop = document.getElementById('suivi-stop');
   if (stop) stop.onclick = () => {
-    if (!confirm('Arrêter l’envoi automatique de ton bilan ? Ton professeur garde le dernier bilan reçu.')) return;
-    store.settings.suiviCode = '';
+    if (!confirm('Arrêter l’envoi automatique de votre bilan ? Votre professeur garde le dernier bilan reçu et sera informé de l’arrêt.')) return;
+    // le professeur est prévenu de l'arrêt : sa ligne du tableur change de couleur
     store.pendingReports = store.pendingReports.filter(x => x.nature !== 'suivi');
+    store.pendingReports.push({ nature: 'suivi-arret', code: store.settings.suiviCode });
+    store.settings.suiviCode = '';
     persist();
+    flushReports();
     rerender();
   };
 }
@@ -1151,11 +1154,11 @@ function renderLexicon() {
       <span class="chap-name">${label}</span><span class="count">${count(code)}</span></button>
     ${lexShown === code ? termList(code) : ''}`;
   let html = `<div class="lex-search" role="combobox" aria-expanded="false" aria-owns="lex-sugg" aria-haspopup="listbox">
-      <input type="search" id="lex-q" placeholder="Tape un terme…" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Chercher un terme" aria-controls="lex-sugg" value="${esc(lexQuery)}">
+      <input type="search" id="lex-q" placeholder="Tapez un terme…" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Chercher un terme" aria-controls="lex-sugg" value="${esc(lexQuery)}">
       <ul id="lex-sugg" class="sugg" role="listbox" hidden></ul>
     </div>
     <h2>Sommaire</h2>
-    <p class="muted small">Touche une partie pour voir ses sous-parties, puis un titre pour voir ses termes par ordre alphabétique.</p>`;
+    <p class="muted small">Touchez une partie pour voir ses sous-parties, puis un titre pour voir ses termes par ordre alphabétique.</p>`;
   for (const p of tree) {
     const title = `<b>${p.code === NO_CODE ? '' : esc(p.code)}</b> ${esc(chapterTitle[p.code] || '')}`;
     if (!p.subs.length) { html += `<div class="chap">${item(p.code, title)}</div>`; continue; }
@@ -1328,8 +1331,8 @@ function renderBilan() {
   const pct = r.reponses_30j ? Math.round(100 * (1 - r.ratees_30j / r.reponses_30j)) : null;
   app.innerHTML = `
     <section class="card form">
-      <p>Ton bilan résume ton travail des 30 derniers jours. Il ne part nulle part tout seul : c’est toi qui l’envoies à ton professeur (par l’ENT ou par mail).</p>
-      <label>Ton nom (tel que ton professeur te connaît) <input type="text" id="sname" maxlength="60" autocomplete="name" value="${esc(name)}"></label>
+      <p>Votre bilan résume votre travail des 30 derniers jours. Il ne part nulle part tout seul : c’est vous qui l’envoyez à votre professeur (par l’ENT ou par mail).</p>
+      <label>Votre nom (tel que votre professeur vous connaît) <input type="text" id="sname" maxlength="60" autocomplete="name" value="${esc(name)}"></label>
     </section>
     <section class="card">
       <h2>Ce que contient le bilan</h2>
@@ -1344,13 +1347,13 @@ function renderBilan() {
       <button class="primary" id="bilan-file">Enregistrer le fichier du bilan</button>
       <button id="bilan-copy">Copier le bilan (à coller dans un message)</button>
     </div>
-    <p class="muted small">Le nom n’est enregistré que sur cet appareil et n’apparaît que dans le bilan que tu envoies.</p>`;
+    <p class="muted small">Le nom n’est enregistré que sur cet appareil et n’apparaît que dans le bilan que vous envoyez.</p>`;
   const input = document.getElementById('sname');
   input.onchange = () => { store.settings.studentName = input.value.trim(); persist(); };
   const current = () => {
     store.settings.studentName = input.value.trim();
     persist();
-    if (!store.settings.studentName) { toast('Indique ton nom pour que ton professeur reconnaisse ton bilan.'); input.focus(); return null; }
+    if (!store.settings.studentName) { toast('Indiquez votre nom pour que votre professeur reconnaisse votre bilan.'); input.focus(); return null; }
     return buildBilan(store.settings.studentName);
   };
   document.getElementById('bilan-file').onclick = () => {
@@ -1365,14 +1368,14 @@ function renderBilan() {
     const text = `Bilan flashcards BCPST de ${data.nom} (${dayKey()})\n` + JSON.stringify(data);
     try {
       await navigator.clipboard.writeText(text);
-      toast('Bilan copié. Colle-le dans un message à ton professeur.');
+      toast('Bilan copié. Collez-le dans un message à votre professeur.');
     } catch (e) {
       const ta = document.createElement('textarea');
       ta.value = text;
       ta.className = 'copy-fallback';
       app.appendChild(ta);
       ta.select();
-      toast('Sélectionne le texte affiché et copie-le.');
+      toast('Sélectionnez le texte affiché et copiez-le.');
     }
   };
 }
@@ -1404,7 +1407,7 @@ function renderSettings() {
     </section>
     <section class="card form">
       <h2>Sauvegarde</h2>
-      <p class="muted">Ta progression est enregistrée uniquement sur cet appareil. Exporte-la de temps en temps, et avant de changer de téléphone.</p>
+      <p class="muted">Votre progression est enregistrée uniquement dans ce navigateur, sur cet appareil. Exportez-la de temps en temps, et avant de changer de téléphone.</p>
       <button id="export">Exporter ma progression</button>
       <label class="file">Restaurer une sauvegarde<input type="file" id="import" accept=".json,application/json"></label>
       <button class="danger" id="reset">Effacer toute ma progression</button>
@@ -1434,7 +1437,7 @@ function renderSettings() {
   document.getElementById('export').onclick = exportBackup;
   document.getElementById('import').onchange = e => e.target.files[0] && importBackup(e.target.files[0]);
   document.getElementById('reset').onclick = async () => {
-    if (!await askConfirm('Effacer toute ta progression sur cet appareil ? Cette action est définitive.', 'Tout effacer')) return;
+    if (!await askConfirm('Effacer toute votre progression sur cet appareil ? Cette action est définitive.', 'Tout effacer')) return;
     store.cards = {}; store.log = []; store.days = {}; store.selection = [];
     persist();
     updateBadge();
@@ -1458,7 +1461,7 @@ function describeChange(oldCards, newCards) {
 
 async function applyDeck(newDeck, source) {
   const ch = describeChange(deck.cards, newDeck.cards);
-  const msg = `${source}\n\n${newDeck.cards.length} définitions : ${ch.added} nouvelles, ${ch.changed} modifiées, ${ch.removed} retirées.\n\nTa progression sur les définitions conservées est gardée.`;
+  const msg = `${source}\n\n${newDeck.cards.length} définitions : ${ch.added} nouvelles, ${ch.changed} modifiées, ${ch.removed} retirées.\n\nVotre progression sur les définitions conservées est gardée.`;
   if (!await askConfirm(msg, 'Mettre à jour')) return;
   setDeck(newDeck, true);
   toast('Définitions mises à jour.');
@@ -1471,7 +1474,7 @@ async function checkUpdate() {
       if (!r.ok) throw new Error(r.status);
       return r.json();
     });
-    if (remote.version <= deck.version) return toast('Tu as déjà la dernière version.');
+    if (remote.version <= deck.version) return toast('Vous avez déjà la dernière version.');
     applyDeck(remote, `Nouvelle version disponible : ${remote.version}.`);
   } catch (e) {
     toast('Pas de connexion : impossible de vérifier pour l’instant.');
@@ -1579,7 +1582,7 @@ function icsReminder(time) {
   return ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Flashcards BCPST//FR', 'BEGIN:VEVENT',
     `UID:flashcards-bcpst-${stamp}@local`, `DTSTAMP:${stamp}`, `DTSTART:${local(start)}`, `DTEND:${local(end)}`,
     'RRULE:FREQ=DAILY', 'SUMMARY:Flashcards BCPST : révisions du jour',
-    'DESCRIPTION:Ouvre l\'application Flashcards BCPST et fais tes cartes à revoir.',
+    'DESCRIPTION:Ouvre l\'application Flashcards BCPST et faites vos cartes à revoir.',
     'BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:Flashcards BCPST', 'TRIGGER:PT0M', 'END:VALARM',
     'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
 }
@@ -1592,16 +1595,17 @@ function renderInstall() {
       <h2>Installer</h2>
       ${standalone ? '<p>L’application est déjà installée.</p>' : installPrompt
         ? '<button class="primary" id="install">Installer sur cet appareil</button>'
-        : ios ? '<p>Sur iPhone ou iPad : ouvre cette page dans <b>Safari</b>, touche le bouton <b>Partager</b>, puis <b>Sur l’écran d’accueil</b>.</p>'
-          : '<p>Sur Android (Chrome) : menu <b>⋮</b> puis <b>Installer l’application</b> ou <b>Ajouter à l’écran d’accueil</b>.<br>Sur ordinateur (Chrome ou Edge) : icône d’installation à droite de la barre d’adresse.</p>'}
-      <p class="muted small">Une fois installée, l’application fonctionne sans connexion. Sur iPhone, installe-la pour éviter que Safari efface tes données après plusieurs semaines sans visite.</p>
+        : ios ? '<p>Sur iPhone ou iPad : ouvrez cette page dans <b>Safari</b>, touchez le bouton <b>Partager</b>, puis <b>Sur l’écran d’accueil</b>.</p>'
+          : '<p>Sur Android, depuis votre navigateur habituel (Chrome, Samsung Internet, Firefox, Edge, Opera, Mi Browser…) : ouvrez son menu (<b>⋮</b> ou <b>≡</b>), puis <b>Installer l’application</b> ou <b>Ajouter à l’écran d’accueil</b>.<br>Sur ordinateur (Chrome ou Edge) : icône d’installation à droite de la barre d’adresse.</p>'}
+      <p class="muted small">Une fois installée, l’application fonctionne sans connexion. Sur iPhone, installez-la pour éviter que Safari efface vos données après plusieurs semaines sans visite.</p>
+      <p class="warn"><b>Ouvrez toujours l’application par son icône.</b> Votre progression et votre suivi sont enregistrés dans le navigateur qui a servi à l’installer : ouverte depuis un autre navigateur, l’application repart de zéro, et ce navigateur enverrait un bilan vide sous votre code.</p>
     </section>
     <section class="card form">
       <h2>Rappel quotidien</h2>
-      <p>Ajoute un rappel répété chaque jour dans le calendrier de ton téléphone. ${'setAppBadge' in navigator ? 'L’icône de l’application affiche aussi le nombre de cartes à revoir.' : ''}</p>
+      <p>Ajoutez un rappel répété chaque jour dans le calendrier de votre téléphone. ${'setAppBadge' in navigator ? 'L’icône de l’application affiche aussi le nombre de cartes à revoir.' : ''}</p>
       <label>Heure du rappel <input type="time" id="rtime" value="${store.settings.reminderTime}"></label>
       <button id="ics">Ajouter le rappel au calendrier</button>
-      <p class="muted small">Le fichier téléchargé s’ouvre avec l’application Calendrier. Pour arrêter le rappel, supprime l’événement dans ton calendrier.</p>
+      <p class="muted small">Le fichier téléchargé s’ouvre avec l’application Calendrier. Pour arrêter le rappel, supprimez l’événement dans votre calendrier.</p>
     </section>`;
   const i = document.getElementById('install');
   if (i) i.onclick = async () => { installPrompt.prompt(); await installPrompt.userChoice; installPrompt = null; render(); };
@@ -1612,27 +1616,27 @@ function renderInstall() {
 function renderPrivacy() {
   app.innerHTML = `<section class="card prose">
     <h2>En bref</h2>
-    <p><b>Ton travail reste sur ton appareil, sauf ce que tu choisis d’envoyer.</b> L’application ne demande ni compte, ni adresse e-mail, et n’utilise ni cookie, ni mesure d’audience, ni publicité. Ton nom n’est jamais envoyé en ligne.</p>
+    <p><b>Votre travail reste sur votre appareil, sauf ce que vous choisissez d’envoyer.</b> L’application ne demande ni compte, ni adresse e-mail, et n’utilise ni cookie, ni mesure d’audience, ni publicité. Votre nom n’est jamais envoyé en ligne.</p>
 
-    <h2>Sur ton appareil</h2>
-    <p>Le stockage de ton navigateur garde l’état de chaque carte (prochaine révision, stabilité, difficulté, oublis), l’historique de tes réponses, tes réglages, ta dernière sélection de chapitres et, si tu le saisis, ton nom pour le bilan manuel et ton code de suivi. Personne d’autre n’y a accès.</p>
+    <h2>Sur votre appareil</h2>
+    <p>Le stockage de votre navigateur garde l’état de chaque carte (prochaine révision, stabilité, difficulté, oublis), l’historique de vos réponses, vos réglages, votre dernière sélection de chapitres et, si vous les saisissez, votre nom pour le bilan manuel et votre code de suivi. Personne d’autre n’y a accès.</p>
 
-    <h2>Ce qui peut être envoyé à ton professeur</h2>
-    <p><b>Un signalement d’erreur</b> (bouton &#9888;&#xFE0E;) ou <b>une suggestion</b> : le terme et sa définition, le type de problème et ce que tu as écrit, sans ton nom.</p>
-    <p><b>Le suivi par ton professeur</b>, seulement si tu l’actives avec le code qu’il t’a donné (Ma progression). Ton bilan part alors après tes séances, au plus toutes les 10 minutes : ton code de suivi ; tes dates de première et de dernière utilisation ; tes nombres de réponses et de réponses « Raté » (7 jours, 30 jours, depuis le début) ; tes jours de travail ; tes définitions vues, acquises et à revoir, par partie du programme ; les définitions que tu rates le plus ; la version des définitions. <b>Ton nom n’est pas envoyé</b> : seul ton professeur sait à qui correspond ton code, et il garde cette liste hors ligne.</p>
-    <p>Un code n’est pas un anonymat complet : ton professeur peut te reconnaître. C’est le but du suivi.</p>
+    <h2>Ce qui peut être envoyé à votre professeur</h2>
+    <p><b>Un signalement d’erreur</b> (bouton &#9888;&#xFE0E;) ou <b>une suggestion</b> : le terme et sa définition, le type de problème et ce que vous avez écrit, sans votre nom.</p>
+    <p><b>Le suivi par votre professeur</b>, seulement si vous l’activez avec le code qu’il vous a remis (Ma progression). Votre bilan part alors après vos séances, au plus toutes les 10 minutes : votre code de suivi ; vos dates de première et de dernière utilisation ; vos nombres de réponses, de cartes sues et de cartes ratées (7 jours, 30 jours, depuis le début, et leur évolution par semaine) ; vos jours de travail ; vos définitions vues, acquises et à revoir, par partie du programme ; les définitions que vous ratez le plus ; la version des définitions. Si vous arrêtez le suivi, un dernier envoi signale seulement l’arrêt. <b>Votre nom n’est pas envoyé</b> : seul votre professeur sait à qui correspond votre code, et il garde cette liste hors ligne.</p>
+    <p>Un code n’est pas un anonymat complet : votre professeur peut vous reconnaître. C’est le but du suivi.</p>
 
     <h2>Pourquoi, et qui y a accès</h2>
-    <p>Ces données servent uniquement à ton professeur pour suivre ton travail et celui de la classe, et pour adapter son enseignement. Il est le seul à les consulter ; elles ne sont ni vendues, ni transmises à d’autres. Le suivi est mis en œuvre par ton professeur dans le cadre de sa mission d’enseignement ; le responsable du traitement est ton établissement.</p>
-    <p>Le suivi est facultatif : tu peux l’activer quand tu veux et l’arrêter à tout moment (« Arrêter le suivi »). Les envois cessent aussitôt.</p>
+    <p>Ces données servent uniquement à votre professeur pour suivre votre travail et celui de la classe, et pour adapter son enseignement. Il est le seul à les consulter ; elles ne sont ni vendues, ni transmises à d’autres. Le suivi est mis en œuvre par votre professeur dans le cadre de sa mission d’enseignement ; le responsable du traitement est votre établissement.</p>
+    <p>Le suivi est facultatif : vous pouvez l’activer quand vous voulez et l’arrêter à tout moment (Ma progression, puis « Arrêter le suivi »). Les envois cessent aussitôt.</p>
 
     <h2>Où sont les données, et combien de temps</h2>
-    <p>Les envois sont rangés dans un tableur Google de ton professeur (Google peut héberger ces données hors de l’Union européenne). L’application elle-même est hébergée par GitHub, qui ne reçoit pas tes réponses. Le tableur n’enregistre pas ton adresse IP, mais, comme pour tout site, les serveurs de Google et de GitHub la voient passer.</p>
-    <p>Les bilans de suivi sont conservés jusqu’à la fin de l’année scolaire, puis effacés par ton professeur, avec la liste des codes.</p>
+    <p>Les envois sont rangés dans un tableur Google de votre professeur (Google peut héberger ces données hors de l’Union européenne). L’application elle-même est hébergée par GitHub, qui ne reçoit pas vos réponses. Le tableur n’enregistre pas ton adresse IP, mais, comme pour tout site, les serveurs de Google et de GitHub la voient passer.</p>
+    <p>Les bilans de suivi sont conservés jusqu’à la fin de l’année scolaire, puis effacés par votre professeur, avec la liste des codes.</p>
 
-    <h2>Tes droits</h2>
-    <p>Tu peux demander à consulter, corriger ou effacer les données envoyées sous ton code, ou t’opposer au suivi : adresse-toi à ton professeur, ou au délégué à la protection des données de ton académie. Tu peux aussi adresser une réclamation à la CNIL (cnil.fr).</p>
-    <p>Pour tout effacer sur ton appareil : Réglages, puis « Effacer toute ma progression », ou supprime l’application. Une sauvegarde exportée est un fichier qui t’appartient : tu choisis où il va.</p>
+    <h2>Vos droits</h2>
+    <p>Vous pouvez demander à consulter, corriger ou effacer les données envoyées sous votre code, ou vous opposer au suivi : adressez-vous à votre professeur, ou au délégué à la protection des données de votre académie. Vous pouvez aussi adresser une réclamation à la CNIL (cnil.fr).</p>
+    <p>Pour tout effacer sur votre appareil : Réglages, puis « Effacer toute ma progression », ou supprimez l’application. Une sauvegarde exportée est un fichier qui vous appartient : vous choisissez où il va.</p>
   </section>`;
 }
 
@@ -1642,7 +1646,7 @@ async function main() {
   try {
     await loadDeck();
   } catch (e) {
-    app.innerHTML = '<p class="warn">Impossible de charger les définitions. Vérifie ta connexion au premier lancement.</p>';
+    app.innerHTML = '<p class="warn">Impossible de charger les définitions. Vérifiez votre connexion au premier lancement.</p>';
     return;
   }
   render();

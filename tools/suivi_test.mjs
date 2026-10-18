@@ -16,7 +16,7 @@ function fakeSheets() {
   const sheet = name => {
     const rows = [];
     const s = {
-      rows,
+      rows, bg: {},
       appendRow: r => rows.push(r.slice()),
       setFrozenRows() {}, getLastRow: () => rows.length, getLastColumn: () => Math.max(0, ...rows.map(r => r.length)),
       getRange(a, c, nr, nc) {
@@ -25,6 +25,8 @@ function fakeSheets() {
           setFontWeight() {}, insertCheckboxes() {},
           getValues: () => rows.slice(a - 1, a - 1 + nr).map(r => r.slice(c - 1, c - 1 + nc)),
           setValues: v => { rows[a - 1] = v[0].slice(); },
+          setValue: v => { rows[a - 1][c - 1] = v; },
+          setBackground: v => { s.bg[a] = v; },
         };
       },
     };
@@ -65,6 +67,14 @@ const read = cle => JSON.parse(fk.ctx.doGet({ parameter: { cle } }).t);
 check(read('mauvaise').erreur, 'script : lecture avec une mauvaise clé');
 check(read('phrase de test').bilans.length === 1, 'script : lecture avec la bonne clé');
 check(!fk.sheets.Signalements, 'script : un bilan de suivi est arrivé dans Signalements');
+// arrêt du suivi : la ligne garde le bilan, prend la couleur et le statut ; un nouvel envoi les efface
+check(fk.sheets.Suivi.rows[0][12] === 'Statut' && fk.sheets.Suivi.rows[1][12] === 'Actif', 'script : colonne Statut absente');
+check(post({ nature: 'suivi-arret', code: 'K7QM4P' }) === 'ok', 'script : arrêt refusé');
+check(post({ nature: 'suivi-arret', code: 'ZZZZ99' }) === 'code inconnu', 'script : arrêt d’un code inconnu accepté');
+check(fk.sheets.Suivi.rows[1][12].startsWith('Suivi arrêté le') && fk.sheets.Suivi.bg[2] === '#fbd9bf' && JSON.parse(fk.sheets.Suivi.rows[1][11]).resume, 'script : arrêt non signalé ' + JSON.stringify(fk.sheets.Suivi.rows[1].slice(12)));
+check(read('phrase de test').bilans[0].suivi_arrete, 'script : arrêt absent de la lecture');
+check(post({ nature: 'suivi', code: 'K7QM4P', bilan: bil(4) }) === 'ok' && fk.sheets.Suivi.rows[1][12] === 'Actif' && fk.sheets.Suivi.bg[2] === null, 'script : reprise du suivi non signalée');
+check(!read('phrase de test').bilans[0].suivi_arrete, 'script : arrêt toujours lu après reprise');
 
 /* ---------- Application de l'élève ---------- */
 const browser = await chromium.launch();
@@ -123,6 +133,8 @@ await p.click('#go-progress');
 p.once('dialog', d => d.accept());
 await p.click('#suivi-stop');
 await p.waitForSelector('#suivi-code');
+await p.waitForTimeout(300);
+check(posts.length === 3 && posts[2].nature === 'suivi-arret' && posts[2].code === 'K7QM4P' && !posts[2].bilan, 'élève : arrêt non transmis ' + JSON.stringify(posts.slice(2)));
 // code invalide
 await p.fill('#suivi-code', 'a!');
 await p.click('#suivi-start');
@@ -178,7 +190,7 @@ check(['Dernière utilisation', 'Jours sans utilisation', 'Cartes sues', 'Cartes
 const cells = await q.$$eval('#results section:first-of-type tbody td', tds => tds.map(t => t.textContent));
 check(cells[2] === '0' && cells[4] === '0' && cells[5] === '6', 'enseignant : valeurs d’Alice ' + cells.slice(0, 9));
 // Bob : 9 jours sans utilisation (en rouge), 40 sues dont +28 en 4 semaines (33 au 18/10 contre 5 au 13/09... dernier point il y a ≥ 28 j : 20/09 = 12)
-check(cells[9 + 2] === '9' && cells[9 + 4] === '40' && cells[9 + 6] === '+28', 'enseignant : valeurs de Bob ' + cells.slice(9, 18));
+check(cells[10 + 2] === '9' && cells[10 + 4] === '40' && cells[10 + 6] === '+28' && cells[9] === 'actif', 'enseignant : valeurs de Bob ' + cells.slice(9, 20));
 check(await q.$$eval('#results section:first-of-type tbody tr.alert', t => t.length) === 1, 'enseignant : Bob non signalé inactif');
 const figs = await q.$$eval('section:nth-of-type(2) .multiples figure', f => f.map(x => [x.querySelector('b').textContent, x.className]));
 check(figs.some(([c, k]) => c === 'SV-A' && !k) && figs.some(([c, k]) => c === 'ST-A' && !k) && figs.some(([c, k]) => c === 'BG-C' && k === 'closed'), 'enseignant : thèmes ouverts en couleur ' + JSON.stringify(figs));
