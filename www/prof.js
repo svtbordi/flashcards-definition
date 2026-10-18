@@ -152,6 +152,7 @@ function studentRows() {
       'Sues, sur 4 semaines': signed(gain(b)),
       'À revoir': r.cartes_a_revoir,
       'Bilan reçu le': fmtDate(b.genere),
+      Suivi: b.suivi_arrete ? `arrêté le ${b.suivi_arrete}` : 'actif',
       _inactive: idle === null || idle >= INACTIF_JOURS,
     };
   });
