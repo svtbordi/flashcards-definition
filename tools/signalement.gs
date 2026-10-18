@@ -25,7 +25,7 @@ const COLONNES_SUGGESTIONS = ['Reçu le', 'Type', 'Message', 'Version des défin
 // Laissée vide, la lecture depuis la page enseignant est désactivée (le tableur reste consultable directement).
 const CLE_ENSEIGNANT = '';
 const MAX_SUIVI_PAR_CODE = 100; // envois acceptés par code et par jour
-const COLONNES_SUIVI = ['Code', 'Dernier envoi', 'Dernière utilisation', 'Réponses depuis le début', 'Su (%)', 'Raté (%)',
+const COLONNES_SUIVI = ['Code', 'Dernier envoi', 'Dernière utilisation', 'Cartes sues', 'Cartes ratées', 'Réponses depuis le début',
   'Jours actifs 30 j', 'Définitions vues', 'Acquises', 'À revoir', 'Les plus ratées', 'Bilan complet (lu par la page enseignant)'];
 
 function doPost(e) {
@@ -93,9 +93,9 @@ function suivi(p, props, jour) {
   const nb = v => (typeof v === 'number' && isFinite(v) ? v : '');
   b.nom = code; // le bilan ne porte jamais de nom
   const ratees = [].concat(b.plus_ratees_total || b.plus_ratees || []).slice(0, 5).map(x => String(x && x.terme || '').slice(0, 80)).join(' ; ');
-  const tot = nb(r.reponses_total), rat = nb(r.ratees_total);
+  const tot = nb(r.reponses_total);
   const derniere = r.derniere_utilisation && !isNaN(Date.parse(r.derniere_utilisation)) ? new Date(r.derniere_utilisation) : '';
-  const ligne = [code, new Date(), derniere, tot, tot ? Math.round(100 * (tot - rat) / tot) : '', tot ? Math.round(100 * rat / tot) : '',
+  const ligne = [code, new Date(), derniere, nb(r.cartes_sues), nb(r.cartes_ratees), tot,
     nb(r.jours_actifs_30j), nb(r.cartes_vues), nb(r.cartes_acquises), nb(r.cartes_a_revoir),
     ratees.replace(/^[=+\-@]/, '\'$&'), JSON.stringify(b).slice(0, 45000)];
 
