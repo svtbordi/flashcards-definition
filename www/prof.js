@@ -7,6 +7,10 @@ const label = b => names.get(String(b.nom).trim().toUpperCase()) || b.nom;
 let chapterTitle = {};
 let chapterOrder = {};
 
+fetch('data/ouverts.json', { cache: 'no-cache' }).then(r => r.json()).then(o => {
+  if (o && Array.isArray(o.chapitres)) { opened = o.chapitres; render(); }
+}).catch(() => {});
+
 fetch('data/chapters.json').then(r => r.json()).then(list => {
   list.forEach((c, i) => { chapterTitle[c.code] = c.title; chapterOrder[c.code] = i; });
   chapterTitle.NC = 'Définitions sans chapitre';
@@ -92,21 +96,20 @@ document.getElementById('read-paste').onclick = () => {
 drop.addEventListener('drop', e => addFiles([...e.dataTransfer.files]));
 
 /* ---------- Calculs ----------
-   « Su » : toute réponse autre que « Raté » (Difficile, Su, Facile). Les pourcentages portent sur les réponses
-   données depuis le début ; un bilan ancien (sans ces totaux) se rabat sur ses 30 derniers jours. */
+   Carte sue : sa dernière réponse est autre que « Raté » (Difficile, Su, Facile). Carte ratée : dernière réponse « Raté ».
+   On suit des nombres de cartes, pas des pourcentages, pour que l'ajout de définitions ne fausse pas la lecture. */
 
 const INACTIF_JOURS = 7; // au-delà, l'élève est signalé dans le tableau
-const pct = (a, b) => (b ? Math.round(100 * a / b) : null);
-const fmtPct = v => (v === null ? '–' : `${v} %`);
 const fmtDate = iso => (iso ? new Date(iso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }) : '–');
+const fmtShort = d => { const [, m, j] = d.split('-'); return `${Number(j)}/${Number(m)}`; };
 const partName = code => (code === 'NC' ? 'Sans chapitre' : code);
 const byPart = (a, b) => (chapterOrder[a] ?? 9999) - (chapterOrder[b] ?? 9999) || a.localeCompare(b);
-
-const total = r => (r.reponses_total ?? r.reponses_30j ?? 0);
-const failed = r => (r.ratees_total ?? r.ratees_30j ?? 0);
-const chapTotal = c => (c.reponses_total ?? c.reponses_30j ?? 0);
-const chapFailed = c => (c.ratees_total ?? c.ratees_30j ?? 0);
+const plural = (n, one, many) => `${n} ${n > 1 ? many : one}`;
 const lastUse = b => b.resume.derniere_utilisation || null;
+
+// Parties ouvertes en cours (data/ouverts.json) : une partie est ouverte si elle, une de ses sous-parties ou son domaine l'est.
+let opened = null;
+const isOpen = code => !opened || opened.some(o => o === code || o.startsWith(code + '-') || code.startsWith(o + '-'));
 
 function daysSince(iso) {
   if (!iso) return null;
@@ -121,6 +124,19 @@ function students() {
   return [...bilans.values()].sort((a, b) => label(a).localeCompare(label(b), 'fr'));
 }
 
+const evo = b => b.evolution || [];
+// Variation des cartes sues sur 4 semaines : dernier point comparé au point d'il y a 28 jours ou plus
+function gain(b) {
+  const e = evo(b);
+  if (e.length < 2) return null;
+  const last = e[e.length - 1];
+  const limit = new Date(last.d);
+  limit.setDate(limit.getDate() - 28);
+  const ref = [...e].reverse().find(p => new Date(p.d) <= limit) || e[0];
+  return last.s - ref.s;
+}
+const signed = v => (v === null ? '–' : v > 0 ? `+${v}` : String(v));
+
 function studentRows() {
   return students().map(b => {
     const r = b.resume;
@@ -131,11 +147,9 @@ function studentRows() {
       'Dernière utilisation': fmtDate(last),
       'Jours sans utilisation': idle ?? '–',
       'Jours actifs (30 j)': r.jours_actifs_30j,
-      'Réponses depuis le début': total(r),
-      'Su (%)': pct(total(r) - failed(r), total(r)),
-      'Raté (%)': pct(failed(r), total(r)),
-      'Définitions vues': r.cartes_vues,
-      Acquises: r.cartes_acquises,
+      'Cartes sues': r.cartes_sues ?? '–',
+      'Cartes ratées': r.cartes_ratees ?? '–',
+      'Sues, sur 4 semaines': signed(gain(b)),
       'À revoir': r.cartes_a_revoir,
       'Bilan reçu le': fmtDate(b.genere),
       _inactive: idle === null || idle >= INACTIF_JOURS,
@@ -148,11 +162,10 @@ function themeRows(b) {
   return (b.chapitres || []).filter(c => c.vues > 0).sort((x, y) => byPart(x.code, y.code)).map(c => ({
     Partie: partName(c.code),
     Intitulé: chapterTitle[c.code] || '',
+    'Vu en cours': isOpen(c.code) ? 'oui' : 'non',
     'Définitions vues': `${c.vues} / ${c.total}`,
-    Réponses: chapTotal(c),
-    'Su (%)': pct(chapTotal(c) - chapFailed(c), chapTotal(c)),
-    'Raté (%)': pct(chapFailed(c), chapTotal(c)),
-    'Acquises (%)': pct(c.acquises, c.total),
+    'Cartes sues': c.cartes_sues ?? '–',
+    'Cartes ratées': c.cartes_ratees ?? '–',
   }));
 }
 
@@ -162,24 +175,22 @@ function chapterRows() {
   for (const b of bilans.values()) {
     for (const c of b.chapitres || []) {
       if (!c.vues) continue;
-      const x = agg[c.code] || (agg[c.code] = { code: c.code, eleves: 0, vues: 0, total: 0, acquises: 0, reps: 0, ratees: 0 });
+      const x = agg[c.code] || (agg[c.code] = { code: c.code, eleves: 0, sues: 0, ratees: 0, total: c.total });
       x.eleves += 1;
-      x.vues += c.vues;
-      x.total += c.total;
-      x.acquises += c.acquises;
-      x.reps += chapTotal(c);
-      x.ratees += chapFailed(c);
+      x.sues += c.cartes_sues || 0;
+      x.ratees += c.cartes_ratees || 0;
+      x.total = Math.max(x.total, c.total);
     }
   }
   return Object.values(agg).sort((a, b) => byPart(a.code, b.code)).map(x => ({
     Partie: partName(x.code),
     Intitulé: chapterTitle[x.code] || '',
+    'Vu en cours': isOpen(x.code) ? 'oui' : 'non',
     'Élèves qui l’ont abordée': `${x.eleves} / ${n}`,
-    Réponses: x.reps,
-    'Su (%)': pct(x.reps - x.ratees, x.reps),
-    'Raté (%)': pct(x.ratees, x.reps),
-    'Vues, moyenne (%)': pct(x.vues, x.total),
-    'Acquises, moyenne (%)': pct(x.acquises, x.total),
+    'Définitions de la partie': x.total,
+    'Cartes sues (classe)': x.sues,
+    'Cartes ratées (classe)': x.ratees,
+    'Sues par élève, en moyenne': Math.round(x.sues / x.eleves),
   }));
 }
 
@@ -196,17 +207,79 @@ function hardRows() {
     .map(x => ({ Définition: x.terme, 'Élèves qui la ratent': x.eleves, 'Réponses « Raté » depuis le début': x.ratees }));
 }
 
-/* ---------- Affichage ---------- */
+// Évolution de la classe : à chaque date, somme des élèves (pour chacun, son dernier point à cette date)
+function classEvolution() {
+  const list = students().filter(b => evo(b).length);
+  const dates = [...new Set(list.flatMap(b => evo(b).map(p => p.d)))].sort();
+  return dates.map(d => {
+    const p = { d, s: 0, r: 0, t: {} };
+    for (const b of list) {
+      const q = [...evo(b)].reverse().find(x => x.d <= d);
+      if (!q) continue;
+      p.s += q.s;
+      p.r += q.r;
+      for (const [code, [s, r]] of Object.entries(q.t)) {
+        const x = p.t[code] || (p.t[code] = [0, 0]);
+        x[0] += s;
+        x[1] += r;
+      }
+    }
+    return p;
+  });
+}
 
-const PCT_COLS = ['Su (%)', 'Raté (%)', 'Acquises (%)', 'Vues, moyenne (%)', 'Acquises, moyenne (%)'];
+/* ---------- Courbes ---------- */
+
+const niceMax = v => { if (v <= 5) return 5; const m = 10 ** Math.floor(Math.log10(v)); return Math.ceil(v / m) * m; };
+
+// Deux courbes : cartes sues (trait plein) et cartes ratées (pointillés). muted : partie pas encore vue en cours.
+function lineChart(points, { w = 900, h = 220, max = null, compact = false, muted = false, title = '' } = {}) {
+  if (!points.length) return '<p class="muted small">Pas encore de réponse.</p>';
+  const pad = compact ? { l: 26, r: 8, t: 8, b: 18 } : { l: 36, r: 44, t: 12, b: 24 };
+  const top = niceMax(max ?? Math.max(1, ...points.map(p => Math.max(p.s, p.r))));
+  const t0 = Date.parse(points[0].d);
+  const t1 = Date.parse(points[points.length - 1].d);
+  const x = d => pad.l + (t1 === t0 ? (w - pad.l - pad.r) / 2 : (Date.parse(d) - t0) / (t1 - t0) * (w - pad.l - pad.r));
+  const y = v => h - pad.b - v / top * (h - pad.t - pad.b);
+  const path = key => points.map((p, i) => `${i ? 'L' : 'M'}${x(p.d).toFixed(1)},${y(p[key]).toFixed(1)}`).join('');
+  const cls = muted ? 'muted-series' : '';
+  const grid = [0, top / 2, top].map(v => `<line class="grid" x1="${pad.l}" x2="${w - pad.r}" y1="${y(v)}" y2="${y(v)}"/><text class="tick" x="${pad.l - 4}" y="${y(v) + 4}" text-anchor="end">${v}</text>`).join('');
+  const last = points[points.length - 1];
+  const dots = key => points.length === 1 ? `<circle class="${key} ${cls}" cx="${x(last.d)}" cy="${y(last[key])}" r="4"/>` : '';
+  const labels = compact ? '' : `<text class="end s" x="${x(last.d) + 6}" y="${y(last.s) + 4}">${last.s} sues</text><text class="end r" x="${x(last.d) + 6}" y="${y(last.r) + (Math.abs(y(last.r) - y(last.s)) < 14 ? 16 : 4)}">${last.r} ratées</text>`;
+  const step = points.length > 1 ? (x(points[1].d) - x(points[0].d)) : 40;
+  const hits = points.map(p => `<rect class="hit" x="${x(p.d) - step / 2}" y="${pad.t}" width="${Math.max(step, 8)}" height="${h - pad.t - pad.b}"><title>${fmtShort(p.d)} : ${p.s} cartes sues, ${p.r} ratées</title></rect>`).join('');
+  return `<svg class="chart" viewBox="0 0 ${w} ${h}" role="img" aria-label="${esc(title || 'Évolution')} : ${last.s} cartes sues et ${last.r} ratées au ${fmtShort(last.d)}">
+    ${grid}
+    <text class="tick" x="${pad.l}" y="${h - 4}">${fmtShort(points[0].d)}</text>
+    ${points.length > 1 ? `<text class="tick" x="${w - pad.r}" y="${h - 4}" text-anchor="end">${fmtShort(last.d)}</text>` : ''}
+    <path class="line s ${cls}" d="${path('s')}"/><path class="line r ${cls}" d="${path('r')}"/>${dots('s')}${dots('r')}
+    ${labels}${hits}
+  </svg>`;
+}
+
+const legend = '<p class="legend-line"><span class="key s"></span>Cartes sues <span class="key r"></span>Cartes ratées <span class="key m"></span>Partie pas encore vue en cours</p>';
+
+// Une petite courbe par thème, même échelle pour toutes ; les parties vues en cours en couleur, les autres en gris
+function themeCharts(points) {
+  const codes = [...new Set(points.flatMap(p => Object.keys(p.t)))].sort(byPart);
+  if (!codes.length) return '';
+  const series = code => points.filter(p => p.t[code] || points.indexOf(p) === points.length - 1).map(p => ({ d: p.d, s: (p.t[code] || [0, 0])[0], r: (p.t[code] || [0, 0])[1] }));
+  const max = Math.max(1, ...codes.flatMap(c => series(c).map(p => Math.max(p.s, p.r))));
+  return `<div class="multiples">${codes.map(code => `<figure class="${isOpen(code) ? '' : 'closed'}">
+      <figcaption><b>${esc(partName(code))}</b> ${esc(chapterTitle[code] || '')}${isOpen(code) ? '' : ' <span class="muted">(pas encore vue)</span>'}</figcaption>
+      ${lineChart(series(code), { w: 260, h: 110, max, compact: true, muted: !isOpen(code), title: partName(code) })}
+    </figure>`).join('')}</div>`;
+}
+
+/* ---------- Affichage ---------- */
 
 function table(rows, opts = {}) {
   if (!rows.length) return '<p class="muted">Rien à afficher.</p>';
   const cols = Object.keys(rows[0]).filter(k => !k.startsWith('_'));
   const txt = opts.txt || [];
-  const fmt = (k, v) => (PCT_COLS.includes(k) ? fmtPct(v) : esc(v ?? '–'));
   return `<div class="scroll"><table><thead><tr>${cols.map(k => `<th class="${txt.includes(k) ? 'txt' : ''}">${esc(k)}</th>`).join('')}</tr></thead><tbody>${
-    rows.map(r => `<tr class="${r._inactive ? 'alert' : ''}">${cols.map(k => `<td class="${txt.includes(k) ? 'txt' : ''}">${fmt(k, r[k])}</td>`).join('')}</tr>`).join('')
+    rows.map(r => `<tr class="${r._inactive ? 'alert' : ''}">${cols.map(k => `<td class="${txt.includes(k) ? 'txt' : ''}">${esc(r[k] ?? '–')}</td>`).join('')}</tr>`).join('')
   }</tbody></table></div>`;
 }
 
@@ -220,28 +293,31 @@ function render() {
     return;
   }
   const versions = [...new Set(list.map(b => b.definitions))];
-  const old = list.filter(b => b.resume.reponses_total === undefined).length;
+  const old = list.filter(b => !b.evolution).length;
+  const cls = classEvolution();
   out.innerHTML = `
     <div class="row-actions">
       <button class="primary" id="export">Télécharger le tableur (.xlsx)</button>
       <button id="clear">Vider la liste</button>
     </div>
-    ${versions.length > 1 ? `<p class="warn">Les élèves n’ont pas tous la même version des définitions (${versions.map(esc).join(', ')}). Les totaux par thème peuvent légèrement différer.</p>` : ''}
-    ${old ? `<p class="warn">${old} bilan${old > 1 ? 's' : ''} d’une ancienne version de l’application : pourcentages calculés sur 30 jours seulement.</p>` : ''}
+    ${versions.length > 1 ? `<p class="warn">Les élèves n’ont pas tous la même version des définitions (${versions.map(esc).join(', ')}).</p>` : ''}
+    ${old ? `<p class="warn">${plural(old, 'bilan vient', 'bilans viennent')} d’une ancienne version de l’application : pas de nombres de cartes ni d’évolution pour ${old > 1 ? 'eux' : 'lui'} avant leur prochain envoi.</p>` : ''}
     <section class="card"><h2>Élèves (${list.length})</h2>${table(studentRows())}
-      <p class="muted small">Su et Raté : part des réponses données depuis le début (Difficile et Facile comptent comme Su). En rouge : aucune utilisation depuis ${INACTIF_JOURS} jours ou plus.</p></section>
-    <section class="card"><h2>Résultats par thème, élève par élève</h2>
-      ${list.map(b => `<details class="student"><summary><b>${esc(label(b))}</b> <span class="muted">· ${plural(themeRows(b).length, 'thème abordé', 'thèmes abordés')}</span></summary>${table(themeRows(b), { txt: ['Intitulé'] })}</details>`).join('')}
-    </section>
-    <section class="card"><h2>La classe, par thème</h2>${table(chapterRows(), { txt: ['Intitulé'] })}
-      <p class="muted small">Su et Raté : toutes les réponses des élèves sur le thème. Moyennes de vues et d’acquises : sur les élèves qui ont abordé le thème.</p></section>
+      <p class="muted small">Carte sue : dernière réponse Su (ou Difficile, Facile). Carte ratée : dernière réponse Raté ; elle redevient sue quand l’élève la réussit. « Sues, sur 4 semaines » : cartes sues gagnées depuis 4 semaines. En rouge : aucune utilisation depuis ${INACTIF_JOURS} jours ou plus.</p></section>
+    <section class="card"><h2>La classe</h2>${legend}
+      <h3>Toutes les définitions</h3>${lineChart(cls, { title: 'Classe' })}
+      <h3>Par thème</h3>${themeCharts(cls)}
+      ${table(chapterRows(), { txt: ['Intitulé'] })}</section>
     <section class="card"><h2>Définitions les plus ratées dans la classe</h2>${table(hardRows(), { txt: ['Définition'] })}</section>
+    <section class="card"><h2>Élève par élève</h2>
+      ${list.map(b => `<details class="student"><summary><b>${esc(label(b))}</b> <span class="muted">· ${b.resume.cartes_sues ?? '–'} sues, ${b.resume.cartes_ratees ?? '–'} ratées · ${plural(themeRows(b).length, 'thème abordé', 'thèmes abordés')}</span></summary>
+        ${legend}<h3>Toutes les définitions</h3>${lineChart(evo(b), { title: label(b) })}
+        <h3>Par thème</h3>${themeCharts(evo(b))}${table(themeRows(b), { txt: ['Intitulé'] })}</details>`).join('')}
+    </section>
     <p class="muted small">Les réponses Su ou Raté sont déclarées par les élèves : elles reflètent leur travail dans l’application, pas un contrôle.</p>`;
   document.getElementById('export').onclick = exportXlsx;
   document.getElementById('clear').onclick = () => { bilans.clear(); render(); };
 }
-
-const plural = (n, one, many) => `${n} ${n > 1 ? many : one}`;
 
 function loadScript(src) {
   return new Promise((resolve, reject) => {
@@ -258,17 +334,22 @@ async function exportXlsx() {
     if (!window.XLSX) await loadScript('vendor/xlsx.full.min.js');
     const X = window.XLSX;
     const clean = rows => rows.map(r => Object.fromEntries(Object.entries(r).filter(([k]) => !k.startsWith('_'))));
+    const sheet = rows => X.utils.json_to_sheet(rows.length ? rows : [{ '': 'Rien à afficher' }]);
     const wb = X.utils.book_new();
-    X.utils.book_append_sheet(wb, X.utils.json_to_sheet(clean(studentRows())), 'Élèves');
-    const detail = students().flatMap(b => themeRows(b).map(r => Object.assign({ Élève: label(b) }, r)));
-    X.utils.book_append_sheet(wb, X.utils.json_to_sheet(detail.length ? detail : [{ Élève: '' }]), 'Élèves par thème');
-    X.utils.book_append_sheet(wb, X.utils.json_to_sheet(chapterRows()), 'Classe par thème');
-    X.utils.book_append_sheet(wb, X.utils.json_to_sheet(hardRows()), 'Les plus ratées');
-    const days = new Set();
-    students().forEach(b => Object.keys(b.jours || {}).forEach(d => days.add(d)));
-    const sortedDays = [...days].sort();
-    const daily = students().map(b => Object.assign({ Élève: label(b) }, Object.fromEntries(sortedDays.map(d => [d, (b.jours || {})[d] || 0]))));
-    X.utils.book_append_sheet(wb, X.utils.json_to_sheet(daily), 'Réponses par jour (30 j)');
+    X.utils.book_append_sheet(wb, sheet(clean(studentRows())), 'Élèves');
+    X.utils.book_append_sheet(wb, sheet(students().flatMap(b => themeRows(b).map(r => Object.assign({ Élève: label(b) }, r)))), 'Élèves par thème');
+    X.utils.book_append_sheet(wb, sheet(chapterRows()), 'Classe par thème');
+    X.utils.book_append_sheet(wb, sheet(hardRows()), 'Les plus ratées');
+    const rows = [];
+    for (const b of students()) {
+      for (const p of evo(b)) {
+        rows.push({ Élève: label(b), Date: p.d, Thème: 'Toutes', 'Cartes sues': p.s, 'Cartes ratées': p.r });
+        for (const [code, [s, r]] of Object.entries(p.t).sort(([a], [c]) => byPart(a, c))) {
+          rows.push({ Élève: label(b), Date: p.d, Thème: partName(code), 'Cartes sues': s, 'Cartes ratées': r });
+        }
+      }
+    }
+    X.utils.book_append_sheet(wb, sheet(rows), 'Évolution');
     const today = new Date().toISOString().slice(0, 10);
     X.writeFile(wb, `bilans-classe-${today}.xlsx`);
   } catch (e) {

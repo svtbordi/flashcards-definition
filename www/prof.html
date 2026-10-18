@@ -25,6 +25,30 @@
   .pills { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 0; }
   .pills span { background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 2px 10px; font-size: 13px; }
   .row-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; }
+  /* courbes : cartes sues (série 1, trait plein) et ratées (série 2, pointillés) ; parties pas encore vues en gris */
+  #results { --series-1: #2a78d6; --series-2: #eb6834; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) #results { --series-1: #3987e5; --series-2: #d95926; } }
+  :root[data-theme="dark"] #results { --series-1: #3987e5; --series-2: #d95926; }
+  h3 { font-size: 14px; margin: 14px 0 6px; color: var(--muted); font-weight: 600; }
+  svg.chart { width: 100%; max-width: 900px; height: auto; display: block; overflow: visible; }
+  svg.chart .grid { stroke: var(--line); stroke-width: 1; }
+  svg.chart .tick { fill: var(--muted); font-size: 11px; }
+  svg.chart .line { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+  svg.chart .line.s, svg.chart circle.s { stroke: var(--series-1); }
+  svg.chart .line.r, svg.chart circle.r { stroke: var(--series-2); }
+  svg.chart .line.r { stroke-dasharray: 5 4; }
+  svg.chart circle.s { fill: var(--series-1); } svg.chart circle.r { fill: var(--series-2); }
+  svg.chart .line.muted-series, svg.chart circle.muted-series { stroke: var(--muted); } svg.chart circle.muted-series { fill: var(--muted); }
+  svg.chart .end { fill: var(--text); font-size: 12px; }
+  svg.chart .hit { fill: transparent; } svg.chart .hit:hover { fill: var(--line); fill-opacity: .35; }
+  .multiples { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; margin-bottom: 12px; }
+  .multiples figure { margin: 0; padding: 8px; border: 1px solid var(--line); border-radius: 10px; }
+  .multiples figure.closed { background: var(--bg); }
+  .multiples figcaption { font-size: 12px; margin-bottom: 4px; }
+  .legend-line { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; font-size: 13px; color: var(--muted); margin: 0 0 8px; }
+  .legend-line .key { display: inline-block; width: 22px; height: 0; border-top: 2px solid var(--series-1); margin-right: -8px; }
+  .legend-line .key.r { border-top: 2px dashed var(--series-2); }
+  .legend-line .key.m { border-top: 2px solid var(--muted); }
 </style>
 </head>
 <body>

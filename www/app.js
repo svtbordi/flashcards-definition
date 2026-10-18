@@ -1037,7 +1037,12 @@ function queueSuivi(force = false) {
   if (!force && (last.n === store.log.length || Date.now() - (last.t ? Date.parse(last.t) : 0) < SUIVI_GAP)) return;
   // un seul bilan en attente : le plus récent remplace le précédent
   store.pendingReports = store.pendingReports.filter(x => x.nature !== 'suivi');
-  store.pendingReports.push({ nature: 'suivi', code: store.settings.suiviCode, bilan: buildBilan(store.settings.suiviCode) });
+  const bilan = buildBilan(store.settings.suiviCode);
+  // une cellule du tableur contient au plus 50 000 caractères : on espace les points anciens de l'évolution si besoin
+  while (JSON.stringify(bilan).length > 40000 && bilan.evolution.length > 8) {
+    bilan.evolution = bilan.evolution.filter((x, i, a) => i % 2 === 1 || i >= a.length - 4);
+  }
+  store.pendingReports.push({ nature: 'suivi', code: store.settings.suiviCode, bilan });
   store.suivi = { t: new Date().toISOString(), n: store.log.length };
   persist();
   flushReports();
@@ -1208,6 +1213,38 @@ function mostFailed(entries) {
   return [...count].map(([id, n]) => ({ c: byId.get(id), n })).sort((a, b) => b.n - a.n || a.c.term.localeCompare(b.c.term, 'fr'));
 }
 
+// Évolution, à chaque fin de semaine (dimanche soir) et aujourd'hui : nombre de cartes sues (dernière réponse autre
+// que « Raté ») et de cartes ratées (dernière réponse « Raté »), au total et par partie du programme. Des nombres de
+// cartes, et non des pourcentages, pour que l'ajout de nouvelles définitions ne fausse pas la lecture.
+function evolution(byId, partsOf, now) {
+  if (!store.log.length) return [];
+  const ends = [];
+  const d = new Date(store.log[0].t);
+  d.setDate(d.getDate() + ((7 - d.getDay()) % 7)); // premier dimanche
+  d.setHours(23, 59, 59, 999);
+  while (d < now) { ends.push(new Date(d)); d.setDate(d.getDate() + 7); }
+  ends.push(now);
+  const last = new Map();
+  const points = [];
+  let k = 0;
+  for (const end of ends.slice(-52)) { // une année au plus
+    while (k < store.log.length && Date.parse(store.log[k].t) <= end.getTime()) { last.set(store.log[k].id, store.log[k].g); k += 1; }
+    const p = { d: dayKey(end), s: 0, r: 0, t: {} };
+    for (const [id, g] of last) {
+      const c = byId.get(id);
+      if (!c) continue;
+      const failedNow = g === Rating.Again;
+      if (failedNow) p.r += 1; else p.s += 1;
+      for (const code of partsOf(c)) {
+        const x = p.t[code] || (p.t[code] = [0, 0]);
+        x[failedNow ? 1 : 0] += 1;
+      }
+    }
+    points.push(p);
+  }
+  return points;
+}
+
 function buildBilan(name) {
   const now = new Date();
   const since = d => now.getTime() - d * 864e5;
@@ -1243,13 +1280,16 @@ function buildBilan(name) {
       }
     }
   }
+  const evo = evolution(byId, partsOf, now);
+  const today = evo.length ? evo[evo.length - 1] : { s: 0, r: 0, t: {} };
+  for (const x of Object.values(chap)) [x.cartes_sues, x.cartes_ratees] = today.t[x.code] || [0, 0];
   const all = statsFor(deck.cards);
   const jours = {};
   Object.keys(store.days).filter(k => k >= dayKey(new Date(since(30)))).sort()
     .forEach(k => { jours[k] = store.days[k].reviews; });
   return {
     app: 'flashcards-bcpst-bilan',
-    v: 2,
+    v: 3,
     nom: name,
     genere: now.toISOString(),
     definitions: deck.version,
@@ -1260,6 +1300,8 @@ function buildBilan(name) {
       jours_actifs_7j: activeDays(7),
       jours_actifs_30j: activeDays(30),
       serie: streak(),
+      cartes_sues: today.s,
+      cartes_ratees: today.r,
       reponses_total: store.log.length,
       ratees_total: store.log.filter(x => x.g === Rating.Again).length,
       jours_actifs_total: Object.keys(store.days).filter(k => store.days[k].reviews > 0).length,
@@ -1274,6 +1316,7 @@ function buildBilan(name) {
       .sort((a, b) => (chapterOrder[a.code] ?? 9999) - (chapterOrder[b.code] ?? 9999) || a.code.localeCompare(b.code)),
     plus_ratees: mostFailed(recent).slice(0, 20).map(x => ({ terme: x.c.term, ratees: x.n })),
     plus_ratees_total: mostFailed(store.log).slice(0, 20).map(x => ({ terme: x.c.term, ratees: x.n })),
+    evolution: evo,
     jours,
   };
 }
