@@ -16,7 +16,7 @@ acide gras;SV-D-2-1;acide aminé (acide α-aminé);acide nucléique | protéine 
 acide gras insaturé;SV-D-2-1;acide gras saturé;acide nucléique | protéine | acétyl-coenzyme A (acétyl-CoA) | glycérol;molécule;
 acide gras saturé;SV-D-2-1;acide gras insaturé;acide nucléique | protéine | acétyl-coenzyme A (acétyl-CoA) | glycérol;molécule;
 acide nucléique;SV-D-2-3;nucléotide;nucléoside | acide aminé (acide α-aminé) | base azotée | ATP (adénosine triphosphate);molécule;
-acide uronique;SV-D-2-2;liaison ester;nucléoside | acide aminé (acide α-aminé) | base azotée | ATP (adénosine triphosphate);molécule;"Ligne corrigée par l'enseignante reprise telle quelle (orthographe « acide aminé » alignée sur la base) ; noter que « liaison ester » n'est pas une molécule."
+acide uronique;SV-D-2-2;acide aminé (acide α-aminé);nucléoside | glycérol | base azotée | ATP (adénosine triphosphate);molécule;"Ligne corrigée par l'enseignante reprise telle quelle (orthographe « acide aminé » alignée sur la base) ; noter que « liaison ester » n'est pas une molécule."
 acidité d'une roche;ST-F-1;roche plutonique;roche volcanique | diagramme TAS | viscosité (d'un magma) | composition normative;grandeur;Ligne de l'enseignante reprise telle quelle.
 adaptation (sens évolutif);SV-B-3, SV-K-1, SV-J-1;accommodation (biologie);homéostasie | convergence | évolution régressive (régression évolutive) | plasticité phénotypique;concept;Innovation évolutive écartée (dans la définition).
 adaptation (sens physiologique);SV-I-1;régulation (physiologie);homéostasie | adaptation (sens évolutif) | plasticité phénotypique | boucle de régulation;processus;
@@ -29,8 +29,7 @@ adsorption;BG-B-1-1, BG-B-1-2;lixiviation;lessivage | dissolution d'un minéral 
 adventice;SV-I-1;intima;média | endothélium | lame basale | épithélium;structure;
 aérenchyme;SV-B-3-3;parenchyme chlorophyllien;sclérenchyme | parenchyme de réserve | collenchyme | suber;structure;
 affinité;SV-D-2-4;spécificité;coopérativité | allostérie | efficacité catalytique | ajustement induit;concept;
-affleurement;ST-A;carrière;strate | encaissant | gisement | formation résiduelle;structure;
-agent de couplage;SV-E-3;enzyme michaélienne;enzyme allostérique | glycogène phosphorylase | rubisCO (ribulose-1,5-bisphosphate carboxylase/oxygénase) | acétylcholinestérase;molécule;
+agent de couplage;SV-E-3;enzyme michaélienne;enzyme allostérique | glycogène phosphorylase | rubisco (ribulose-1,5-bisphosphate carboxylase/oxygénase) | acétylcholinestérase;molécule;
 agent mutagène;SV-F-4;agent de couplage;pression de sélection | morphogène | facteur de transcription | inhibiteur enzymatique non compétitif;autre;Peu d'« agents/facteurs » dans la base : leurres = autres agents agissant sur un processus biologique.
 agrosystème (agroécosystème);SV-J-2-1;biotope;biome | biocénose | sol | estuaire;milieu;« écosystème » écarté : terme englobant.
 aimantation thermorémanente;ST-C-3;inversion du champ magnétique;anomalie magnétique | taux d'accrétion | fermeture d'un système | remise à zéro (d'un radiochronomètre);concept;
@@ -134,7 +133,7 @@ atmosphère;BG-C-1;hydrosphère;atmosphère du sol | stratosphère | lithosphèr
 atmosphère du sol;BG-B-1-2;solution du sol;eau de gravité | complexe d’échange | complexe argilo-humique | troposphère;milieu;
 atome;SV-D-1;isotope;molécule organique | zwitterion (amphion) | macromolécule | monomère;concept;
 ATP (adénosine triphosphate);SV-D-2-3, SV-E-2;nucléoside;AMPc (AMP cyclique) | NAD⁺ (nicotinamide adénine dinucléotide) | FAD (flavine adénine dinucléotide) | coenzyme A (CoA);molécule;
-ATP synthase;SV-E-1, SV-E-2;complexe translocateur de protons;glycogène synthase | photosystème | pompe Na⁺/K⁺-ATPase | rubisCO (ribulose-1,5-bisphosphate carboxylase/oxygénase);structure;
+ATP synthase;SV-E-1, SV-E-2;complexe translocateur de protons;glycogène synthase | photosystème | pompe Na⁺/K⁺-ATPase | rubisco (ribulose-1,5-bisphosphate carboxylase/oxygénase);structure;
 auréole de contact;ST-F-1, ST-G-2;pluton;chambre magmatique | filon | enclave | racine crustale;structure;
 autogamie;SV-F-4, SV-K-1;allogamie;homogamie | hétérogamie | zoïdogamie | siphonogamie;processus;
 autoincompatibilité gamétophytique;SV-G-1;dioécie;allogamie | autogamie | siphonogamie | polyspermie;processus;Pas d'autre système d'autoincompatibilité dans la base : leurres = autres notions du régime de reproduction.
@@ -233,13 +232,13 @@ cardiomyocyte;SV-I-1;myocyte;myoblaste | myotube | pneumocyte | hématie;structu
 carpelle;SV-G-1;étamine;anthère | nectaire | archégone | sporange;structure;
 carrefour métabolique;SV-E-2;substrat;coenzyme | photosynthétats | nutriment | second messager;molécule;
 carrière;ST-I-2;mine;gisement | placer | ressource naturelle | minerai;structure;Seule « mine » est un autre type d'exploitation dans la base : complété par les termes voisins du chapitre ressources.
-carte géologique;ST-A;coupe géologique;carte thématique | profil topographique | MNT | schéma structural;méthode;
-carte thématique;ST-A;carte géologique;profil topographique | coupe géologique | schéma structural | MNT;méthode;
+carte géologique;ST-A;coupe géologique;carte thématique | SIG | MNT | schéma structural;méthode;
+carte thématique;ST-A;carte géologique;SIG | coupe géologique | schéma structural | MNT;méthode;
 caryopse;SV-G-1;akène;drupe | fruit charnu | gousse | baie;structure;
 caryotype;SV-F-4, SV-F-1-2;génome;génotype | phénotype | protéome | transcriptome;concept;
 cascade d'induction;SV-H-2;induction florale;amplification du signal | transduction du signal | information de position | spécification;processus;induction exclue (englobant, citée dans la définition).
 catabolisme;SV-E-1, SV-E-2;anabolisme;voie métabolique | biosynthèse | interconversion | photosynthèse;processus;
-catalyse;SV-E-3;couplage énergétique;hydrolyse | interconversion | transphosphorylation | conversion énergétique;processus;
+catalyse;SV-E-3;couplage énergétique;hydrolyse | interconversion | transphosphorylation (=phosphorylation sur substrat) | conversion énergétique;processus;
 catécholamines;SV-I-1;acétylcholine;hormone stéroïde | monoxyde d'azote (NO) | AMPc (AMP cyclique) | acide aminé (acide α-aminé);molécule;
 ceinture;SV-H-2;bourgeon de membre;stylopode | zeugopode | autopode | tendon;structure;
 cellule;SV-C-2;compartiment cellulaire;cytoplasme | vacuole | organite | tissu;structure;
@@ -383,7 +382,7 @@ contrôle transcriptionnel;SV-F-3;contrôle post-transcriptionnel;contrôle post
 convection (géologie);ST-C-1;conduction;décompression adiabatique | échauffement isobare | diffusion simple | couche limite thermique;processus;Peu de modes de transfert thermique dans la base : complété par des processus et notions thermiques proches.
 convection (physiologie);SV-B-1, SV-I-1;diffusion;osmose | transport actif | conduction | convection (géologie);processus;Ventilation et perfusion écartées (cas particuliers de convection).
 convergence;SV-K-2-2, SV-B-3;réversion;divergence évolutive | innovation évolutive | coévolution | évolution réticulée;processus;
-conversion énergétique;SV-E-1, SV-E-2;couplage énergétique;interconversion | catalyse | transphosphorylation | photorespiration;processus;
+conversion énergétique;SV-E-1, SV-E-2;couplage énergétique;interconversion | catalyse | transphosphorylation (=phosphorylation sur substrat) | photorespiration;processus;
 coopérativité;SV-D-2-4;effet hétérotrope;spécificité | ajustement induit | dénaturation | efficacité catalytique;concept;
 coronaires;SV-I-1;cœur;disque intercalaire | ventricule | valvules tricuspides | faisceau de His;structure;
 correction à l'air libre;ST-C-2;anomalie à l'air libre;correction de Bouguer | anomalie de Bouguer | modèle d'Airy | altimétrie satellitaire;méthode;Correction = étape de traitement des données gravimétriques : leurres = autres corrections/méthodes de gravimétrie.
@@ -393,14 +392,14 @@ cotransport;SV-C-3;uniport;transport actif primaire | diffusion facilitée | dif
 couche de mélange;BG-C-1, ST-B;thermocline;couche d’ozone | océan profond | couche limite thermique | troposphère;structure;
 couche d’ozone;BG-C-1;couche de mélange;tropopause | thermocline | troposphère | couche limite thermique;structure;
 couche limite thermique;ST-C-1;asthénosphère;couche de mélange | LVZ | zone de transition (du manteau) | surface de compensation;structure;
-coupe à main levée;SV-B-2;lame mince;coloration (microscopie) | dessin d'observation | huile à immersion | microscopie à épifluorescence;méthode;
+coupe à main levée;SV-B-2;microscope optique;coloration (microscopie) | dessin d'observation | huile à immersion | microscopie à épifluorescence;méthode;
 coupe géologique;ST-A;schéma structural;carte thématique | MNT | profil ECORS | sismique réflexion;méthode;
 couplage chimio-chimique;SV-E-3;couplage chimio-osmotique;couplage osmo-chimique | couplage chimio-mécanique | réaction d'oxydoréduction (réaction rédox) | catalyse;processus;couplage énergétique exclu (terme englobant).
-couplage chimio-mécanique;SV-H-3;couplage chimio-chimique;couplage chimio-osmotique | couplage osmo-chimique | transphosphorylation | transport actif primaire;processus;couplage énergétique exclu (englobant).
-couplage chimio-osmotique;SV-E-1, SV-E-2;couplage osmo-chimique;couplage chimio-chimique | couplage chimio-mécanique | transphosphorylation | interconversion;processus;
+couplage chimio-mécanique;SV-H-3;couplage chimio-chimique;couplage chimio-osmotique | couplage osmo-chimique | transphosphorylation (=phosphorylation sur substrat) | transport actif primaire;processus;couplage énergétique exclu (englobant).
+couplage chimio-osmotique;SV-E-1, SV-E-2;couplage osmo-chimique;couplage chimio-chimique | couplage chimio-mécanique | transphosphorylation (=phosphorylation sur substrat) | interconversion;processus;
 couplage des cycles du carbone et de l’azote;BG-A-2;cycle de l’azote;azote réactif | cycle du carbone | sous-cycle lent du carbone | cycle biogéochimique;concept;
-couplage énergétique;SV-D-2-3, SV-E-2;conversion énergétique;interconversion | transphosphorylation | catalyse | réaction d'oxydoréduction (réaction rédox);processus;
-couplage osmo-chimique;SV-E-1, SV-E-2;couplage chimio-osmotique;couplage chimio-chimique | couplage chimio-mécanique | transphosphorylation | interconversion;processus;
+couplage énergétique;SV-D-2-3, SV-E-2;conversion énergétique;interconversion | transphosphorylation (=phosphorylation sur substrat) | catalyse | réaction d'oxydoréduction (réaction rédox);processus;
+couplage osmo-chimique;SV-E-1, SV-E-2;couplage chimio-osmotique;couplage chimio-chimique | couplage chimio-mécanique | transphosphorylation (=phosphorylation sur substrat) | interconversion;processus;
 courants locaux;SV-I-2;propagation régénérative;propagation saltatoire | repolarisation | dépolarisation | hyperpolarisation;processus;
 courbe de saturation de l'hémoglobine;SV-B-1;pouvoir oxyphorique;effet Bohr | effet Haldane | loi de Henry | effet homotrope;concept;
 crête apicale ectodermique (AER);SV-H-2;zone d'activité polarisante (ZPA);autopode | stylopode | chorde | somite;structure;
@@ -547,6 +546,7 @@ effet hétérotrope;SV-D-2-4, SV-E-3;effet homotrope;coopérativité | ajustemen
 effet homotrope;SV-D-2-4, SV-E-3;effet hétérotrope;effet Bohr | effet Haldane | inhibition non compétitive | spécificité;concept;
 effet hydrophobe;SV-D-1, SV-D-2-1, SV-D-2-4;liaison hydrogène;liaison ionique | pont disulfure | liaison covalente | liaison polarisée;concept;
 effet Janzen-Connell;SV-J-2-2;facilitation;succession écologique | compétition interspécifique | prédation | effet fondateur;processus;
+effet Janzen-Connell inversé;SV-J-2-2;effet Janzen-Connell;facilitation | succession écologique | compétition interspécifique | mycorhize;concept;
 efficacité catalytique;SV-E-3;Vmax;K0,5 | vitesse initiale (vi) | constante de dissociation (Kd) | enthalpie libre de réaction (ΔrG');grandeur;Km exclu (KM figure dans la définition).
 égestion;SV-A-1;digestion;diurèse | exodigestion | rumination | uréotélie;processus;
 élastance;SV-I-1;résistance vasculaire;résistance périphérique totale (RPT) | pression artérielle différentielle (pression pulsée) | débit sanguin | pression artérielle moyenne;grandeur;
@@ -589,7 +589,7 @@ enzyme allostérique;SV-D-2-4, SV-E-3;effecteur allostérique;enzyme michaélien
 enzyme michaélienne;SV-D-2-4, SV-E-3;enzyme allostérique;effecteur allostérique | substrat | coenzyme | complexe enzyme-substrat;molécule;
 épaississement crustal;ST-J-1;anatexie (crustale);raccourcissement | subsidence | surrection | obduction;processus;
 épibolie;SV-H-1;involution;invagination | neurulation | segmentation | induction;processus;
-épicentre d'un séisme;ST-D-2;zone d'ombre;point chaud | miroir de faille | plan de Wadati-Benioff | affleurement;structure;"« foyer d'un séisme » figure dans la définition : écarté ; peu de lieux ponctuels comparables dans la base."
+épicentre d'un séisme;ST-D-2;zone d'ombre;point chaud | miroir de faille | plan de Wadati-Benioff | discordance;structure;"« foyer d'un séisme » figure dans la définition : écarté ; peu de lieux ponctuels comparables dans la base."
 épiderme;SV-B-2-1;rhizoderme;endoderme (racine) | ectoderme | phelloderme | parenchyme de réserve;structure;
 épigénétique;SV-F-3;expression génétique;code génétique | polymorphisme (génétique) | mutation | digénétique;concept;épigénome exclu (synonyme).
 épigénome;SV-F-3;transcriptome;protéome | génotype | caryotype | génome compact;concept;génome (dans la définition) et épigénétique (synonyme) exclus.
@@ -768,8 +768,8 @@ GLUT;SV-C-3;SGLT;aquaporine | pompe Na⁺/K⁺-ATPase | canal ionique | canal vo
 glycémie;SV-A-1, SV-I-1;pression artérielle;fréquence cardiaque | débit cardiaque | pression oncotique | volume d’éjection systolique;grandeur;
 glycérol;SV-D-2-1;triose;cholestérol | ribose | pyruvate | glucose;molécule;
 glycogène;SV-D-2-2;amidon;cellulose | amylopectine | glycosaminoglycane (GAG) | glycoprotéine;molécule;
-glycogène phosphorylase;SV-E-2, SV-E-3;glycogène synthase;phosphofructokinase 1 (PFK1) | protéine kinase | rubisCO (ribulose-1,5-bisphosphate carboxylase/oxygénase) | adénylate cyclase;molécule;
-glycogène synthase;SV-E-2;glycogène phosphorylase;ATP synthase | phosphofructokinase 1 (PFK1) | rubisCO (ribulose-1,5-bisphosphate carboxylase/oxygénase) | protéine kinase;molécule;
+glycogène phosphorylase;SV-E-2, SV-E-3;glycogène synthase;phosphofructokinase 1 (PFK1) | protéine kinase | rubisco (ribulose-1,5-bisphosphate carboxylase/oxygénase) | adénylate cyclase;molécule;
+glycogène synthase;SV-E-2;glycogène phosphorylase;ATP synthase | phosphofructokinase 1 (PFK1) | rubisco (ribulose-1,5-bisphosphate carboxylase/oxygénase) | protéine kinase;molécule;
 glycolipide;SV-D-2-1, SV-C-3;phospholipide;triglycéride (triacylglycérol) | cholestérol | glycoprotéine | protéoglycane;molécule;
 glycolyse;SV-E-2;fermentation;cycle de Krebs | β-oxydation | cycle de Calvin | photorespiration;processus;
 glycoprotéine;SV-D-2-2, SV-D-2-4;protéoglycane;protéine globulaire | protéine kinase | glycogène | protéine fibreuse;molécule;
@@ -794,7 +794,7 @@ graine (végétal);SV-G-1;fruit;grain de pollen | spore | péricarpe | albumen;s
 graine albuminée;SV-G-1;graine exalbuminée;akène | bulbe | tubercule | ovule (Angiospermes);structure;
 graine exalbuminée;SV-G-1;graine albuminée;caryopse | bulbe | tubercule | ovule (Angiospermes);structure;
 granite;ST-A, ST-F-1;diorite;gabbro | rhyolite | basalte | gneiss;roche;
-granulométrie;BG-B-1-1, ST-E-1-2, ST-E-2;diagramme d'Allen;mise en évidence de la CEC (éosine et bleu de méthylène) | lame mince | diagramme de Goldschmidt | microsonde électronique;méthode;triangle des textures et diagramme de Hjulström exclus (cités dans la définition).
+granulométrie;BG-B-1-1, ST-E-1-2, ST-E-2;diagramme d'Allen;mise en évidence de la CEC (éosine et bleu de méthylène) | coloration (microscopie) | diagramme de Goldschmidt | microsonde électronique;méthode;triangle des textures et diagramme de Hjulström exclus (cités dans la définition).
 gravitropisme;SV-A-2;photopériodisme;chimiotactisme | vernalisation | phyllotaxie | auxèse;processus;« tropisme » écarté (terme englobant).
 grenat;ST-A, ST-B;olivine;pyroxène | amphibole | bridgmanite | biotite;minéral;
 grès;ST-A, ST-E-2;conglomérat;argilite | calcaire | marne | lœss;roche;
@@ -835,10 +835,9 @@ histogène;SV-B-3-1;organogène;totipotence | différenciation cellulaire | spé
 histone;SV-F-1-1;facteur de transcription;facteur général de transcription | chaperonne | ADN polymérase | protéine kinase;molécule;
 holobionte;SV-A-1, SV-A-2, SV-A-3;microbiote;biofilm | mycobionte | mycorhize | biocénose;concept;
 homéodomaine;SV-H-2;motif bHLH;site actif | hélice α | feuillet β | site catalytique;structure;domaine (protéique) exclu (englobant).
-homéose;SV-H;homéostasie;colinéarité | induction | spécification | homéothermie;processus;
+homéose;SV-H;homéostasie;colinéarité | induction | spécification | homéotherme;processus;
 homéostasie;SV-I-1;boucle de régulation;homéose | valeur de consigne | adaptation (sens physiologique) | plasticité phénotypique;concept;homéothermie exclue (cas particulier).
-homéotherme;SV-A-1;homéothermie;gonochorique | hétérotrophe | dioïque | polyphage;autre;Qualificatif : leurre = nom de même racine, autres = autres qualificatifs d'organismes.
-homéothermie;SV-A-1;homéostasie;vie ralentie | régulation (physiologie) | plasticité phénotypique | uréotélie;concept;
+homéotherme;SV-A-1;vie ralentie;gonochorique | hétérotrophe | dioïque | polyphage;autre;Qualificatif : leurre = nom de même racine, autres = autres qualificatifs d'organismes.
 homogamie;SV-K-1;hétérogamie;allogamie | autogamie | panmixie | amphimixie;concept;
 homologie;SV-K-2-2;homoplasie;convergence | réversion | divergence évolutive | innovation évolutive;concept;Organes homologues et homologies primaire/secondaire/par connexion écartés : cas particuliers.
 homologie par connexion;SV-K-2-1;homologie secondaire;homoplasie | convergence | synapomorphie | symplésiomorphie;concept;« homologie primaire » écartée : englobe le critère de connexion.
@@ -851,7 +850,7 @@ horizon organique;BG-B-1-1;horizon organo-minéral;profil de sol | roche mère (
 horizon organo-minéral;BG-B-1-1;profil de sol;roche mère (d'un sol) | litière | strate | sol brun;structure;horizon organique exclu (cité dans la définition).
 hormone;SV-I-2;neurotransmetteur;phéromone | morphogène | second messager | monoxyde d'azote (NO);molécule;Hormones particulières (catécholamines, noradrénaline, hormone stéroïde) écartées : cas particuliers.
 hormone stéroïde;SV-D-2-1, SV-I-2;catécholamines;noradrénaline | acide abscissique (ABA) | auxine | FGF (facteurs de croissance des fibroblastes);molécule;
-huile à immersion;SV-C-1;coloration (microscopie);coupe à main levée | microscopie à épifluorescence | microscope électronique à transmission (MET) | lame mince;méthode;Microscope optique écarté (dans la définition).
+huile à immersion;SV-C-1;coloration (microscopie);coupe à main levée | microscopie à épifluorescence | microscope électronique à transmission (MET) | microscope optique;méthode;Microscope optique écarté (dans la définition).
 humification;BG-B-1-1, SV-J-2-3;minéralisation;ammonification | brunification | décomposition | simplification;processus;
 humus;BG-B-1-1;litière;complexe argilo-humique | lignine | argiles (granulométrie) | carbone fossile;autre;colloïde et nécromasse exclus (figurent dans la définition).
 hybridation in situ;SV-F-3;immunomarquage;northern blot | Southern blot | gène rapporteur | puce à ADN;méthode;hybridation moléculaire (englobant) et sonde nucléotidique (dans la définition) exclues.
@@ -859,7 +858,7 @@ hybridation interspécifique;SV-F-4, SV-K-1;introgression;spéciation | transfer
 hybridation magmatique;ST-F-2-2;contamination;cristallisation fractionnée | fusion partielle | anatexie (crustale) | recristallisation;processus;
 hybridation moléculaire;SV-F-3;PCR (réaction de polymérisation en chaîne);western blot | immunomarquage | électrophorèse | séquençage;méthode;Southern/northern blot, puce à ADN, hybridation in situ, sonde nucléotidique exclus (cas particuliers ou cités).
 hydrodynamisme;ST-E-2;flux sédimentaire;accommodation (sédimentologie) | eustatisme | niveau de base | hydrothermalisme;concept;
-hydrolyse;SV-D-2-3, SV-E-1;estérification;réaction d'oxydoréduction (réaction rédox) | transphosphorylation | désamination | dénaturation;processus;
+hydrolyse;SV-D-2-3, SV-E-1;estérification;réaction d'oxydoréduction (réaction rédox) | transphosphorylation (=phosphorylation sur substrat) | désamination | dénaturation;processus;
 hydrolyse d'un minéral;ST-E-1;dissolution d'un minéral;érosion | précipitation | cimentation | recristallisation;processus;
 hydrophile;SV-D-1, SV-D-2-1;hydrophobe;amphiphile | effet hydrophobe | solubilité | électronégativité;concept;Peu de qualificatifs physico-chimiques de même nature dans la base : complété par des propriétés proches (amphiphile, solubilité, électronégativité).
 hydrophobe;SV-D-1, SV-D-2-1;hydrophile;amphiphile | solubilité | électronégativité | liaison polarisée;concept;"Peu de qualificatifs physico-chimiques de même nature dans la base ; « effet hydrophobe » exclu car cité dans la définition : complété par des propriétés proches."
@@ -886,7 +885,7 @@ innovation évolutive;SV-K-2-2, SV-K-1;réversion;convergence | divergence évol
 insertion (mutation génique);SV-F-4;délétion (mutation génique);substitution (mutation génique) | duplication chromosomique | mutation silencieuse | mutation faux-sens;processus;mutation génique exclue (englobant).
 intégrine;SV-C-1;cadhérine;fibronectine | laminine | aquaporine | élastine;molécule;
 intensité d'un séisme;ST-D-2, ST-I-1;magnitude;magnitude de moment | temps de récurrence | seuil de rupture | vitesse de déformation;grandeur;
-interconversion;SV-E-2;conversion énergétique;anabolisme | catabolisme | transphosphorylation | couplage énergétique;processus;
+interconversion;SV-E-2;conversion énergétique;anabolisme | catabolisme | transphosphorylation (=phosphorylation sur substrat) | couplage énergétique;processus;
 interférence ARN;SV-F-3;contrôle post-traductionnel;contrôle transcriptionnel | méthylation de l'ADN | épissage alternatif | acétylation des histones;processus;
 interglaciaire;BG-C-3-2;glaciation;crise biologique | ère | étage | radiation évolutive;autre;Seules deux périodes climatiques dans la base (glaciation, interglaciaire) : complété par d'autres divisions/événements des temps géologiques.
 interphase;SV-F-1-2;prophase;métaphase | anaphase | télophase | diplophase;processus;phase S exclue (sous-période de l'interphase citée dans la définition).
@@ -919,7 +918,6 @@ Km;SV-E-3;K0,5;constante de dissociation (Kd) | efficacité catalytique | point 
 labour;BG-B-2;artificialisation des sols;engrais vert | bioturbation | sélection artificielle | domestication;processus;
 lagon;ST-E-2;estuaire;delta | plateforme carbonatée | océan profond | bassin intracratonique (épicontinental);milieu;Récif (cité dans la définition) écarté.
 lame basale;SV-C-1;hémidesmosome;paroi végétale (pectocellulosique) | lamelle moyenne | paroi primaire | point focal d'adhérence;structure;MEC écartée (englobant).
-lame mince;ST-A;coupe à main levée;microsonde électronique | microscope électronique à balayage (MEB) | coloration (microscopie) | microscope électronique à transmission (MET);méthode;
 lamelle branchiale;SV-B-1;alvéole pulmonaire;trachéole | trachée | poumon | poil absorbant;structure;Branchie et échangeur écartés (termes englobants).
 lamelle moyenne;SV-C-1;lame basale;paroi secondaire | plasmodesme | cadre de Caspary | paroi bactérienne;structure;Paroi primaire écartée (dans la définition).
 laminine;SV-C-1;fibronectine;cadhérine | élastine | aquaporine | myosine;molécule;
@@ -1062,7 +1060,7 @@ miroir de faille;ST-D-1;mur d’une faille;toit d'une faille | faille normale | 
 mise en évidence de la CEC (éosine et bleu de méthylène);BG-B-1-2;granulométrie;triangle des textures | électrophorèse | coloration (microscopie) | chromatographie d'affinité;méthode;
 mitochondrie;SV-C-2;chloroplaste;réticulum endoplasmique | peroxysome | noyau (cellulaire) | lysosome;structure;Organite énergétique écarté (englobant).
 mitose;SV-F-1-2;cycle cellulaire;méiose | réplication | interphase | fécondation;processus;
-MNT;ST-A;profil topographique;carte géologique | coupe géologique | carte thématique | schéma structural;méthode;
+MNT;ST-A;SIG;carte géologique | coupe géologique | carte thématique | schéma structural;méthode;
 mode de gisement;ST-F-1;dynamisme éruptif;série magmatique | composition modale | texture d'une roche magmatique | source du magma;concept;
 modelé (du paysage);ST-E-1;lithologie;formation résiduelle | arène granitique | moraine | niveau de base;concept;Peu de formes de relief dans la base : complété par des notions proches (formations, lithologie).
 modèle ABCDE;SV-B-3-2;colinéarité;modèle de la Reine Rouge | modèle de Hardy-Weinberg | modèle de Lotka-Volterra | mosaïque fluide;principe;
@@ -1127,7 +1125,7 @@ niche écologique potentielle (fondamentale);SV-J-2-2;niche écologique réalis�
 niche écologique réalisée;SV-J-2-2;niche écologique potentielle (fondamentale);aire de répartition | biotope | biome | capacité biotique;concept;
 nitratation;BG-A-2;nitrosation;dénitrification | ammonification | simplification | fixation du diazote;processus;nitrification exclue (terme englobant).
 nitrification;BG-A-2;ammonification;simplification | dénitrification | fixation du diazote | assimilation (de l’azote);processus;
-nitrogénase;SV-B-2-3, BG-A-2;rubisCO (ribulose-1,5-bisphosphate carboxylase/oxygénase);ATP synthase | phosphofructokinase 1 (PFK1) | glycogène synthase | glycogène phosphorylase;enzyme;
+nitrogénase;SV-B-2-3, BG-A-2;rubisco (ribulose-1,5-bisphosphate carboxylase/oxygénase);ATP synthase | phosphofructokinase 1 (PFK1) | glycogène synthase | glycogène phosphorylase;enzyme;
 nitrosation;BG-A-2;nitratation;ammonification | dénitrification | simplification | fixation du diazote;processus;nitrification exclue (terme englobant).
 niveau de base;ST-E-2;accommodation (sédimentologie);niveaux de découplage | géoïde | surface de compensation | lysocline;concept;
 niveau trophique;SV-J-2-3;réseau trophique;type trophique | groupe fonctionnel | rendement écologique | production;concept;
@@ -1190,6 +1188,7 @@ ovocyte;SV-G-3;ovule (Mammifères);follicule ovarien | ovaire (Mammifères) | sp
 ovogenèse;SV-G-3;spermatogenèse;fécondation interne | capacitation | organogenèse | amphimixie;processus;
 ovule (Angiospermes);SV-G-1;ovule (Mammifères);cellule centrale | oosphère | grain de pollen | anthère;structure;
 ovule (Mammifères);SV-G-3;ovule (Angiospermes);follicule ovarien | pronucléus | spermatozoïde | zygote;structure;
+p50;SV-B-1;affinité;coopérativité | effet Bohr | débit cardiaque | courbe de saturation de l'hémoglobine;grandeur;
 paléoenvironnement;BG-C-3-2, ST-H-1;climat;paléozonéographie | variabilité climatique | faciès sédimentaire | biome;concept;
 Paléozoïque;ST-H-1;Mésozoïque;Cénozoïque | période (stratigraphie) | étage | strate;concept;« Phanérozoïque » et « ère » figurent dans la définition : complété par « strate ».
 paléozonéographie;BG-C-3-2;paléoenvironnement;biome | faciès sédimentaire | aire de répartition | variabilité climatique;concept;
@@ -1239,7 +1238,7 @@ phénologie;BG-C-3-3;météo;paléozonéographie | systématique | taxonomie | p
 phénotype;SV-F-4;plasticité phénotypique;caryotype | génome | protéome | transcriptome;concept;génotype exclu (dans la définition).
 phéromone;SV-A-1, SV-G-3;hormone;neurotransmetteur | morphogène | florigène | phytohormone;molécule;
 phloème;SV-B-2, SV-B-3;xylème;bois (xylème secondaire) | cambium | sclérenchyme | collenchyme;structure;Liber écarté (cas particulier de phloème).
-phosphofructokinase 1 (PFK1);SV-E-2, SV-E-3;glycogène phosphorylase;protéine kinase | glycogène synthase | rubisCO (ribulose-1,5-bisphosphate carboxylase/oxygénase) | adénylate cyclase;molécule;
+phosphofructokinase 1 (PFK1);SV-E-2, SV-E-3;glycogène phosphorylase;protéine kinase | glycogène synthase | rubisco (ribulose-1,5-bisphosphate carboxylase/oxygénase) | adénylate cyclase;molécule;
 phospholipide;SV-D-2-1, SV-C-3;glycolipide;cholestérol | triglycéride (triacylglycérol) | acide gras | glycérol;molécule;
 phosphorylation (d'une protéine);SV-D-2-4, SV-E-3;glycosylation;acétylation des histones | méthylation de l'ADN | clivage protéique | ionisation;processus;
 photolithoautotrophie;SV-E-1, SV-A-3;chimiolithoautotrophie;chimioorganohétérotrophie | hétérotrophie | chimiotrophie | organotrophie;concept;
@@ -1325,7 +1324,7 @@ précipitation;ST-E-2;fusion;cimentation | dissolution d'un minéral | cristalli
 précipitation des carbonates;BG-A-1;altération des silicates;dissolution d'un minéral | pompe biologique du carbone | pompe physique du carbone | hydrolyse d'un minéral;processus;
 prédation;SV-J-2-2;parasitisme;phytophagie | commensalisme | mutualisme | amensalisme;concept;
 PREM (modèle);ST-B, ST-C-1;tomographie sismique;modèle d'Airy | ellipsoïde (de Clairaut) | sismique réflexion | enveloppe rhéologique (profil rhéologique);méthode;"Modèle de référence : leurres = autres modèles/méthodes de géophysique ; profil de vitesse des ondes sismiques exclu (quasi synonyme)."
-presse hydraulique (pétrologie expérimentale);ST-F-2-1, ST-G-1;enclume à diamant;microsonde électronique | lame mince | géothermomètre | tomographie sismique;méthode;
+presse hydraulique (pétrologie expérimentale);ST-F-2-1, ST-G-1;enclume à diamant;microsonde électronique | coloration (microscopie) | géothermomètre | tomographie sismique;méthode;
 pression artérielle;SV-I-1;pression oncotique;pression partielle | pression nette de filtration | potentiel hydrique | débit sanguin;grandeur;pression hydrostatique (englobant), pression artérielle moyenne et différentielle (cas particuliers) exclues.
 pression artérielle différentielle (pression pulsée);SV-I-1;pression artérielle moyenne;pression partielle | pression hydrostatique | pression oncotique | pression nette de filtration;grandeur;
 pression artérielle moyenne;SV-I-1;pression artérielle différentielle (pression pulsée);pression hydrostatique | pression oncotique | pression partielle | pression nette de filtration;grandeur;
@@ -1356,8 +1355,7 @@ productivité;SV-J-2-3;production primaire nette;production secondaire nette | p
 profil d'hydropathie;SV-D-2-4;modélisation moléculaire;alignement de séquences | électrophorèse en conditions dénaturantes (SDS-PAGE) | mutagenèse dirigée | immunomarquage;méthode;
 profil de sol;BG-B-1-1;lithosol;sol brun | sol brun lessivé | structure (d’un sol) | litière;structure;"Horizons exclus (cités dans la définition) ; leurres pris parmi les sols et notions de pédologie."
 profil de vitesse des ondes sismiques;ST-B;tomographie sismique;sismique réflexion | sismogramme | mécanisme au foyer | profil ECORS;méthode;
-profil ECORS;ST-J-1;tomographie sismique;profil topographique | profil de vitesse des ondes sismiques | coupe géologique | anomalie de Bouguer;méthode;« sismique réflexion » écartée (méthode englobante, citée dans la définition).
-profil topographique;ST-A;MNT;profil ECORS | altimétrie satellitaire | schéma structural | profil de vitesse des ondes sismiques;méthode;coupe géologique exclue (citée dans la définition).
+profil ECORS;ST-J-1;tomographie sismique;MNT | profil de vitesse des ondes sismiques | coupe géologique | anomalie de Bouguer;méthode;« sismique réflexion » écartée (méthode englobante, citée dans la définition).
 profondeur de compensation des carbonates PCC (=CCD);ST-E-2, BG-A-1;lysocline;thermocline | niveau de base | surface de compensation | couche de mélange;structure;
 projection climatique;BG-C-3-3;forçage climatique;rétroaction climatique | changement climatique anthropique | variabilité climatique | paléozonéographie;concept;
 promoteur (séquence promotrice);SV-F-2;enhancer;silencer | séquence Kozak | codon initiateur | UTR;structure;région régulatrice et séquence cis-régulatrice exclues (englobants).
@@ -1405,7 +1403,7 @@ rapport C/N;BG-A-2, BG-B-1-1;capacité d’échange cationique (CEC);porosité |
 rapports isotopiques ⁸⁷Sr/⁸⁶Sr et ¹⁴³Nd/¹⁴⁴Nd;ST-F-2-1;isochrone;δ¹⁸O | méthode U/Pb | méthode K/Ar | δ¹³C;méthode;
 rasoir d'Occam;SV-K-2-1;principe d'actualisme;principe du handicap | modèle de Hardy-Weinberg | théorie synthétique de l'évolution | théorie endosymbiotique;principe;
 réaction acrosomique;SV-G-3;spermatogenèse;polyspermie | décapacitation | capacitation | dégranulation corticale;processus;
-réaction d'oxydoréduction (réaction rédox);SV-E-1, SV-E-2;hydrolyse;transphosphorylation | estérification | ionisation | désamination;processus;
+réaction d'oxydoréduction (réaction rédox);SV-E-1, SV-E-2;hydrolyse;transphosphorylation (=phosphorylation sur substrat) | estérification | ionisation | désamination;processus;
 réaction univariante;ST-G-1;transition de phase;eutectique | domaine de stabilité | métastabilité | liquidus;concept;Géothermomètre/géobaromètre écartés : ce sont des réactions univariantes (cas particuliers).
 réajustement isostatique;ST-C-2;eustatisme;exhumation | obduction | épaississement crustal | raccourcissement;processus;
 rebond élastique;ST-D-2;cycle sismique;séisme | déformation plastique | déformation cassante | fluage;processus;
@@ -1480,7 +1478,7 @@ roche réservoir;ST-I-2;roche mère (d'un sol);roche mère (d'hydrocarbures) | �
 roche sédimentaire;ST-A, ST-E-3;roche magmatique;roche volcanique | roche plutonique | métamorphique | formation résiduelle;roche;
 roche volcanique;ST-F-1;roche plutonique;gabbro | granite | diorite | roche sédimentaire;roche;
 RT-PCR;SV-F-3;northern blot;puce à ADN | hybridation in situ | Southern blot | méthode de Sanger;méthode;PCR exclue (englobant).
-rubisCO (ribulose-1,5-bisphosphate carboxylase/oxygénase);SV-E-1, SV-E-3;phosphofructokinase 1 (PFK1);ATP synthase | glycogène phosphorylase | glycogène synthase | nitrogénase;molécule;
+rubisco (ribulose-1,5-bisphosphate carboxylase/oxygénase);SV-E-1, SV-E-3;phosphofructokinase 1 (PFK1);ATP synthase | glycogène phosphorylase | glycogène synthase | nitrogénase;molécule;
 rumen;SV-A-1;nodosité;néphron | alvéole pulmonaire | organe de réserve | branchie;structure;
 rumination;SV-A-1;exodigestion;égestion | fermentation | domestication | excrétion;processus;« digestion » écartée (terme englobant : mode de digestion).
 sables;BG-B-1-1;argiles (granulométrie);limons | colloïde | humus | litière;autre;"Seulement trois fractions granulométriques dans la base ; complété par d'autres constituants du sol."
@@ -1491,7 +1489,7 @@ sang;SV-A-1, SV-I-1;hémolymphe;sève brute | sève élaborée | solution du sol
 saprotrophie;SV-A-3, SV-J-2-3;phagotrophie;absorbotrophie | phototrophie | autotrophie | chimiotrophie;processus;
 sarcomère;SV-H-3;muscle strié squelettique;somite | phytomère | myocyte | disque intercalaire;structure;
 scénario d’émissions;BG-C-3-3;changement climatique anthropique;forçage climatique | variabilité climatique | rétroaction climatique | érosion de la biodiversité;concept;
-schéma structural;ST-A;coupe géologique;carte thématique | MNT | profil topographique | SIG;méthode;
+schéma structural;ST-A;coupe géologique;carte thématique | MNT | carte géologique | SIG;méthode;
 schistosité;ST-D, ST-G;foliation;linéation | strate | fissure | tectoglyphes;structure;
 sclérenchyme;SV-B;collenchyme;suber | aérenchyme | parenchyme de réserve | parenchyme chlorophyllien;structure;
 sclérophyte;SV-B-3;malacophyte;hydrophyte | écotype | embryophyte | fabacées;organisme;Peu de catégories écologiques de plantes dans la base : complété avec des taxons/notions voisins.
@@ -1534,7 +1532,7 @@ sex-ratio;SV-J-1;fréquence génotypique;taux d'accroissement | taux de reproduc
 sexualité;SV-F-4;reproduction asexuée;multiplication végétative | brassage génétique | mutation | dérive génétique;processus;Transferts horizontaux, transformation, conjugaison, transduction, fécondation, reproduction sexuée exclus (cas particuliers de sexualité).
 SGLT;SV-C-3;GLUT;pompe Na⁺/K⁺-ATPase | aquaporine | canal ionique | ATP synthase;molécule;
 Shh (Sonic hedgehog);SV-H-2;FGF (facteurs de croissance des fibroblastes);wnt | auxine | facteurs de régulation myogénique (MRF) | acide abscissique (ABA);molécule;morphogène exclu (englobant).
-SIG;ST-A;carte thématique;coupe géologique | schéma structural | profil topographique | GPS (géodésie spatiale);méthode;
+SIG;ST-A;carte thématique;coupe géologique | schéma structural | MNT | GPS (géodésie spatiale);méthode;
 signature isotopique;ST-F-2-1;fractionnement isotopique;élément hygromagmatophile (incompatible) | radiogénique | taux de fusion partielle | acidité d'une roche;concept;
 silencer;SV-F-3;enhancer;promoteur (séquence promotrice) | séquence Kozak | UTR | séquence répétée;structure;région régulatrice et séquence cis-régulatrice exclues (englobants).
 silicates;ST-A;calcite;halite | gypse | anhydrite | sylvite;minéral;Tous les autres minéraux silicatés de la base sont des cas particuliers : leurres = minéraux non silicatés (carbonates, évaporites).
@@ -1585,12 +1583,12 @@ stimulus;SV-A-1, SV-A-2;facteur anisotrope;seuil de déclenchement | potentiel d
 stockage géologique du CO2;ST-I-2;fertilisation de l’océan par le fer;pompe physique du carbone | pompe biologique du carbone | précipitation des carbonates | altération des silicates;processus;
 stolon;SV-G-2;tubercule;bulbille | bulbe | phytomère | méristème apical caulinaire;structure;
 stomate;SV-A-2, SV-B-2;chambre sous-stomatique;stigmate (Insectes) | trachée | méat | poil absorbant;structure;
-strate;ST-A, ST-E;faciès sédimentaire;horizon (de sol) | étage | stratotype | affleurement;concept;
+strate;ST-A, ST-E;faciès sédimentaire;horizon (de sol) | étage | stratotype | discordance;concept;
 stratégie K;SV-J-1, SV-G-3;stratégie r;régime de reproduction | compromis évolutif (trade-off) | cycle de reproduction | sélection sexuelle;concept;
 stratégie r;SV-J-1, SV-G-3;stratégie K;régime de reproduction | compromis évolutif (trade-off) | cycle de reproduction | sélection sexuelle;concept;
 stratification;BG-C-1;inversion thermique;convection (géologie) | upwelling | circulation méridienne de retournement | cellule de convection atmosphérique;concept;
 stratosphère;BG-C-1;troposphère;couche d’ozone | hydrosphère | couche de mélange | asthénosphère;structure;
-stratotype;ST-H-1;échelle stratigraphique (chronostratigraphique);strate | affleurement | fossile stratigraphique | période (stratigraphie);concept;"« GSSP » écarté (cas particulier de stratotype) ; « étage » figure dans la définition."
+stratotype;ST-H-1;échelle stratigraphique (chronostratigraphique);strate | discordance | fossile stratigraphique | période (stratigraphie);concept;"« GSSP » écarté (cas particulier de stratotype) ; « étage » figure dans la définition."
 stratotype de limite chronostratigraphique;ST-E;échelle stratigraphique (chronostratigraphique);étage | période (stratigraphie) | ère | fossile stratigraphique;concept;GSSP et clou d'or (synonymes) et stratotype (dans la définition) écartés.
 stromatolithe;ST-E-2;récif;litage horizontal | micrite | boue siliceuse | test (squelette);structure;
 structure (d’un sol);BG-B-1-2;texture (d’un sol);fertilité (d’un sol) | profil de sol | capacité d’échange cationique (CEC) | réserve utile en eau;concept;
@@ -1663,7 +1661,7 @@ thalle;SV-A-3;tige;phytomère | unité de végétation | organe de réserve | po
 théorie de la cohésion-tension;SV-B-2-1;théorie synthétique de l'évolution;mosaïque fluide | loi de Fick | filtration-réabsorption (modèle de Starling) | loi de Hagen-Poiseuille;principe;Transpiration foliaire et poussée racinaire écartées (processus, pas des modèles).
 théorie endosymbiotique;SV-K-2-2;théorie synthétique de l'évolution;théorie de la cohésion-tension | modèle de la Reine Rouge | principe du handicap | modèle de Hardy-Weinberg;principe;
 théorie synthétique de l'évolution;SV-K-1;théorie endosymbiotique;modèle de Hardy-Weinberg | modèle de la Reine Rouge | principe du handicap | rasoir d'Occam;concept;
-thermobarométrie;ST-G-1;microsonde électronique;radiochronologie | grille pétrogénétique | tomographie sismique | lame mince;méthode;Géobaromètre/géothermomètre écartés : outils de la thermobarométrie (cas particuliers).
+thermobarométrie;ST-G-1;microsonde électronique;radiochronologie | grille pétrogénétique | tomographie sismique | coloration (microscopie);méthode;Géobaromètre/géothermomètre écartés : outils de la thermobarométrie (cas particuliers).
 thermocline;BG-C-1;océan profond;hydrosphère | lysocline | profondeur de compensation des carbonates PCC (=CCD) | tropopause;structure;
 thylakoïde;SV-C-2;nucléoïde;dictyosome | appareil de Golgi | réticulum endoplasmique | pyrénoïde;structure;
 tige;SV-B-3;phytomère;unité de végétation | feuille d'ombre | fleur | poil absorbant;structure;
@@ -1694,8 +1692,8 @@ transition de phase;ST-B, ST-G;recristallisation;fusion | cristallisation fracti
 transition fragile-ductile;ST-D-1;niveaux de découplage;LVZ | Moho (discontinuité de Mohorovičić) | couche limite thermique | zone de transition (du manteau);structure;
 translocation chromosomique;SV-F-4;duplication chromosomique;inversion chromosomique | délétion chromosomique | aneuploïdie | polyploïdie;processus;
 transmembranaire;SV-C-3;protéine extrinsèque;protéine ancrée | glycoprotéine | protéine globulaire | protéine fibreuse;concept;
-transpeptidation;SV-F-2;traduction;transphosphorylation | estérification | transcription | glycosylation;processus;
-transphosphorylation;SV-E-2;hydrolyse;estérification | glycosylation | réaction d'oxydoréduction (réaction rédox) | désamination;processus;
+transpeptidation;SV-F-2;traduction;transphosphorylation (=phosphorylation sur substrat) | estérification | transcription | glycosylation;processus;
+transphosphorylation (=phosphorylation sur substrat);SV-E-2;hydrolyse;estérification | glycosylation | réaction d'oxydoréduction (réaction rédox) | désamination;processus;
 transpiration foliaire;SV-B-2;poussée racinaire;respiration (organisme) | photorespiration | cyclose | gravitropisme;processus;
 transport actif;SV-C-3;transport passif;diffusion facilitée | diffusion simple | osmose | uniport;processus;
 transport actif primaire;SV-C-3;transport actif secondaire;cotransport | uniport | diffusion facilitée | transport passif;processus;
@@ -1731,10 +1729,12 @@ valeur sélective relative;SV-K-1;coefficient de sélection;héritabilité | via
 valves cardiaques (artérielles et auriculo-ventriculaires);SV-I-1;faisceau de His;coronaires | disque intercalaire | réseau de Purkinje | nœud sino-atrial;structure;"valvules mitrales/tricuspides (cas particuliers) et valvules (englobant) exclues ; autres structures cardiaques."
 valvules (valves);SV-I-1;coronaires;oreillette | ventricule | faisceau de His | disque intercalaire;structure;valves cardiaques, valvules mitrales et tricuspides exclues (cas particuliers de valvules).
 valvules mitrales (ou bicuspides);SV-I-1;valvules tricuspides;faisceau de His | coronaires | nœud auriculo-ventriculaire | réseau de Purkinje;structure;valves cardiaques exclues (englobant).
+valvules sigmoïdes;SV-I-1;valvules mitrales (ou bicuspides);valvules tricuspides | faisceau de His | coronaires | nœud auriculo-ventriculaire;structure;
 valvules tricuspides;SV-I-1;valvules mitrales (ou bicuspides);nœud auriculo-ventriculaire | faisceau de His | coronaires | nœud sino-atrial;structure;
 variabilité climatique;BG-C-3-1, BG-C-3-2;forçage climatique;projection climatique | rétroaction climatique | changement climatique anthropique | cycles de Milankovitch;concept;
 variance génétique;SV-K-1;héritabilité;fréquence allélique | hétérozygotie | coefficient de sélection | effectif efficace d'une population;grandeur;
 variance phénotypique;SV-K-1;variance génétique;héritabilité | fréquence génotypique | coefficient de sélection | hétérozygotie;grandeur;
+vasoconstriction;SV-I-1;vasodilatation;hyperhémie active | compliance | élastance | baroréflexe;processus;
 vasodilatation;SV-I-1;hyperhémie active;compliance | élastance | baroréflexe | automatisme cardiaque;processus;« vasomotricité » écartée : terme englobant (vasodilatation et vasoconstriction).
 vasomotricité;SV-I-1;compliance;élastance | hyperhémie active | baroréflexe | automatisme cardiaque;processus;
 végétaux;SV-K-2-2;algues;archéoplastidés (Lignée verte au sens large) | champignons | hétérocontes (Straménopiles) | cyanobactérie;organisme;
@@ -1746,7 +1746,7 @@ verre volcanique;ST-F-1;microlite;phénocristal | lave | pyroclastes | cristal z
 vertébré;SV-A-1, SV-H-1;arthropode;mollusque | hexapode | bivalve | ecdysozoaire;organisme;Chordé (englobant) et sous-taxons de vertébrés (cas particuliers) écartés.
 vésicule de sécrétion;SV-C-2, SV-C-3;lysosome;peroxysome | liposome | dictyosome | vacuole;structure;Système endomembranaire écarté (englobant).
 viabilité (v);SV-K-1;fertilité (f);valeur sélective (fitness) | valeur sélective relative | coefficient de sélection | fréquence génotypique;grandeur;
-vie ralentie;SV-A-2, SV-G-1;dormance;homéothermie | vernalisation | photopériodisme | dissémination;processus;Dormance (inaptitude à germer) est la confusion classique avec la vie ralentie (état métabolique), sans en être un synonyme.
+vie ralentie;SV-A-2, SV-G-1;dormance;homéotherme | vernalisation | photopériodisme | dissémination;processus;Dormance (inaptitude à germer) est la confusion classique avec la vie ralentie (état métabolique), sans en être un synonyme.
 virus;SV-F-1-1;bactéries;archées | procaryote | mycète | cyanobactérie;organisme;"bactériophage exclu (cas particulier) ; seul virus de la base."
 viscosité (d'un magma);ST-F-1;acidité d'une roche;taux de fusion partielle | nombre de Rayleigh | vitesse de déformation | gradient géothermique;grandeur;
 vitesse de déformation;ST-D-1;taux d'accrétion;rejet d'une faille | magnitude | seuil de rupture | contrainte déviatorique;grandeur;
