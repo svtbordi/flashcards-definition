@@ -2,7 +2,7 @@
 const CACHE = 'fc-bcpst-__BUILD__';
 const SHELL = ['./', 'index.html', 'styles.css', 'qcm.js', 'app.js', 'config.json', 'manifest.webmanifest',
   'vendor/ts-fsrs.umd.js', 'vendor/xlsx.full.min.js',
-  'data/definitions.json', 'data/chapters.json', 'data/ouverts.json',
+  'data/definitions.json', 'data/chapters.json', 'data/ouverts.json', 'data/leurres.json',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png',
   'prof.html', 'prof.js', 'chapitres.html', 'chapitres.js'];
 

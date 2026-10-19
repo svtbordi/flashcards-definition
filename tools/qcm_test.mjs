@@ -24,17 +24,36 @@ for (const c of cards) {
 }
 check(leaks === 0, `${leaks} définitions contiennent encore leur terme après masquage`);
 
-// leurres
+// leurres : d'abord ceux calculés, puis ceux choisis par l'enseignant (data/leurres.json)
 let incomplete = 0, crossCode = 0, dup = 0;
 for (const c of cards) {
   const q = Q.makeQuestion(c, cards);
   if (q.options.length < 4) incomplete += 1;
+}
+check(incomplete === 0, `${incomplete} questions incomplètes sans liste de l'enseignant`);
+const curated = JSON.parse(readFileSync(new URL('../www/data/leurres.json', import.meta.url)));
+Q.setCurated(curated);
+const FACET = /\s*\((principe|objectifs)\)$/i;
+let fromList = 0, listed = 0;
+for (const c of cards) {
+  const q = Q.makeQuestion(c, cards);
+  if (q.options.length < 4) incomplete += 1;
   if (new Set(q.options.map(o => o.term)).size !== q.options.length) dup += 1;
-  if (!q.options.every(o => o.codes.some(x => c.codes.some(y => x.slice(0, 2) === y.slice(0, 2))))) crossCode += 1;
+  if (!q.options.every(o => (o.codes || c.codes).some(x => c.codes.some(y => x.slice(0, 2) === y.slice(0, 2))))) crossCode += 1;
+  const e = curated[c.term.replace(FACET, '')];
+  if (e) {
+    listed += 1;
+    const names = [e.l, ...e.a];
+    fromList += q.options.filter(o => o.id !== c.id && names.includes(o.term.replace(FACET, ''))).length === 3;
+    // une méthode est proposée avec la même facette que la question
+    const f = (c.term.match(FACET) || [])[1];
+    check(!f || q.options.every(o => !FACET.test(o.term) || o.term.endsWith(`(${f})`)), 'facette mélangée : ' + c.term);
+  }
   check(q.options.filter(o => o.id === c.id).length === 1, 'bonne réponse absente : ' + c.term);
 }
 check(incomplete === 0 && dup === 0, `${incomplete} questions incomplètes, ${dup} avec doublon`);
-console.log(`${cards.length} définitions, ${masked} avec terme masqué, ${crossCode} questions avec un leurre hors du domaine (SV, BG, ST)`);
+check(listed > cards.length * 0.95 && fromList > listed * 0.95, `leurres de l'enseignant : ${fromList} questions sur ${listed}`);
+console.log(`${cards.length} définitions, ${masked} avec terme masqué, ${crossCode} questions avec un leurre hors du domaine (SV, BG, ST), ${fromList}/${listed} entièrement tirées de la liste de l'enseignant`);
 
 // parcours dans un navigateur de téléphone
 const base = process.env.BASE_URL || 'http://localhost:8765';

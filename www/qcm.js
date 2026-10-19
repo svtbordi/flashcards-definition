@@ -148,9 +148,43 @@
   // chapitre. Sont exclus les homonymes et cas particuliers, les termes cités dans la définition affichée et
   // les définitions presque identiques (probables synonymes : la question aurait deux bonnes réponses).
   function pickDistractors(card, cards, shownDef, n = 3, rnd = Math.random) {
+    const chosen = curatedFor(card, cards, shownDef, n, rnd);
+    if (chosen) return chosen;
     const ok = candidates(card, cards, shownDef, n + 2);
     // le plus proche est toujours proposé ; les autres sont tirés parmi les suivants, pour varier d'une fois à l'autre
     return ok.length <= n ? ok : [ok[0], ...shuffle(ok.slice(1), rnd).slice(0, n - 1)];
+  }
+
+  // Leurres choisis par l'enseignant (data/leurres.json, construit depuis source/leurres.csv) :
+  // { terme sans (principe)/(objectifs) : { l: leurre toujours proposé, a: autres leurres, dont n - 1 tirés au hasard } }
+  let curated = null;
+  function setCurated(map) { curated = map && typeof map === 'object' ? map : null; }
+
+  const FACET = /\s*\((principe|objectifs)\)$/i;
+  const facetOf = term => (term.match(FACET) || [])[1];
+
+  function curatedFor(card, cards, shownDef, n, rnd) {
+    const e = curated && curated[card.term.replace(FACET, '')];
+    if (!e) return null;
+    const facet = facetOf(card.term);
+    // une méthode est proposée avec la même facette que la question ; un leurre hors de la base n'a pas de définition
+    const toCard = name => {
+      const same = cards.filter(c => c.term.replace(FACET, '') === name);
+      return same.find(c => facetOf(c.term) === facet) || same[0] || { id: 'leurre:' + name, term: name, def: '' };
+    };
+    const own = card.term.replace(FACET, '');
+    const usable = name => name && name !== own && !mentions(shownDef, name);
+    const out = [];
+    const add = name => { if (usable(name) && !out.some(c => c.term.replace(FACET, '') === name)) out.push(toCard(name)); };
+    add(e.l);
+    shuffle(e.a || [], rnd).forEach(name => { if (out.length < n) add(name); });
+    if (out.length < n) { // liste incomplète : on complète avec les termes les plus proches
+      const names = new Set(out.map(c => c.term.replace(FACET, '')));
+      candidates(card, cards, shownDef, n + 5).forEach(c => {
+        if (out.length < n && !names.has(c.term.replace(FACET, ''))) out.push(c);
+      });
+    }
+    return out;
   }
 
   // Les termes les plus proches, du plus au moins proche.
@@ -203,7 +237,7 @@
     return { card, def: shown, options };
   }
 
-  const api = { normMap, variants, maskTerm, mentions, findSpans, candidates, pickDistractors, makeQuestion, shuffle, indexOf, cosine };
+  const api = { normMap, variants, maskTerm, mentions, findSpans, candidates, pickDistractors, makeQuestion, shuffle, indexOf, cosine, setCurated };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.QCM = api;
 })(typeof window !== 'undefined' ? window : globalThis);

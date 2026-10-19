@@ -163,6 +163,7 @@ async function loadDeck() {
     fetch('data/chapters.json').then(r => r.json()),
     fetch('config.json', { cache: 'no-cache' }).then(r => r.json()).catch(() => ({})),
     fetch('data/ouverts.json', { cache: 'no-cache' }).then(r => r.json()).catch(() => null),
+    fetch('data/leurres.json').then(r => r.json()).then(QCM.setCurated).catch(() => null),
   ]);
   config = conf || {};
   opened = open && Array.isArray(open.chapitres) ? open : null;
@@ -694,7 +695,7 @@ function renderQcm(s) {
     }).join('')}</div>
     ${answered ? `<div class="feedback ${ok ? 'ok' : 'ko'}">
       ${ok ? '<p><b>Bonne réponse.</b></p>'
-        : `<p><b>La bonne réponse est « ${esc(q.card.term)} ».</b></p><p>Vous avez choisi « ${esc(picked.term)} » : ${esc(picked.def)}</p>`}
+        : `<p><b>La bonne réponse est « ${esc(q.card.term)} ».</b></p><p>Vous avez choisi « ${esc(picked.term.replace(FACET, ''))} »${picked.def ? ` : ${esc(picked.def)}` : '.'}</p>`}
     </div>
     <button class="primary wide" id="qcm-next">${last ? 'Voir mon score' : 'Question suivante'} <small>Entrée</small></button>` : ''}`;
   app.querySelectorAll('.opt').forEach(b => { b.onclick = () => qcmChoose(Number(b.dataset.k)); });
