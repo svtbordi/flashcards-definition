@@ -1,5 +1,5 @@
 """Construit www/data/definitions.json et chapters.json à partir du tableur et de l'index du programme."""
-import json, re, sys, unicodedata, datetime, collections
+import csv, json, os, re, sys, unicodedata, datetime, collections
 import openpyxl
 
 XLSX, OUT = sys.argv[1], sys.argv[2]
@@ -47,9 +47,20 @@ for line in (open(INDEX, encoding='utf8') if INDEX else []):
     if m:
         chapters.append({'code': m.group(1), 'title': re.sub(r'\s*\(BCPST.*?\)$', '', m.group(2)).strip()})
 
+# Leurres du QCM choisis par l'enseignant (source/leurres.csv, à côté du tableur) : terme ; chapitres ;
+# leurre toujours proposé ; autres leurres séparés par « | ». Sans ce fichier, l'application les calcule.
+leurres = {}
+LEURRES = os.path.join(os.path.dirname(XLSX), 'leurres.csv')
+if os.path.exists(LEURRES):
+    for row in list(csv.reader(open(LEURRES, encoding='utf-8-sig'), delimiter=';'))[1:]:
+        row = [x.strip() for x in row] + [''] * 4
+        if row[0] and row[2]:
+            leurres[row[0]] = {'l': row[2], 'a': [x.strip() for x in row[3].split('|') if x.strip()]}
+json.dump(leurres, open(f'{OUT}/leurres.json', 'w', encoding='utf8'), ensure_ascii=False)
+
 stamp = datetime.date.today().isoformat()
 json.dump({'version': stamp, 'source': 'definitions_SVT.xlsx', 'cards': cards},
           open(f'{OUT}/definitions.json', 'w', encoding='utf8'), ensure_ascii=False)
 if chapters:
     json.dump(chapters, open(f'{OUT}/chapters.json', 'w', encoding='utf8'), ensure_ascii=False, indent=0)
-print(len(cards), 'cartes,', skipped, 'sans chapitre ignorées,', sum(v > 1 for v in seen.values()), 'termes en double;', len(chapters), 'chapitres')
+print(len(cards), 'cartes,', skipped, 'sans chapitre ignorées,', sum(v > 1 for v in seen.values()), 'termes en double;', len(chapters), 'chapitres;', len(leurres), 'listes de leurres')
