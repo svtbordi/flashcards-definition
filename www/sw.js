@@ -1,5 +1,8 @@
 // Service worker : l'application marche hors connexion ; les définitions sont mises à jour dès qu'il y a du réseau.
-const CACHE = 'fc-bcpst-__BUILD__';
+// Les applications publiées sur svtbordi.github.io (définitions de SVT, formules de maths…) partagent le même
+// stockage de caches : celle-ci ne supprime que les caches dont le nom commence par PREFIX.
+const PREFIX = 'fc-bcpst-';
+const CACHE = PREFIX + '__BUILD__';
 const SHELL = ['./', 'index.html', 'styles.css', 'qcm.js', 'app.js', 'config.json', 'manifest.webmanifest',
   'vendor/ts-fsrs.umd.js', 'vendor/xlsx.full.min.js',
   'data/definitions.json', 'data/chapters.json', 'data/ouverts.json', 'data/leurres.json',
@@ -12,7 +15,7 @@ self.addEventListener('install', e => {
 
 self.addEventListener('activate', e => {
   e.waitUntil(caches.keys()
-    .then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
+    .then(keys => Promise.all(keys.filter(k => k.startsWith(PREFIX) && k !== CACHE).map(k => caches.delete(k))))
     .then(() => self.clients.claim()));
 });
 
