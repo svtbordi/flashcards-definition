@@ -9,8 +9,10 @@ const SHELL = ['./', 'index.html', 'styles.css', 'qcm.js', 'app.js', 'config.jso
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png',
   'prof.html', 'prof.js', 'chapitres.html', 'chapitres.js'];
 
+// cache: 'reload' contourne le cache HTTP du navigateur (10 min sur GitHub Pages) : sans cela, une nouvelle version
+// pouvait mettre en cache l'ancien app.js.
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL.map(u => new Request(u, { cache: 'reload' })))).then(() => self.skipWaiting()));
 });
 
 self.addEventListener('activate', e => {
