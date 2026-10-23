@@ -362,6 +362,7 @@ let expanded = new Set();
 function go(next, push = true) {
   if (push && view !== next) viewStack.push(view);
   view = next;
+  if (next === 'home' && !session && updateReady) return location.reload();
   render();
   window.scrollTo(0, 0);
 }
@@ -369,6 +370,7 @@ function go(next, push = true) {
 function back() {
   if (view === 'session') session = null;
   view = viewStack.pop() || 'home';
+  if (view === 'home' && !session && updateReady) return location.reload();
   render();
 }
 
@@ -1655,11 +1657,23 @@ async function main() {
   flushReports();
   if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
   if ('serviceWorker' in navigator && location.protocol !== 'file:') {
-    navigator.serviceWorker.register('sw.js').catch(() => {});
+    navigator.serviceWorker.register('sw.js').then(reg => { swReg = reg; }).catch(() => {});
+    // nouvelle version installée : on recharge, mais jamais au milieu d'une séance
+    if (navigator.serviceWorker.controller) {
+      navigator.serviceWorker.addEventListener('controllerchange', () => { updateReady = true; reloadIfIdle(); });
+    }
   }
 }
 
+let swReg = null;
+let updateReady = false;
+function reloadIfIdle() {
+  if (updateReady && !session && view === 'home') location.reload();
+}
+
 document.addEventListener('visibilitychange', () => {
+  // sur téléphone, l'application est souvent reprise sans être relancée : on cherche alors une mise à jour
+  if (document.visibilityState === 'visible' && swReg) swReg.update().catch(() => {});
   if (document.visibilityState === 'visible' && view === 'home') render();
   if (document.visibilityState === 'hidden') queueSuivi(); // l'élève quitte l'application : on envoie la séance
 });
