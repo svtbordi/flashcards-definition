@@ -19,6 +19,7 @@ const DEFAULT_SETTINGS = {
   buttons: 2,
   retention: 0.9,
   reminderTime: '18:00',
+  direction: 'td', // sens des cartes en entraînement libre : td terme → définition, dt définition → terme, mix les deux
 };
 
 /* ---------- Stockage ---------- */
@@ -43,7 +44,7 @@ function saveJSON(key, value) {
 }
 
 const store = Object.assign(
-  { cards: {}, log: [], days: {}, settings: {}, selection: [], qcmLog: [], pendingReports: [] },
+  { cards: {}, log: [], days: {}, settings: {}, selection: [], qcmLog: [], revLog: [], pendingReports: [] },
   loadJSON(STORE_KEY, {})
 );
 store.settings = Object.assign({}, DEFAULT_SETTINGS, store.settings);
@@ -248,7 +249,7 @@ function inScope(c, selected, reviews) {
   return matchesSelection(c, selected) || (reviews && isStarted(c));
 }
 
-function buildSession(selected, { ahead = false, label = '', reviews = false } = {}) {
+function buildSession(selected, { ahead = false, label = '', reviews = false, dir = 'td' } = {}) {
   const now = new Date();
   const endDay = endOfStudyDay(now);
   const pool = deck.cards.filter(c => inScope(c, selected, reviews));
@@ -274,14 +275,27 @@ function buildSession(selected, { ahead = false, label = '', reviews = false } =
     const newLeft = Math.max(0, store.settings.newPerDay - today().newCards);
     queue = due.map(x => x.c).concat(fresh.slice(0, newLeft));
   }
+  if (dir !== 'td') {
+    const rev = reverseItems(pool, dir === 'dt' ? store.settings.dailyGoal : Math.max(5, Math.ceil(queue.length / 2)));
+    if (dir === 'dt') queue = rev;
+    else for (const r of rev) queue.splice(Math.floor(Math.random() * (queue.length + 1)), 0, r);
+  }
   return {
-    selected, label, ahead, reviews,
+    selected, label, ahead, reviews, dir,
     pool, queue,
     relearn: [], // cartes ratées, à revoir dans la séance
     done: 0, again: 0,
     current: null, revealed: false, undo: null,
     poolStats: { due: due.length, fresh: fresh.length, notDue: notDue.length },
   };
+}
+
+// Cartes « définition → terme » : hors calendrier des révisions espacées, car retrouver le terme ne prouve pas
+// qu'on sait restituer la définition. Les cartes déjà commencées passent en premier, au hasard.
+function reverseItems(pool, n) {
+  const started = QCM.shuffle(pool.filter(isStarted));
+  const others = QCM.shuffle(pool.filter(c => !isStarted(c)));
+  return started.concat(others).slice(0, n).map(card => ({ rev: true, card }));
 }
 
 function nextCard() {
@@ -327,10 +341,45 @@ function answer(rating) {
   render();
 }
 
+function answerReverse(ok) {
+  const s = session;
+  const item = s.current;
+  store.revLog.push({ id: item.card.id, t: new Date().toISOString(), ok: ok ? 1 : 0 });
+  if (store.revLog.length > 5000) store.revLog.splice(0, store.revLog.length - 5000);
+  if (!ok) {
+    s.again += 1;
+    s.relearn.push({ card: item, due: Date.now() + 60e3 }); // revient un peu plus loin dans la séance
+  }
+  s.done += 1;
+  s.undo = { card: item, rev: true, ok, typed: s.typed };
+  persist();
+  s.current = nextCard();
+  s.revealed = false;
+  s.typed = '';
+  render();
+}
+
 function undoLast() {
   const s = session;
   if (!s || !s.undo) return;
   const u = s.undo;
+  if (u.rev) {
+    store.revLog.pop();
+    if (!u.ok) {
+      const i = s.relearn.findIndex(x => x.card === u.card);
+      if (i >= 0) s.relearn.splice(i, 1);
+      s.again -= 1;
+    }
+    if (s.current) s.queue.unshift(s.current);
+    s.current = u.card;
+    s.revealed = true;
+    s.typed = u.typed;
+    s.done -= 1;
+    s.undo = null;
+    persist();
+    render();
+    return;
+  }
   if (u.before) store.cards[u.card.id] = u.before;
   else delete store.cards[u.card.id];
   store.days[dayKey()] = u.dayBefore;
@@ -452,6 +501,9 @@ function renderHome() {
     </div>
     <h2 class="section">Entraînement libre</h2>
     <p class="muted small">N’importe quel chapitre, par exemple pour anticiper une révision. Les cartes commencées ici entrent ensuite dans vos révisions espacées.</p>
+    <label class="dir">Sens des cartes
+      <select id="dir">${Object.entries(DIRECTIONS).map(([k, v]) => `<option value="${k}" ${store.settings.direction === k ? 'selected' : ''}>${v}</option>`).join('')}</select></label>
+    ${store.settings.direction !== 'td' ? '<p class="muted small">Les cartes « définition → terme » ne modifient pas le calendrier de vos révisions espacées.</p>' : ''}
     <div class="actions">
       <button id="go-choose">Choisir un ou plusieurs chapitres</button>
       ${store.selection.length ? `<button id="go-last">Reprendre ma dernière sélection <small>(${esc(store.selection.slice(0, 3).join(', '))}${store.selection.length > 3 ? '…' : ''})</small></button>` : ''}
@@ -468,6 +520,7 @@ function renderHome() {
   document.getElementById('go-all').onclick = () => startSession(openList, 'Révisions espacées', { reviews: true });
   document.getElementById('go-started').onclick = () => startSession(started, 'Mes chapitres commencés');
   document.getElementById('go-choose').onclick = () => go('choose');
+  document.getElementById('dir').onchange = e => { store.settings.direction = e.target.value; persist(); render(); };
   const last = document.getElementById('go-last');
   if (last) last.onclick = () => startSession(store.selection, 'Dernière sélection');
   const methods = document.getElementById('go-methods');
@@ -575,8 +628,12 @@ function renderChoose() {
   if (clear) clear.onclick = () => { chooseSel.clear(); render(); };
 }
 
+const DIRECTIONS = { td: 'terme → définition', dt: 'définition → terme', mix: 'les deux, mélangés' };
+
 function startSession(selected, label, { ahead = false, reviews = false, offerWarmup = !ahead && !reviews } = {}) {
-  session = buildSession(selected, { label, ahead, reviews });
+  const dir = reviews || ahead ? 'td' : store.settings.direction;
+  session = buildSession(selected, { label, ahead, reviews, dir });
+  if (dir === 'dt') offerWarmup = false; // le QCM interroge déjà dans ce sens
   // l'échauffement précède toujours des flashcards : proposé seulement s'il y a des cartes à faire ensuite
   if (offerWarmup && session.queue.length && session.pool.length >= 4) session.phase = 'intro';
   else session.current = nextCard();
@@ -587,7 +644,7 @@ function startSession(selected, label, { ahead = false, reviews = false, offerWa
 
 // Définitions interrogées : celles de la séance qui suit, jamais vues ou ratées d'abord, puis le reste du thème.
 function pickQcmCards(s, n = QCM_SIZE) {
-  const inQueue = new Set(s.queue.map(c => c.id));
+  const inQueue = new Set(s.queue.map(c => (c.rev ? c.card : c).id));
   const weak = c => {
     const st = stateOf(c.id);
     return !st || st.state !== State.Review || st.lapses > 0;
@@ -645,9 +702,9 @@ function qcmToCards() {
   const old = session;
   const failed = old.qcm.failed;
   const failedIds = new Set(failed.map(c => c.id));
-  session = buildSession(old.selected, { label: old.label, reviews: old.reviews });
+  session = buildSession(old.selected, { label: old.label, reviews: old.reviews, dir: old.dir });
   // les définitions ratées au QCM reviennent après leur délai de 10 minutes, comme une carte ratée en séance
-  session.queue = session.queue.filter(c => !failedIds.has(c.id));
+  session.queue = session.queue.filter(c => c.rev || !failedIds.has(c.id));
   for (const c of failed) session.relearn.push({ card: c, due: stateOf(c.id).due.getTime() });
   session.phase = 'cards';
   session.current = nextCard();
@@ -757,7 +814,7 @@ function renderSession() {
       const st = stateOf(c.id);
       return st && st.state !== State.New && st.due > endDay && inScope(c, s.selected, s.reviews);
     }).length;
-    s.poolStats.notDue = notDue;
+    s.poolStats.notDue = s.dir === 'dt' ? 0 : notDue;
     app.innerHTML = `<section class="card hero">
       <p class="big">${s.done ? 'Séance terminée' : 'Rien à revoir pour l’instant'}</p>
       ${s.done ? `<p>${plural(s.done, 'réponse', 'réponses')}${s.again ? `, dont ${plural(s.again, 'carte ratée', 'cartes ratées')} et revues dans la séance` : ', aucune ratée'}.</p>` : ''}
@@ -773,6 +830,7 @@ function renderSession() {
     document.getElementById('home').onclick = () => { session = null; viewStack = []; go('home', false); };
     return;
   }
+  if (s.current.rev) return renderReverse(s);
   const c = s.current;
   const st = stateOf(c.id);
   const left = s.queue.length + s.relearn.length + 1;
@@ -798,6 +856,42 @@ function renderSession() {
   app.querySelectorAll('[data-key]').forEach(cb => {
     cb.onchange = () => { s.keysOk[Number(cb.dataset.key)] = cb.checked; render(); };
   });
+}
+
+function renderReverse(s) {
+  const c = s.current.card;
+  const left = s.queue.length + s.relearn.length + 1;
+  const ok = s.revealed && QCM.sameTerm(s.typed || '', c.term);
+  s.revOk = ok;
+  app.innerHTML = `
+    <div class="progress-line"><span>${s.label ? esc(s.label) : ''}</span><span>${left} restantes</span></div>
+    <article class="flash ${s.revealed ? 'revealed' : ''}">
+      ${s.revealed && canReport() ? reportButton() : ''}
+      <div class="codes">${cardCodes(c).map(x => `<span>${esc(x === NO_CODE ? 'sans chapitre' : x)}</span>`).join('')}${c.method ? '<span>méthode</span>' : ''} <span class="tag rev">définition → terme</span></div>
+      <p class="def">${esc(s.revealed ? c.def : QCM.maskTerm(c.def, c.term).text)}</p>
+      ${s.revealed ? `<h2 class="term">${esc(c.term)}</h2>` : '<p class="hint muted">Quel est le terme défini ? Tapez-le, ou dites-le de tête, puis affichez la réponse.</p>'}
+    </article>
+    ${!s.revealed ? `<form id="rev-form" class="rev-form">
+        <input id="rev-input" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="Votre réponse" placeholder="Votre réponse (facultatif)" value="${esc(s.typed || '')}">
+        <button class="primary reveal" type="submit">Voir le terme <small>Entrée</small></button></form>`
+      : ok ? `<div class="feedback ok"><p><b>Bonne réponse.</b></p></div>
+        <button class="primary wide" id="rev-next">Carte suivante <small>Entrée</small></button>`
+        : `<div class="feedback ${s.typed ? 'ko' : ''}">${s.typed ? `<p>Vous avez répondu « ${esc(s.typed)} ».</p>` : ''}<p>Si vous aviez trouvé ce terme, ou un synonyme exact, choisissez « Su ».</p></div>
+        <div class="grade"><button class="again" data-rev="0">Raté<small>1</small></button><button class="good" data-rev="1">Su<small>2</small></button></div>`}
+    ${s.undo ? '<button class="link undo" id="undo">Annuler la dernière réponse</button>' : ''}`;
+  const form = document.getElementById('rev-form');
+  if (form) {
+    const input = document.getElementById('rev-input');
+    form.onsubmit = e => { e.preventDefault(); s.typed = input.value.trim(); s.revealed = true; render(); };
+    input.focus({ preventScroll: true });
+  }
+  const next = document.getElementById('rev-next');
+  if (next) { next.onclick = () => answerReverse(true); next.focus({ preventScroll: true }); }
+  app.querySelectorAll('[data-rev]').forEach(b => { b.onclick = () => answerReverse(b.dataset.rev === '1'); });
+  const u = document.getElementById('undo');
+  if (u) u.onclick = undoLast;
+  const rep = app.querySelector('.report-btn');
+  if (rep) rep.onclick = () => openReport(c, 'inverse', { reponse: s.typed || '' });
 }
 
 /* ---------- Mots-clés à vérifier au verso ----------
@@ -837,6 +931,12 @@ document.addEventListener('keydown', e => {
   }
   if (session.phase === 'qcmEnd' && e.key === 'Enter') { e.preventDefault(); qcmToCards(); return; }
   if (!session.current) return;
+  if (session.current.rev) {
+    if (!session.revealed) return; // la saisie et le bouton « Voir le terme » s'en chargent
+    if (session.revOk && e.key === 'Enter') { e.preventDefault(); answerReverse(true); }
+    else if (!session.revOk && (e.key === '1' || e.key === '2')) { e.preventDefault(); answerReverse(e.key === '2'); }
+    return;
+  }
   if (!session.revealed && (e.key === ' ' || e.key === 'Enter')) {
     e.preventDefault();
     session.revealed = true;
@@ -942,7 +1042,7 @@ function openReport(card, context, extra = {}) {
       codes: card.codes.join(', '),
       type: REPORT_TYPES[type()],
       precision: text.value.trim(),
-      contexte: { flashcard: 'flashcard', qcm: 'QCM d’échauffement', lexique: 'lexique' }[context] || context,
+      contexte: { flashcard: 'flashcard', qcm: 'QCM d’échauffement', lexique: 'lexique', inverse: 'carte définition → terme' }[context] || context,
       version: deck.version,
       date: new Date().toISOString(),
     }, extra));
