@@ -1,5 +1,5 @@
 {
- "version": "2026-10-18T13:48:35.389Z",
+ "version": "2026-10-26T19:02:34.453Z",
  "chapitres": [
   "SV-A-1",
   "SV-A-2",
@@ -7,8 +7,14 @@
   "SV-F",
   "SV-G",
   "SV-J",
+  "ST-A",
+  "ST-B",
+  "ST-C",
+  "ST-D",
+  "ST-E",
   "ST-F",
   "ST-G",
+  "ST-H",
   "ST-J-1"
  ],
  "methodes": true
