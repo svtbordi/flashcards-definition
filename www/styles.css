@@ -247,3 +247,9 @@ h2.section { font-size: 17px; margin: 8px 0 4px; }
 .keys label { display: flex; align-items: center; gap: 10px; min-height: 40px; }
 .keys input { width: 22px; height: 22px; margin: 0; flex: none; accent-color: var(--accent); }
 .center { text-align: center; }
+.dir { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 4px 0 12px; }
+.dir select { font: inherit; padding: 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--text); max-width: 100%; }
+.tag.rev { color: var(--accent); }
+.flash .codes + .def { margin-top: 16px; }
+.rev-form { display: grid; gap: 10px; }
+.rev-form input { font: inherit; font-size: 18px; padding: 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--text); width: 100%; min-width: 0; }

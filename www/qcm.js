@@ -237,7 +237,18 @@
     return { card, def: shown, options };
   }
 
-  const api = { normMap, variants, maskTerm, mentions, findSpans, candidates, pickDistractors, makeQuestion, shuffle, indexOf, cosine, setCurated };
+  // Réponse tapée par l'élève (carte définition → terme) : juste si elle redonne le terme ou l'une de ses formes,
+  // aux accents, majuscules, ponctuation et pluriels près. « (principe) » et « (objectifs) » ne sont pas attendus.
+  function sameTerm(answer, term) {
+    const clean = x => normMap(x).s.split(/[^a-z0-9α-ω]+/).filter(Boolean).map(w => w.length > 3 ? w.replace(/[sx]$/, '') : w).join(' ');
+    const a = clean(answer);
+    if (!a) return false;
+    const bare = term.replace(/\s*\((principe|objectifs)\)$/i, '');
+    const inner = [...bare.matchAll(/\(([^)]+)\)/g)].map(m => m[1]);
+    return [bare, ...variants(bare), ...inner].some(v => clean(v) === a);
+  }
+
+  const api = { normMap, variants, maskTerm, mentions, findSpans, candidates, pickDistractors, makeQuestion, shuffle, indexOf, cosine, setCurated, sameTerm };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.QCM = api;
 })(typeof window !== 'undefined' ? window : globalThis);
