@@ -95,7 +95,14 @@ await p.evaluate(term => {
 await p.goto(`${base}/`);
 await p.click('#go-all');
 await p.waitForSelector('.flash');
-check((await p.textContent('h2.term')).trim() === freeTerm, `carte d'entraînement libre (${freeTerm}) absente des révisions`);
+// l'ordre des cartes est aléatoire : on parcourt la séance jusqu'à la trouver
+let found = false;
+for (let i = 0; i < 40 && await p.$('h2.term'); i++) {
+  if ((await p.textContent('h2.term')).trim() === freeTerm) { found = true; break; }
+  await p.click('#reveal');
+  await p.click('.grade .again');
+}
+check(found, `carte d'entraînement libre (${freeTerm}) absente des révisions`);
 
 // page enseignant : cocher, publier vers GitHub (simulé)
 const t = await ctx.newPage();

@@ -152,12 +152,6 @@ function matchesSelection(card, selected) {
   return cardCodes(card).some(code => selected.some(sel => code === sel || code.startsWith(sel + '-')));
 }
 
-function cardOrderKey(c) {
-  const code = cardCodes(c)[0];
-  const order = chapterOrder[code] ?? chapterOrder[partOf(code)] ?? 9999;
-  return [order, c.term];
-}
-
 async function loadDeck() {
   const [bundled, chaps, conf, open] = await Promise.all([
     fetch('data/definitions.json').then(r => r.json()),
@@ -268,13 +262,11 @@ function buildSession(selected, { ahead = false, label = '', reviews = false, di
     notDue.sort((a, b) => a.r - b.r);
     queue = notDue.slice(0, store.settings.dailyGoal).map(x => x.c);
   } else {
-    fresh.sort((a, b) => {
-      const ka = cardOrderKey(a), kb = cardOrderKey(b);
-      return ka[0] - kb[0] || ka[1].localeCompare(kb[1], 'fr');
-    });
+    // nouvelles cartes tirées au hasard dans la sélection, pour ne pas revoir toujours les mêmes dans le même ordre
     const newLeft = Math.max(0, store.settings.newPerDay - today().newCards);
-    queue = due.map(x => x.c).concat(fresh.slice(0, newLeft));
+    queue = due.map(x => x.c).concat(QCM.shuffle(fresh).slice(0, newLeft));
   }
+  queue = QCM.shuffle(queue); // ordre de présentation aléatoire à chaque séance
   if (dir !== 'td') {
     const rev = reverseItems(pool, dir === 'dt' ? store.settings.dailyGoal : Math.max(5, Math.ceil(queue.length / 2)));
     if (dir === 'dt') queue = rev;
@@ -702,7 +694,8 @@ function qcmToCards() {
   const old = session;
   const failed = old.qcm.failed;
   const failedIds = new Set(failed.map(c => c.id));
-  session = buildSession(old.selected, { label: old.label, reviews: old.reviews, dir: old.dir });
+  // mêmes cartes que celles annoncées avant le QCM (la file tirée au hasard n'est pas retirée)
+  session = Object.assign(old, { qcm: null, relearn: [], current: null, revealed: false, undo: null });
   // les définitions ratées au QCM reviennent après leur délai de 10 minutes, comme une carte ratée en séance
   session.queue = session.queue.filter(c => c.rev || !failedIds.has(c.id));
   for (const c of failed) session.relearn.push({ card: c, due: stateOf(c.id).due.getTime() });
