@@ -246,6 +246,54 @@ function dayGoal(plan) {
   return Math.min(store.settings.dailyGoal, today().reviews + plan.due + plan.fresh);
 }
 
+// Progrès depuis une date, d'après le journal des réponses : définitions nouvelles apprises (vues pour la première fois
+// dans la période et dont la dernière réponse n'est pas « Raté »), définitions ratées puis retrouvées, jours de travail.
+function gains(sinceKey) {
+  const firstSeen = {};
+  const last = {};
+  const recovered = new Set();
+  const days = new Set();
+  let answers = 0;
+  for (const e of store.log) {
+    const k = dayKey(new Date(e.t));
+    if (!(e.id in firstSeen)) firstSeen[e.id] = k;
+    if (k >= sinceKey) {
+      answers += 1;
+      days.add(k);
+      if (e.g !== Rating.Again && last[e.id] === Rating.Again) recovered.add(e.id);
+    }
+    last[e.id] = e.g;
+  }
+  let learned = 0;
+  for (const id in firstSeen) if (firstSeen[id] >= sinceKey && last[id] !== Rating.Again) learned += 1;
+  for (const id of recovered) if (firstSeen[id] >= sinceKey || last[id] === Rating.Again) recovered.delete(id); // les nouvelles comptent déjà
+  return { learned, recovered: recovered.size, answers, days: days.size };
+}
+
+const daysAgoKey = n => { const d = new Date(); d.setDate(d.getDate() - n); return dayKey(d); };
+
+function gainsCard() {
+  const y = gains(daysAgoKey(1));
+  const w = gains(daysAgoKey(6));
+  if (!w.answers) return '';
+  const line = g => [
+    g.learned ? plural(g.learned, 'nouvelle définition apprise', 'nouvelles définitions apprises') : '',
+    g.recovered ? plural(g.recovered, 'définition ratée retrouvée', 'définitions ratées retrouvées') : '',
+  ].filter(Boolean).join(', ') || `${plural(g.answers, 'réponse', 'réponses')}`;
+  return `<section class="card gains">
+    <h2>Vos progrès</h2>
+    ${y.answers ? `<p><b>Depuis hier</b> : ${line(y)}.</p>` : ''}
+    <p><b>Sur 7 jours</b> : ${line(w)}, ${plural(w.days, 'jour de travail', 'jours de travail')}.</p>
+  </section>`;
+}
+
+// Nouvelles cartes au-delà de la limite du jour, par paquets de DISCOVER : seulement quand les révisions du jour sont
+// faites et qu'il n'y a pas de retard, car chaque nouvelle carte ajoute des révisions les jours suivants.
+const DISCOVER = 10;
+function canDiscover(plan, revs) {
+  return plan.due + plan.fresh === 0 && !plan.deferred && revs.new > 0;
+}
+
 const reminderHour = () => Number((store.settings.reminderTime || '20:00').split(':')[0]);
 
 function dueCountAll() {
@@ -269,7 +317,7 @@ function inScope(c, selected, reviews) {
   return matchesSelection(c, selected) || (reviews && isStarted(c));
 }
 
-function buildSession(selected, { ahead = false, label = '', reviews = false, dir = 'td', noCap = false } = {}) {
+function buildSession(selected, { ahead = false, label = '', reviews = false, dir = 'td', noCap = false, discover = false } = {}) {
   const now = new Date();
   const endDay = endOfStudyDay(now);
   const pool = deck.cards.filter(c => inScope(c, selected, reviews));
@@ -285,7 +333,9 @@ function buildSession(selected, { ahead = false, label = '', reviews = false, di
   due.sort((a, b) => a.r - b.r);
   let queue;
   let deferred = 0;
-  if (ahead) {
+  if (discover) {
+    queue = QCM.shuffle(fresh).slice(0, DISCOVER);
+  } else if (ahead) {
     notDue.sort((a, b) => a.r - b.r);
     queue = notDue.slice(0, store.settings.dailyGoal).map(x => x.c);
   } else {
@@ -533,10 +583,12 @@ function renderHome() {
       <p class="muted">${goal ? `Objectif du jour : ${Math.min(d.reviews, goal)} / ${goal} cartes` : 'Rien à faire aujourd’hui'}${steps > 1 ? ` · ${steps} paliers de ${STEP}` : ''}${st ? ` · ${plural(st, 'jour', 'jours')} d’affilée` : ''}</p>
       ${lateWarning ? `<p class="warn">Il vous reste ${plural(goal - d.reviews, 'carte', 'cartes')} pour atteindre votre objectif du jour.</p>` : ''}
     </section>
+    ${gainsCard()}
     <div class="actions">
       <button class="primary" id="go-all" ${plan.due + newToday ? '' : 'disabled'}>Révisions espacées du jour
         <small>${opened ? `chapitres vus en cours (${plural(opened.chapitres.length, 'partie ou sous-partie', 'parties ou sous-parties')})${openList.includes(METHODS) && methodCards().length ? ' et méthodes' : ''}` : 'tout le programme'}</small></button>
     </div>
+    ${canDiscover(plan, revs) ? `<div class="actions"><button id="go-discover">Découvrir ${DISCOVER} nouvelles définitions <small>en plus de la limite du jour, ${opened ? 'dans les chapitres vus en cours' : 'dans tout le programme'}</small></button></div>` : ''}
     <h2 class="section">Entraînement libre</h2>
     <p class="muted small">N’importe quel chapitre, par exemple pour anticiper une révision. Les cartes commencées ici entrent ensuite dans vos révisions espacées.</p>
     <label class="dir">Sens des cartes
@@ -557,6 +609,8 @@ function renderHome() {
     <p class="muted small">${deck.cards.length} définitions · version ${esc(deck.version)}</p>`;
   document.getElementById('go-all').onclick = () => startSession(openList, 'Révisions espacées', { reviews: true });
   bindBanners();
+  const disc = document.getElementById('go-discover');
+  if (disc) disc.onclick = () => startSession(openList, 'Nouvelles définitions', { discover: true });
   document.getElementById('go-started').onclick = () => startSession(started, 'Mes chapitres commencés');
   document.getElementById('go-choose').onclick = () => go('choose');
   document.getElementById('dir').onchange = e => { store.settings.direction = e.target.value; persist(); render(); };
@@ -729,9 +783,9 @@ function renderChoose() {
 
 const DIRECTIONS = { td: 'terme → définition', dt: 'définition → terme', mix: 'les deux, mélangés' };
 
-function startSession(selected, label, { ahead = false, reviews = false, noCap = false, offerWarmup = !ahead && !reviews } = {}) {
-  const dir = reviews || ahead ? 'td' : store.settings.direction;
-  session = buildSession(selected, { label, ahead, reviews, dir, noCap });
+function startSession(selected, label, { ahead = false, reviews = false, noCap = false, discover = false, offerWarmup = !ahead && !reviews } = {}) {
+  const dir = reviews || ahead || discover ? 'td' : store.settings.direction;
+  session = buildSession(selected, { label, ahead, reviews, dir, noCap, discover });
   if (dir === 'dt') offerWarmup = false; // le QCM interroge déjà dans ce sens
   // l'échauffement précède toujours des flashcards : proposé seulement s'il y a des cartes à faire ensuite
   if (offerWarmup && session.queue.length && session.pool.length >= 4) session.phase = 'intro';
@@ -1133,7 +1187,7 @@ function renderProgress() {
   const revs = k => (store.days[k] ? store.days[k].reviews : 0);
   const maxRev = Math.max(1, ...days.map(revs));
   const anyDay = days.some(k => revs(k) > 0);
-  let html = `${suiviCard()}<button class="${store.settings.suiviCode ? '' : 'primary '}wide" id="go-bilan">Préparer mon bilan pour le professeur</button>
+  let html = `${gainsCard()}${suiviCard()}<button class="${store.settings.suiviCode ? '' : 'primary '}wide" id="go-bilan">Préparer mon bilan pour le professeur</button>
   <section class="card">
     <div class="legend"><span class="l-mastered">acquises</span><span class="l-learning">en cours</span><span class="l-due">à revoir</span><span class="l-new">jamais vues</span></div>
     <p><b>Tout le programme</b> : ${all.mastered} acquises, ${all.learning} en cours, ${all.due} à revoir, ${all.new} jamais vues.</p>

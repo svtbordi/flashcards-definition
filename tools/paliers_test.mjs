@@ -73,6 +73,40 @@ await p.click('#step-stop');
 await p.waitForSelector('#go-all');
 check((await text(p, '.hero')).includes('Objectif du jour : 20 / '), 'réponses du jour non comptées après l’arrêt');
 
+// ---------- bilan des progrès et nouvelles définitions en plus ----------
+const g = await text(p, '.gains');
+console.log('progrès :', g);
+check(/Depuis hier : 1[0-9] nouvelles définitions apprises/.test(g), 'bilan « depuis hier » absent ou faux : ' + g);
+await p.click('#go-progress');
+check(await p.$('.gains') !== null, 'bilan absent de « Ma progression »');
+await p.click('#btn-back');
+await p.waitForSelector('#go-all');
+// limite du jour atteinte : on fait les nouvelles cartes restantes, puis le bouton « Découvrir » apparaît
+const sd = await getStore(p);
+sd.settings.newPerDay = 0;
+for (const id in sd.cards) sd.cards[id].due = new Date(Date.now() + 30 * 864e5).toISOString();
+await setStore(p, sd);
+await p.goto(`${base}/`);
+await p.waitForSelector('#go-discover');
+await p.screenshot({ path: `${out}/pal-6-decouvrir.png`, fullPage: true });
+await p.click('#go-discover');
+if (await p.$('#cards-go')) await p.click('#cards-go');
+await p.waitForSelector('.flash');
+const nd = await p.evaluate(() => session.queue.length + 1);
+const isNew = await p.$('.tag.new') !== null;
+check(nd === 10 && isNew, `découverte : ${nd} cartes, nouvelle : ${isNew}`);
+
+// définition ratée avant-hier puis retrouvée aujourd'hui : comptée comme retrouvée, pas comme nouvelle
+const rec = await p.evaluate(() => {
+  const ago = d => new Date(Date.now() - d * 864e5).toISOString();
+  const saved = store.log;
+  store.log = [{ id: 'a', t: ago(10), g: 3 }, { id: 'a', t: ago(2), g: 1 }, { id: 'a', t: ago(0), g: 3 }, { id: 'b', t: ago(0), g: 1 }];
+  const r = gains(daysAgoKey(1));
+  store.log = saved;
+  return r;
+});
+check(rec.recovered === 1 && rec.learned === 0, 'définitions retrouvées mal comptées : ' + JSON.stringify(rec));
+
 // ---------- retard étalé ----------
 const s = await getStore(p);
 const realIds = await p.evaluate(() => deck.cards.slice(0, 100).map(c => c.id));
