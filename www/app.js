@@ -12,13 +12,16 @@ const NO_CODE = 'NC';
 // « (principe) » ou « (objectifs) » d'une méthode : caché dans les propositions du QCM, où il trahirait la bonne réponse
 const FACET = /\s*\((principe|objectifs)\)$/i;
 const QCM_SIZE = 10; // questions de l'échauffement
+const STEP = 10; // une séance est découpée en paliers de 10 réponses, avec une pause entre deux
+const BACKLOG_FACTOR = 2; // au plus 2 fois l'objectif du jour en révisions espacées : le retard s'étale sur plusieurs jours
+const BACKUP_DAYS = 7; // rappel de sauvegarde une fois par semaine
 
 const DEFAULT_SETTINGS = {
   newPerDay: 20,
   dailyGoal: 30,
   buttons: 2,
   retention: 0.9,
-  reminderTime: '18:00',
+  reminderTime: '20:00',
   direction: 'td', // sens des cartes en entraînement libre : td terme → définition, dt définition → terme, mix les deux
 };
 
@@ -48,6 +51,9 @@ const store = Object.assign(
   loadJSON(STORE_KEY, {})
 );
 store.settings = Object.assign({}, DEFAULT_SETTINGS, store.settings);
+// ancien réglage par défaut (18 h, quand les élèves sont parfois encore en cours) : passé à 20 h, sauf heure choisie
+if (!store.settings.reminderChosen && store.settings.reminderTime === '18:00') store.settings.reminderTime = '20:00';
+store.ui = Object.assign({ installLater: '', backupLater: '', lastBackup: '' }, store.ui);
 const persist = () => saveJSON(STORE_KEY, store);
 
 /* ---------- Dates ---------- */
@@ -222,6 +228,26 @@ function startedCodes() {
   return [...codes];
 }
 
+// Ce qui reste à faire aujourd'hui en révisions espacées. Les cartes à revoir sont plafonnées à BACKLOG_FACTOR fois
+// l'objectif du jour (réponses déjà données comprises) : un retard accumulé s'étale sur plusieurs jours, les cartes les
+// plus menacées d'oubli d'abord, et aucune nouvelle carte n'est ajoutée tant qu'il reste du retard.
+function dailyPlan(dueN, freshN) {
+  const d = today();
+  const cap = Math.max(0, BACKLOG_FACTOR * store.settings.dailyGoal - d.reviews);
+  const due = Math.min(dueN, cap);
+  const deferred = dueN - due;
+  const newLeft = Math.max(0, store.settings.newPerDay - d.newCards);
+  const fresh = deferred ? 0 : Math.min(freshN, newLeft, cap - due);
+  return { due, fresh, deferred, cap };
+}
+
+// Objectif du jour ramené à ce qui est réellement à faire : certains jours le calendrier ne demande que quelques cartes.
+function dayGoal(plan) {
+  return Math.min(store.settings.dailyGoal, today().reviews + plan.due + plan.fresh);
+}
+
+const reminderHour = () => Number((store.settings.reminderTime || '20:00').split(':')[0]);
+
 function dueCountAll() {
   return statsFor(deck.cards).due;
 }
@@ -243,7 +269,7 @@ function inScope(c, selected, reviews) {
   return matchesSelection(c, selected) || (reviews && isStarted(c));
 }
 
-function buildSession(selected, { ahead = false, label = '', reviews = false, dir = 'td' } = {}) {
+function buildSession(selected, { ahead = false, label = '', reviews = false, dir = 'td', noCap = false } = {}) {
   const now = new Date();
   const endDay = endOfStudyDay(now);
   const pool = deck.cards.filter(c => inScope(c, selected, reviews));
@@ -258,13 +284,22 @@ function buildSession(selected, { ahead = false, label = '', reviews = false, di
   }
   due.sort((a, b) => a.r - b.r);
   let queue;
+  let deferred = 0;
   if (ahead) {
     notDue.sort((a, b) => a.r - b.r);
     queue = notDue.slice(0, store.settings.dailyGoal).map(x => x.c);
   } else {
     // nouvelles cartes tirées au hasard dans la sélection, pour ne pas revoir toujours les mêmes dans le même ordre
-    const newLeft = Math.max(0, store.settings.newPerDay - today().newCards);
-    queue = due.map(x => x.c).concat(QCM.shuffle(fresh).slice(0, newLeft));
+    let nDue = due.length;
+    let newLeft = Math.max(0, store.settings.newPerDay - today().newCards);
+    if (reviews && !noCap) {
+      // retard étalé : les cartes les plus menacées d'oubli d'abord (due est trié par probabilité de rappel croissante)
+      const plan = dailyPlan(due.length, fresh.length);
+      nDue = plan.due;
+      newLeft = plan.fresh;
+      deferred = plan.deferred;
+    }
+    queue = due.slice(0, nDue).map(x => x.c).concat(QCM.shuffle(fresh).slice(0, newLeft));
   }
   queue = QCM.shuffle(queue); // ordre de présentation aléatoire à chaque séance
   if (dir !== 'td') {
@@ -273,8 +308,10 @@ function buildSession(selected, { ahead = false, label = '', reviews = false, di
     else for (const r of rev) queue.splice(Math.floor(Math.random() * (queue.length + 1)), 0, r);
   }
   return {
-    selected, label, ahead, reviews, dir,
+    selected, label, ahead, reviews, dir, deferred,
     pool, queue,
+    results: [], // 1 juste, 0 raté, pour le bilan de chaque palier
+    pausedAt: 0, pause: null,
     relearn: [], // cartes ratées, à revoir dans la séance
     done: 0, again: 0,
     current: null, revealed: false, undo: null,
@@ -330,6 +367,7 @@ function answer(rating) {
   updateBadge();
   s.current = nextCard();
   s.revealed = false;
+  stepCheck(s, rating !== Rating.Again, dayBefore.reviews);
   render();
 }
 
@@ -348,6 +386,7 @@ function answerReverse(ok) {
   s.current = nextCard();
   s.revealed = false;
   s.typed = '';
+  stepCheck(s, ok, null);
   render();
 }
 
@@ -367,6 +406,7 @@ function undoLast() {
     s.revealed = true;
     s.typed = u.typed;
     s.done -= 1;
+    s.results.pop();
     s.undo = null;
     persist();
     render();
@@ -385,6 +425,7 @@ function undoLast() {
   s.current = u.card;
   s.revealed = true;
   s.done -= 1;
+  s.results.pop();
   s.undo = null;
   persist();
   updateBadge();
@@ -474,21 +515,26 @@ function renderHome() {
   const started = startedCodes();
   const startedStats = started.length ? statsFor(deck.cards.filter(c => matchesSelection(c, started))) : null;
   const d = today();
-  const goal = store.settings.dailyGoal;
-  const pct = Math.min(100, Math.round(100 * d.reviews / goal));
+  const plan = dailyPlan(revs.due, revs.new);
+  const goal = dayGoal(plan);
+  const pct = goal ? Math.min(100, Math.round(100 * d.reviews / goal)) : 100;
   const st = streak();
-  const newToday = Math.min(revs.new, Math.max(0, store.settings.newPerDay - d.newCards));
-  const lateWarning = d.reviews < goal && new Date().getHours() >= 18;
+  const newToday = plan.fresh;
+  const lateWarning = d.reviews < goal && new Date().getHours() >= reminderHour();
+  const steps = Math.ceil((plan.due + plan.fresh) / STEP);
   app.innerHTML = `
+    ${homeBanners()}
     <section class="card hero">
-      <p class="big">${plural(revs.due, 'carte à revoir', 'cartes à revoir')} aujourd’hui</p>
-      <p class="muted">${newToday ? `+ ${plural(newToday, 'nouvelle carte disponible', 'nouvelles cartes disponibles')}` : 'Limite de nouvelles cartes atteinte pour aujourd’hui'}</p>
+      <p class="big">${plural(plan.due, 'carte à revoir', 'cartes à revoir')} aujourd’hui</p>
+      <p class="muted">${newToday ? `+ ${plural(newToday, 'nouvelle carte disponible', 'nouvelles cartes disponibles')}`
+        : plan.deferred ? 'Pas de nouvelles cartes tant qu’il reste du retard' : 'Limite de nouvelles cartes atteinte pour aujourd’hui'}</p>
+      ${plan.deferred ? `<p class="muted small">Retard étalé : ${plural(plan.deferred, 'carte reportée', 'cartes reportées')} aux jours suivants (au plus ${BACKLOG_FACTOR * store.settings.dailyGoal} cartes par jour), les plus menacées d’oubli passent d’abord.</p>` : ''}
       <div class="goal"><div class="goal-fill" style="width:${pct}%"></div></div>
-      <p class="muted">Objectif du jour : ${Math.min(d.reviews, goal)} / ${goal} cartes${st ? ` · ${plural(st, 'jour', 'jours')} d’affilée` : ''}</p>
-      ${lateWarning ? `<p class="warn">Il vous reste ${goal - d.reviews} cartes pour atteindre votre objectif du jour.</p>` : ''}
+      <p class="muted">${goal ? `Objectif du jour : ${Math.min(d.reviews, goal)} / ${goal} cartes` : 'Rien à faire aujourd’hui'}${steps > 1 ? ` · ${steps} paliers de ${STEP}` : ''}${st ? ` · ${plural(st, 'jour', 'jours')} d’affilée` : ''}</p>
+      ${lateWarning ? `<p class="warn">Il vous reste ${plural(goal - d.reviews, 'carte', 'cartes')} pour atteindre votre objectif du jour.</p>` : ''}
     </section>
     <div class="actions">
-      <button class="primary" id="go-all" ${revs.due + newToday ? '' : 'disabled'}>Révisions espacées du jour
+      <button class="primary" id="go-all" ${plan.due + newToday ? '' : 'disabled'}>Révisions espacées du jour
         <small>${opened ? `chapitres vus en cours (${plural(opened.chapitres.length, 'partie ou sous-partie', 'parties ou sous-parties')})${openList.includes(METHODS) && methodCards().length ? ' et méthodes' : ''}` : 'tout le programme'}</small></button>
     </div>
     <h2 class="section">Entraînement libre</h2>
@@ -510,6 +556,7 @@ function renderHome() {
     </div>
     <p class="muted small">${deck.cards.length} définitions · version ${esc(deck.version)}</p>`;
   document.getElementById('go-all').onclick = () => startSession(openList, 'Révisions espacées', { reviews: true });
+  bindBanners();
   document.getElementById('go-started').onclick = () => startSession(started, 'Mes chapitres commencés');
   document.getElementById('go-choose').onclick = () => go('choose');
   document.getElementById('dir').onchange = e => { store.settings.direction = e.target.value; persist(); render(); };
@@ -522,6 +569,66 @@ function renderHome() {
   document.getElementById('go-install').onclick = () => go('install');
   const suggest = document.getElementById('go-suggest');
   if (suggest) suggest.onclick = openSuggestion;
+}
+
+/* ---------- Bandeaux de l'accueil : installation et sauvegarde ---------- */
+
+const isStandalone = () => window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+const isIos = () => /iphone|ipad|ipod/i.test(navigator.userAgent);
+const isMobile = () => isIos() || /android/i.test(navigator.userAgent);
+const daysSince = iso => (iso ? (Date.now() - Date.parse(iso)) / 864e5 : Infinity);
+const hasProgress = () => store.log.length > 0;
+
+// Sur téléphone, tant que l'application n'est pas installée : dès le premier jour, car sur iPhone l'application
+// installée ne reprend pas les données de Safari (WebKit, bug 181849) et Safari les efface après 7 jours sans visite.
+function installBanner() {
+  if (isStandalone() || !isMobile() || daysSince(store.ui.installLater) < 3) return '';
+  const how = installPrompt ? '<button class="primary" id="ban-install">Installer l’application</button>'
+    : isIos() ? '<p>Dans <b>Safari</b> : bouton <b>Partager</b>, puis <b>Sur l’écran d’accueil</b>.</p>'
+      : '<p>Menu du navigateur (<b>⋮</b>), puis <b>Installer l’application</b> ou <b>Ajouter à l’écran d’accueil</b>.</p>';
+  return `<section class="card banner" id="ban-inst">
+    <h2>Installez l’application sur votre écran d’accueil</h2>
+    <p>Elle s’ouvre en un geste, fonctionne sans connexion${isIos() ? ', et Safari n’efface plus votre progression après une semaine sans visite' : ''}.</p>
+    ${how}
+    ${isIos() && hasProgress() ? '<p class="small">Sur iPhone, l’application installée repart de zéro : <b>sauvegardez d’abord</b> votre progression ici, puis restaurez-la dans l’application (Réglages, « Restaurer une sauvegarde »).</p><button id="ban-save1">Sauvegarder ma progression</button>' : ''}
+    <button class="link" id="ban-inst-later">Plus tard</button>
+  </section>`;
+}
+
+// Application installée sans aucune progression : l'élève avait peut-être commencé dans le navigateur.
+function restoreHint() {
+  if (!isStandalone() || hasProgress() || store.ui.restoreSeen) return '';
+  return `<section class="card banner" id="ban-rest">
+    <p>Vous aviez commencé dans le navigateur ? Restaurez la sauvegarde faite là-bas pour retrouver votre progression.</p>
+    <div class="actions"><button id="ban-restore">Restaurer une sauvegarde</button><button class="link" id="ban-rest-no">Non, je commence</button></div>
+  </section>`;
+}
+
+// Une fois par semaine : rappel de sauvegarde en un geste (un site ne peut pas écrire un fichier sans geste de l'élève).
+function backupBanner() {
+  if (!hasProgress() || daysSince(store.ui.backupLater) < 2) return '';
+  const first = store.log[0] && store.log[0].t;
+  const ref = store.ui.lastBackup || first;
+  if (daysSince(ref) < BACKUP_DAYS) return '';
+  return `<section class="card banner" id="ban-back">
+    <p>${store.ui.lastBackup ? `Dernière sauvegarde il y a ${Math.floor(daysSince(store.ui.lastBackup))} jours.` : 'Votre progression n’a jamais été sauvegardée.'} Une sauvegarde par semaine évite de tout perdre en changeant de téléphone ou si le navigateur efface ses données.</p>
+    <div class="actions"><button class="primary" id="ban-save">Sauvegarder ma progression</button><button class="link" id="ban-back-later">Plus tard</button></div>
+  </section>`;
+}
+
+function homeBanners() {
+  return installBanner() || restoreHint() || backupBanner();
+}
+
+function bindBanners() {
+  const on = (id, fn) => { const b = document.getElementById(id); if (b) b.onclick = fn; };
+  on('ban-install', async () => { installPrompt.prompt(); await installPrompt.userChoice; installPrompt = null; render(); });
+  on('ban-inst-later', () => { store.ui.installLater = new Date().toISOString(); persist(); render(); });
+  on('ban-save1', exportBackup);
+  on('ban-save', () => { exportBackup(); render(); });
+  on('ban-back-later', () => { store.ui.backupLater = new Date().toISOString(); persist(); render(); });
+  on('ban-restore', () => go('settings'));
+  on('ban-rest-no', () => { store.ui.restoreSeen = true; persist(); render(); });
 }
 
 function matchesAny(code, selected) {
@@ -622,9 +729,9 @@ function renderChoose() {
 
 const DIRECTIONS = { td: 'terme → définition', dt: 'définition → terme', mix: 'les deux, mélangés' };
 
-function startSession(selected, label, { ahead = false, reviews = false, offerWarmup = !ahead && !reviews } = {}) {
+function startSession(selected, label, { ahead = false, reviews = false, noCap = false, offerWarmup = !ahead && !reviews } = {}) {
   const dir = reviews || ahead ? 'td' : store.settings.direction;
-  session = buildSession(selected, { label, ahead, reviews, dir });
+  session = buildSession(selected, { label, ahead, reviews, dir, noCap });
   if (dir === 'dt') offerWarmup = false; // le QCM interroge déjà dans ce sens
   // l'échauffement précède toujours des flashcards : proposé seulement s'il y a des cartes à faire ensuite
   if (offerWarmup && session.queue.length && session.pool.length >= 4) session.phase = 'intro';
@@ -800,6 +907,7 @@ function renderSession() {
   if (s.phase === 'intro') return renderWarmupIntro(s);
   if (s.phase === 'qcm') return renderQcm(s);
   if (s.phase === 'qcmEnd') return renderQcmEnd(s);
+  if (s.pause) return renderStep(s);
   if (!s.current) {
     const ahead = s.ahead;
     const endDay = endOfStudyDay();
@@ -811,15 +919,19 @@ function renderSession() {
     app.innerHTML = `<section class="card hero">
       <p class="big">${s.done ? 'Séance terminée' : 'Rien à revoir pour l’instant'}</p>
       ${s.done ? `<p>${plural(s.done, 'réponse', 'réponses')}${s.again ? `, dont ${plural(s.again, 'carte ratée', 'cartes ratées')} et revues dans la séance` : ', aucune ratée'}.</p>` : ''}
-      ${!s.done && !ahead ? `<p class="muted">Toutes les cartes de cette sélection sont à jour${s.poolStats.fresh ? ' et la limite de nouvelles cartes du jour est atteinte' : ''}.</p>` : ''}
+      ${!s.done && !ahead && !s.deferred ? `<p class="muted">Toutes les cartes de cette sélection sont à jour${s.poolStats.fresh ? ' et la limite de nouvelles cartes du jour est atteinte' : ''}.</p>` : ''}
+      ${s.deferred ? `<p class="muted">Retard étalé : ${plural(s.deferred, 'carte en retard est reportée', 'cartes en retard sont reportées')} aux jours suivants, pour ne pas dépasser ${BACKLOG_FACTOR * store.settings.dailyGoal} cartes par jour.</p>` : ''}
     </section>
     <div class="actions">
+      ${s.deferred ? '<button id="more">Faire quand même les cartes en retard</button>' : ''}
       ${s.poolStats.notDue ? '<button id="ahead">Réviser en avance (les cartes les moins sûres)</button>' : ''}
       <button class="primary" id="home">Retour à l’accueil</button>
     </div>
     ${s.poolStats.notDue ? '<p class="muted small">Réviser en avance ne fausse pas le calendrier : une carte revue trop tôt est simplement moins repoussée.</p>' : ''}`;
     const a = document.getElementById('ahead');
     if (a) a.onclick = () => startSession(s.selected, s.label, { ahead: true, reviews: s.reviews });
+    const more = document.getElementById('more');
+    if (more) more.onclick = () => startSession(s.selected, s.label, { reviews: s.reviews, noCap: true });
     document.getElementById('home').onclick = () => { session = null; viewStack = []; go('home', false); };
     return;
   }
@@ -849,6 +961,70 @@ function renderSession() {
   app.querySelectorAll('[data-key]').forEach(cb => {
     cb.onchange = () => { s.keysOk[Number(cb.dataset.key)] = cb.checked; render(); };
   });
+}
+
+/* ---------- Paliers de 10 cartes ---------- */
+
+// Après chaque palier de STEP réponses, s'il reste des cartes : une pause avec un bilan factuel.
+function stepCheck(s, ok, reviewsBefore) {
+  s.results.push(ok ? 1 : 0);
+  const n = s.results.length;
+  if (!s.current || n - s.pausedAt < STEP) return;
+  const step = s.results.slice(s.pausedAt);
+  s.pausedAt = n;
+  const goal = store.settings.dailyGoal;
+  s.pause = {
+    k: Math.round(n / STEP),
+    ok: step.reduce((a, b) => a + b, 0),
+    n: step.length,
+    goalReached: reviewsBefore !== null && reviewsBefore < goal && today().reviews >= goal,
+  };
+}
+
+const pickOne = list => list[Math.floor(Math.random() * list.length)];
+// Au moins 60 % de réussite : un message positif. En dessous : un coup de pouce, plus explicite les premiers jours.
+const STEP_GOOD = [
+  p => `${p.ok} définitions sur ${p.n} retrouvées : elles s’installent.`,
+  p => `${p.ok} sur ${p.n} : c’est solide, continuez sur cette lancée.`,
+  p => `Palier réussi à ${Math.round(100 * p.ok / p.n)} % : vos révisions paient.`,
+];
+const STEP_BOOST = [
+  p => `Palier difficile : les ${p.n - p.ok} cartes ratées reviennent dans quelques minutes, et la deuxième fois est souvent la bonne.`,
+  () => 'Rater puis relire la définition aide à la retenir : ces cartes reviendront plus souvent jusqu’à ce qu’elles tiennent.',
+];
+const STEP_BOOST_START = [
+  () => 'C’est normal au début : vous découvrez ces définitions. Chaque carte ratée revient dans quelques minutes, puis les jours suivants, jusqu’à ce qu’elle tienne.',
+  () => 'Les premiers jours sont les plus durs : le score monte dès que les cartes reviennent. Si vous manquez de temps, un palier par jour suffit déjà.',
+];
+
+function stepMessage(p) {
+  if (p.ok === p.n) return 'Sans faute sur ce palier.';
+  if (p.ok / p.n >= 0.6) return pickOne(STEP_GOOD)(p);
+  const activeDays = Object.values(store.days).filter(d => d.reviews > 0).length;
+  return pickOne(activeDays <= 7 ? STEP_BOOST_START : STEP_BOOST)(p);
+}
+
+function renderStep(s) {
+  const p = s.pause;
+  if (!p.msg) p.msg = stepMessage(p); // tiré une fois, pas à chaque affichage
+  const left = s.queue.length + s.relearn.length + 1;
+  const good = p.ok / p.n >= 0.6;
+  app.innerHTML = `
+    <div class="progress-line"><span>${s.label ? esc(s.label) : ''}</span><span>${left} restantes</span></div>
+    <section class="card hero step ${good ? 'good' : 'boost'}">
+      <p class="muted">Palier ${p.k} terminé</p>
+      <p class="big">${p.ok} sur ${p.n} justes</p>
+      <p>${esc(p.msg)}</p>
+      ${p.goalReached ? `<p><b>Objectif du jour atteint (${store.settings.dailyGoal} cartes).</b></p>` : ''}
+      <p class="muted">Encore ${plural(left, 'carte', 'cartes')}${s.relearn.length ? `, dont ${plural(s.relearn.length, 'carte ratée qui revient', 'cartes ratées qui reviennent')}` : ''}.</p>
+    </section>
+    <div class="actions">
+      <button class="primary" id="step-go">Continuer : palier ${p.k + 1} <small>Entrée</small></button>
+      <button id="step-stop">M’arrêter là</button>
+    </div>
+    <p class="muted small">S’arrêter ici ne perd rien : les cartes non vues restent à faire et reviendront à la prochaine séance.</p>`;
+  document.getElementById('step-go').onclick = () => { s.pause = null; render(); };
+  document.getElementById('step-stop').onclick = () => { session = null; viewStack = []; queueSuivi(); go('home', false); };
 }
 
 function renderReverse(s) {
@@ -923,6 +1099,7 @@ document.addEventListener('keydown', e => {
     return;
   }
   if (session.phase === 'qcmEnd' && e.key === 'Enter') { e.preventDefault(); qcmToCards(); return; }
+  if (session.pause) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); session.pause = null; render(); } return; }
   if (!session.current) return;
   if (session.current.rev) {
     if (!session.revealed) return; // la saisie et le bouton « Voir le terme » s'en chargent
@@ -1640,6 +1817,8 @@ async function download(filename, text, type) {
 }
 
 function exportBackup() {
+  store.ui.lastBackup = new Date().toISOString();
+  persist();
   const data = { app: 'flashcards-bcpst', exported: new Date().toISOString(), store };
   download(`flashcards-bcpst-sauvegarde-${dayKey()}.json`, JSON.stringify(data), 'application/json');
 }
@@ -1651,6 +1830,7 @@ async function importBackup(file) {
     if (!await askConfirm(`Restaurer la sauvegarde du ${data.exported.slice(0, 10)} ? Elle remplace la progression actuelle de cet appareil.`, 'Restaurer')) return;
     Object.assign(store, { cards: {}, log: [], days: {}, selection: [] }, data.store);
     store.settings = Object.assign({}, DEFAULT_SETTINGS, store.settings);
+    store.ui = Object.assign({ installLater: '', backupLater: '' }, store.ui, { lastBackup: data.exported, restoreSeen: true });
     persist();
     scheduler = makeScheduler();
     updateBadge();
@@ -1664,7 +1844,7 @@ async function importBackup(file) {
 /* ---------- Installation et rappels ---------- */
 
 let installPrompt = null;
-window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installPrompt = e; if (view === 'install') render(); });
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installPrompt = e; if (view === 'install' || (view === 'home' && !session)) render(); });
 
 function icsReminder(time) {
   const [h, m] = time.split(':').map(Number);
@@ -1705,7 +1885,7 @@ function renderInstall() {
     </section>`;
   const i = document.getElementById('install');
   if (i) i.onclick = async () => { installPrompt.prompt(); await installPrompt.userChoice; installPrompt = null; render(); };
-  document.getElementById('rtime').onchange = e => { store.settings.reminderTime = e.target.value || '18:00'; persist(); };
+  document.getElementById('rtime').onchange = e => { store.settings.reminderTime = e.target.value || '20:00'; store.settings.reminderChosen = true; persist(); };
   document.getElementById('ics').onclick = () => download('rappel-flashcards-bcpst.ics', icsReminder(store.settings.reminderTime), 'text/calendar');
 }
 
