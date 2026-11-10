@@ -97,7 +97,9 @@ await p.click('#go-all');
 await p.waitForSelector('.flash');
 // l'ordre des cartes est aléatoire : on parcourt la séance jusqu'à la trouver
 let found = false;
-for (let i = 0; i < 40 && await p.$('h2.term'); i++) {
+for (let i = 0; i < 40; i++) {
+  if (await p.$('#step-go')) await p.click('#step-go'); // pause entre deux paliers de 10 cartes
+  if (!await p.$('h2.term')) break;
   if ((await p.textContent('h2.term')).trim() === freeTerm) { found = true; break; }
   await p.click('#reveal');
   await p.click('.grade .again');
