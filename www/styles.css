@@ -201,6 +201,12 @@ a.link { color: var(--accent); }
 button.lex-item { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; background: none; border: 0; padding: 6px 0; color: var(--text); font: inherit; }
 button.lex-item.open .chap-name { color: var(--accent); }
 .terms { list-style: none; margin: 4px 0 8px; padding: 0 0 0 8px; border-left: 3px solid var(--learning); }
+.terms ul { list-style: none; margin: 0; padding: 0; }
+.pick-row { display: flex; align-items: center; gap: 8px; }
+.pick-row input.pick, .pick-def input { width: 22px; height: 22px; flex: none; accent-color: var(--accent); }
+.pick-all { margin: 4px 0; }
+.pick-banner p { margin: 0 0 8px; }
+.pick-def { margin: 0 0 12px; }
 button.term { display: block; background: none; border: 0; padding: 8px 4px; min-height: 40px; width: 100%; text-align: left; font: inherit; color: var(--accent); }
 .def-box { max-height: 85vh; overflow-y: auto; }
 .def-box h2 { margin: 0 0 10px; }
