@@ -22,6 +22,7 @@ const DEFAULT_SETTINGS = {
   buttons: 2,
   retention: 0.9,
   reminderTime: '20:00',
+  writeAnswer: false, // zone pour écrire sa réponse avant de retourner la carte (facultatif)
   direction: 'td', // sens des cartes en entraînement libre : td terme → définition, dt définition → terme, mix les deux
 };
 
@@ -435,6 +436,7 @@ function answer(rating) {
   updateBadge();
   s.current = nextCard();
   s.revealed = false;
+  s.written = ''; s.writtenFor = null; s.keysFor = null; // une carte ratée qui revient se réécrit à neuf
   stepCheck(s, rating !== Rating.Again, dayBefore.reviews);
   render();
 }
@@ -1023,12 +1025,13 @@ function renderSession() {
       ${s.revealed && canReport() ? reportButton() : ''}
       <div class="codes">${cardCodes(c).map(x => `<span>${esc(x === NO_CODE ? 'sans chapitre' : x)}</span>`).join('')}${c.method ? '<span>méthode</span>' : ''} ${tag}</div>
       <h2 class="term">${esc(c.term)}</h2>
-      ${s.revealed ? `<p class="def">${defWithKeys(c)}</p>${keyChecklist(c, s)}` : '<p class="hint muted">Formulez la définition de tête (ou à l’écrit), puis retournez la carte.</p>'}
+      ${s.revealed ? `${typedBlock(c, s)}<p class="def">${defWithKeys(c)}</p>${keyChecklist(c, s)}` : writeArea(c, s)}
     </article>
     ${s.revealed ? ratingButtons(keysDone(c, s)) : '<button class="primary reveal" id="reveal">Voir la définition <small>Espace</small></button>'}
     ${s.undo ? '<button class="link undo" id="undo">Annuler la dernière réponse</button>' : ''}`;
   const r = document.getElementById('reveal');
   if (r) r.onclick = () => { s.revealed = true; render(); };
+  bindWriteArea(s);
   app.querySelectorAll('[data-r]').forEach(b => { b.onclick = () => answer(Number(b.dataset.r)); });
   const u = document.getElementById('undo');
   if (u) u.onclick = undoLast;
@@ -1154,9 +1157,56 @@ function defWithKeys(c) {
   return html + esc(c.def.slice(pos));
 }
 
+/* ---------- Réponse écrite (facultative) ----------
+   Écrire la réponse plutôt que la formuler de tête aide à retenir des définitions (Tauber et al., 2018,
+   J. Appl. Res. Mem. Cogn. 7(1) : 106-115). Le texte n'est ni enregistré ni envoyé ; l'élève s'évalue toujours
+   lui-même, les éléments-clés retrouvés dans son texte sont seulement précochés. */
+
+const typedText = (c, s) => (s.writtenFor === c.id ? s.written || '' : '');
+
+function writeArea(c, s) {
+  const hint = '<p class="hint muted">Formulez la définition de tête ou à l’écrit, puis retournez la carte.</p>';
+  if (!store.settings.writeAnswer) return `${hint}<button class="link write-toggle" id="write-on">✎ Écrire ma réponse</button>`;
+  return `<textarea id="typed" class="typed" rows="4" placeholder="Votre définition…" autocapitalize="sentences" spellcheck="false"
+      aria-label="Votre définition de ${esc(c.term)}">${esc(typedText(c, s))}</textarea>
+    <button class="link write-toggle" id="write-off">Ne plus écrire (de tête)</button>`;
+}
+
+function bindWriteArea(s) {
+  const on = document.getElementById('write-on');
+  const off = document.getElementById('write-off');
+  const setW = v => { store.settings.writeAnswer = v; persist(); render(); };
+  if (on) on.onclick = () => { setW(true); const ta = document.getElementById('typed'); if (ta) ta.focus(); };
+  if (off) off.onclick = () => setW(false);
+  const ta = document.getElementById('typed');
+  if (ta) ta.oninput = () => { s.written = ta.value; s.writtenFor = s.current.id; };
+}
+
+function markSpans(text, forms) {
+  let html = '';
+  let pos = 0;
+  for (const [a, b] of QCM.findSpans(text, forms)) {
+    html += esc(text.slice(pos, a)) + '<mark>' + esc(text.slice(a, b)) + '</mark>';
+    pos = b;
+  }
+  return html + esc(text.slice(pos));
+}
+
+function typedBlock(c, s) {
+  const typed = typedText(c, s).trim();
+  if (!typed) return '';
+  return `<div class="typed-answer"><p class="small muted">Votre réponse</p><p>${c.keys ? markSpans(typed, c.keys) : esc(typed)}</p></div>
+    <p class="small muted typed-label">Définition attendue</p>`;
+}
+
 function keyChecklist(c, s) {
   if (!c.keys) return '';
-  if (s.keysFor !== c.id) { s.keysFor = c.id; s.keysOk = []; }
+  if (s.keysFor !== c.id) {
+    s.keysFor = c.id;
+    // éléments-clés retrouvés dans la réponse écrite : précochés, l'élève corrige si besoin
+    const typed = typedText(c, s);
+    s.keysOk = c.keys.map(k => !!typed.trim() && QCM.findSpans(typed, [k]).length > 0);
+  }
   return `<fieldset class="keys"><legend>Cochez ce que vous aviez cité :</legend>
     ${c.keys.map((k, i) => `<label><input type="checkbox" data-key="${i}" ${s.keysOk[i] ? 'checked' : ''}> ${esc(k)}</label>`).join('')}
   </fieldset>`;
@@ -1167,7 +1217,7 @@ function keysDone(c, s) {
 }
 
 document.addEventListener('keydown', e => {
-  if (view !== 'session' || !session || e.target.tagName === 'INPUT' || document.querySelector('.modal')) return;
+  if (view !== 'session' || !session || e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || document.querySelector('.modal')) return;
   if (session.phase === 'qcm') {
     const Q = session.qcm;
     if (Q.chosen === null && /^[1-4]$/.test(e.key) && Number(e.key) <= Q.items[Q.i].options.length) { e.preventDefault(); qcmChoose(Number(e.key) - 1); }
