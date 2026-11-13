@@ -12,6 +12,7 @@ const NO_CODE = 'NC';
 // « (principe) » ou « (objectifs) » d'une méthode : caché dans les propositions du QCM, où il trahirait la bonne réponse
 const FACET = /\s*\((principe|objectifs)\)$/i;
 const QCM_SIZE = 10; // questions de l'échauffement
+const FREE_NEW_PER_DAY = 50; // entraînement libre : jusqu'à 50 nouvelles cartes par jour (toutes séances confondues)
 const STEP = 10; // une séance est découpée en paliers de 10 réponses, avec une pause entre deux
 const BACKLOG_FACTOR = 2; // au plus 2 fois l'objectif du jour en révisions espacées : le retard s'étale sur plusieurs jours
 const BACKUP_DAYS = 7; // rappel de sauvegarde une fois par semaine
@@ -358,6 +359,8 @@ function buildSession(selected, { ahead = false, label = '', reviews = false, di
     // nouvelles cartes tirées au hasard dans la sélection, pour ne pas revoir toujours les mêmes dans le même ordre
     let nDue = due.length;
     let newLeft = Math.max(0, store.settings.newPerDay - today().newCards);
+    // entraînement libre (chapitres choisis) : l'élève choisit d'avancer, la limite monte à FREE_NEW_PER_DAY
+    if (!reviews) newLeft = Math.max(0, Math.max(FREE_NEW_PER_DAY, store.settings.newPerDay) - today().newCards);
     // définitions cochées : choisies une à une, elles ne butent pas sur la limite du jour, mais une séance
     // n'en présente pas plus de newPerDay nouvelles d'un coup
     if (selected.includes(PICKED)) newLeft = Math.max(newLeft, store.settings.newPerDay);
