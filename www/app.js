@@ -12,6 +12,7 @@ const NO_CODE = 'NC';
 // « (principe) » ou « (objectifs) » d'une méthode : caché dans les propositions du QCM, où il trahirait la bonne réponse
 const FACET = /\s*\((principe|objectifs)\)$/i;
 const QCM_SIZE = 10; // questions de l'échauffement
+const FREE_NEW_PER_DAY = 50; // entraînement libre : jusqu'à 50 nouvelles cartes par jour (toutes séances confondues)
 const STEP = 10; // une séance est découpée en paliers de 10 réponses, avec une pause entre deux
 const BACKLOG_FACTOR = 2; // au plus 2 fois l'objectif du jour en révisions espacées : le retard s'étale sur plusieurs jours
 const BACKUP_DAYS = 7; // rappel de sauvegarde une fois par semaine
@@ -22,6 +23,7 @@ const DEFAULT_SETTINGS = {
   buttons: 2,
   retention: 0.9,
   reminderTime: '20:00',
+  writeAnswer: false, // zone pour écrire sa réponse avant de retourner la carte (facultatif)
   direction: 'td', // sens des cartes en entraînement libre : td terme → définition, dt définition → terme, mix les deux
 };
 
@@ -357,6 +359,8 @@ function buildSession(selected, { ahead = false, label = '', reviews = false, di
     // nouvelles cartes tirées au hasard dans la sélection, pour ne pas revoir toujours les mêmes dans le même ordre
     let nDue = due.length;
     let newLeft = Math.max(0, store.settings.newPerDay - today().newCards);
+    // entraînement libre (chapitres choisis) : l'élève choisit d'avancer, la limite monte à FREE_NEW_PER_DAY
+    if (!reviews) newLeft = Math.max(0, Math.max(FREE_NEW_PER_DAY, store.settings.newPerDay) - today().newCards);
     // définitions cochées : choisies une à une, elles ne butent pas sur la limite du jour, mais une séance
     // n'en présente pas plus de newPerDay nouvelles d'un coup
     if (selected.includes(PICKED)) newLeft = Math.max(newLeft, store.settings.newPerDay);
@@ -435,6 +439,7 @@ function answer(rating) {
   updateBadge();
   s.current = nextCard();
   s.revealed = false;
+  s.written = ''; s.writtenFor = null; s.keysFor = null; // une carte ratée qui revient se réécrit à neuf
   stepCheck(s, rating !== Rating.Again, dayBefore.reviews);
   render();
 }
@@ -623,8 +628,7 @@ function renderHome() {
     </div>
     <div class="actions secondary">
       <button id="go-progress">Ma progression</button>
-      <button id="go-lexicon">Lexique : chercher une définition</button>
-      <button id="go-install">Installer l’application et les rappels</button>
+      ${installLabel() ? `<button id="go-install">${installLabel()}</button>` : ''}
       ${canReport() ? '<button id="go-suggest">Suggérer une amélioration ou faire une demande</button>' : ''}
     </div>
     <p class="muted small">${deck.cards.length} définitions · version ${esc(deck.version)}</p>`;
@@ -642,8 +646,8 @@ function renderHome() {
   const methods = document.getElementById('go-methods');
   if (methods) methods.onclick = () => startSession([METHODS], 'Méthodes et techniques');
   document.getElementById('go-progress').onclick = () => go('progress');
-  document.getElementById('go-lexicon').onclick = () => go('lexicon');
-  document.getElementById('go-install').onclick = () => go('install');
+  const inst = document.getElementById('go-install');
+  if (inst) inst.onclick = () => go('install');
   const suggest = document.getElementById('go-suggest');
   if (suggest) suggest.onclick = openSuggestion;
 }
@@ -1024,12 +1028,13 @@ function renderSession() {
       ${s.revealed && canReport() ? reportButton() : ''}
       <div class="codes">${cardCodes(c).map(x => `<span>${esc(x === NO_CODE ? 'sans chapitre' : x)}</span>`).join('')}${c.method ? '<span>méthode</span>' : ''} ${tag}</div>
       <h2 class="term">${esc(c.term)}</h2>
-      ${s.revealed ? `<p class="def">${defWithKeys(c)}</p>${keyChecklist(c, s)}` : '<p class="hint muted">Formulez la définition de tête (ou à l’écrit), puis retournez la carte.</p>'}
+      ${s.revealed ? `${typedBlock(c, s)}<p class="def">${defWithKeys(c)}</p>${keyChecklist(c, s)}` : writeArea(c, s)}
     </article>
     ${s.revealed ? ratingButtons(keysDone(c, s)) : '<button class="primary reveal" id="reveal">Voir la définition <small>Espace</small></button>'}
     ${s.undo ? '<button class="link undo" id="undo">Annuler la dernière réponse</button>' : ''}`;
   const r = document.getElementById('reveal');
   if (r) r.onclick = () => { s.revealed = true; render(); };
+  bindWriteArea(s);
   app.querySelectorAll('[data-r]').forEach(b => { b.onclick = () => answer(Number(b.dataset.r)); });
   const u = document.getElementById('undo');
   if (u) u.onclick = undoLast;
@@ -1155,9 +1160,56 @@ function defWithKeys(c) {
   return html + esc(c.def.slice(pos));
 }
 
+/* ---------- Réponse écrite (facultative) ----------
+   Écrire la réponse plutôt que la formuler de tête aide à retenir des définitions (Tauber et al., 2018,
+   J. Appl. Res. Mem. Cogn. 7(1) : 106-115). Le texte n'est ni enregistré ni envoyé ; l'élève s'évalue toujours
+   lui-même, les éléments-clés retrouvés dans son texte sont seulement précochés. */
+
+const typedText = (c, s) => (s.writtenFor === c.id ? s.written || '' : '');
+
+function writeArea(c, s) {
+  const hint = '<p class="hint muted">Formulez la définition de tête ou à l’écrit, puis retournez la carte.</p>';
+  if (!store.settings.writeAnswer) return `${hint}<button class="link write-toggle" id="write-on">✎ Écrire ma réponse</button>`;
+  return `<textarea id="typed" class="typed" rows="4" placeholder="Votre définition…" autocapitalize="sentences" spellcheck="false"
+      aria-label="Votre définition de ${esc(c.term)}">${esc(typedText(c, s))}</textarea>
+    <button class="link write-toggle" id="write-off">Ne plus écrire (de tête)</button>`;
+}
+
+function bindWriteArea(s) {
+  const on = document.getElementById('write-on');
+  const off = document.getElementById('write-off');
+  const setW = v => { store.settings.writeAnswer = v; persist(); render(); };
+  if (on) on.onclick = () => { setW(true); const ta = document.getElementById('typed'); if (ta) ta.focus(); };
+  if (off) off.onclick = () => setW(false);
+  const ta = document.getElementById('typed');
+  if (ta) ta.oninput = () => { s.written = ta.value; s.writtenFor = s.current.id; };
+}
+
+function markSpans(text, forms) {
+  let html = '';
+  let pos = 0;
+  for (const [a, b] of QCM.findSpans(text, forms)) {
+    html += esc(text.slice(pos, a)) + '<mark>' + esc(text.slice(a, b)) + '</mark>';
+    pos = b;
+  }
+  return html + esc(text.slice(pos));
+}
+
+function typedBlock(c, s) {
+  const typed = typedText(c, s).trim();
+  if (!typed) return '';
+  return `<div class="typed-answer"><p class="small muted">Votre réponse</p><p>${c.keys ? markSpans(typed, c.keys) : esc(typed)}</p></div>
+    <p class="small muted typed-label">Définition attendue</p>`;
+}
+
 function keyChecklist(c, s) {
   if (!c.keys) return '';
-  if (s.keysFor !== c.id) { s.keysFor = c.id; s.keysOk = []; }
+  if (s.keysFor !== c.id) {
+    s.keysFor = c.id;
+    // éléments-clés retrouvés dans la réponse écrite : précochés, l'élève corrige si besoin
+    const typed = typedText(c, s);
+    s.keysOk = c.keys.map(k => !!typed.trim() && QCM.findSpans(typed, [k]).length > 0);
+  }
   return `<fieldset class="keys"><legend>Cochez ce que vous aviez cité :</legend>
     ${c.keys.map((k, i) => `<label><input type="checkbox" data-key="${i}" ${s.keysOk[i] ? 'checked' : ''}> ${esc(k)}</label>`).join('')}
   </fieldset>`;
@@ -1168,7 +1220,7 @@ function keysDone(c, s) {
 }
 
 document.addEventListener('keydown', e => {
-  if (view !== 'session' || !session || e.target.tagName === 'INPUT' || document.querySelector('.modal')) return;
+  if (view !== 'session' || !session || e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || document.querySelector('.modal')) return;
   if (session.phase === 'qcm') {
     const Q = session.qcm;
     if (Q.chosen === null && /^[1-4]$/.test(e.key) && Number(e.key) <= Q.items[Q.i].options.length) { e.preventDefault(); qcmChoose(Number(e.key) - 1); }
@@ -1453,6 +1505,21 @@ function bindSuivi(rerender) {
 let lexQuery = '';
 let lexOpenParts = new Set();
 let lexShown = ''; // code dont la liste des termes est affichée
+let lexMode = 'chap'; // sommaire par chapitre, ou index alphabétique ('az')
+let lexLetter = ''; // lettre affichée dans l'index alphabétique
+
+// Initiale d'un terme, sans accent ; les termes qui commencent par une lettre grecque ou un chiffre vont dans « # ».
+function letterOf(c) {
+  const l = normTerm(c.term).charAt(0).toUpperCase();
+  return /[A-Z]/.test(l) ? l : '#';
+}
+
+// Termes d'un code de chapitre, ou d'une lettre (clé « L:A »).
+// Pas de « Tout cocher » pour une lettre : cocher 160 termes qui commencent par M n'a pas de sens pour réviser.
+function lexCards(key) {
+  if (key.startsWith('L:')) return deck.cards.filter(c => letterOf(c) === key.slice(2));
+  return deck.cards.filter(c => matchesSelection(c, [key]));
+}
 
 const byTerm = (a, b) => a.term.localeCompare(b.term, 'fr', { sensitivity: 'base' });
 
@@ -1495,11 +1562,12 @@ function showDefinition(card) {
 }
 
 function termList(code) {
-  const cards = deck.cards.filter(c => matchesSelection(c, [code])).sort(byTerm);
+  const cards = lexCards(code).sort(byTerm);
+  const withCodes = code.startsWith('L:'); // index alphabétique : rappeler le chapitre de chaque terme
   const n = cards.filter(c => pickedSet.has(c.id)).length;
   return `<div class="terms">
-    <p class="pick-all small">${n ? `${n} cochée${n > 1 ? 's' : ''} sur ${cards.length} · ` : ''}<button class="link" data-pickall="${code}" data-on="${n < cards.length ? 1 : 0}">${n < cards.length ? 'Tout cocher' : 'Tout décocher'}</button></p>
-    <ul>${cards.map(c => `<li class="pick-row"><input type="checkbox" class="pick" data-id="${esc(c.id)}" aria-label="Réviser « ${esc(c.term)} »" ${pickedSet.has(c.id) ? 'checked' : ''}><button class="term" data-id="${esc(c.id)}">${esc(c.term)}</button></li>`).join('')}</ul></div>`;
+    <p class="pick-all small">${n ? `${n} cochée${n > 1 ? 's' : ''} sur ${cards.length} · ` : ''}${withCodes ? (n ? `<button class="link" data-pickall="${code}" data-on="0">Décocher ces ${n}</button>` : '') : `<button class="link" data-pickall="${code}" data-on="${n < cards.length ? 1 : 0}">${n < cards.length ? 'Tout cocher' : 'Tout décocher'}</button>`}</p>
+    <ul>${cards.map(c => `<li class="pick-row"><input type="checkbox" class="pick" data-id="${esc(c.id)}" aria-label="Réviser « ${esc(c.term)} »" ${pickedSet.has(c.id) ? 'checked' : ''}><button class="term" data-id="${esc(c.id)}">${esc(c.term)}${withCodes ? ` <small class="muted">${esc(cardCodes(c).join(', '))}</small>` : ''}</button></li>`).join('')}</ul></div>`;
 }
 
 function pickedBanner() {
@@ -1522,9 +1590,19 @@ function renderLexicon() {
       <input type="search" id="lex-q" placeholder="Tapez un terme…" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Chercher un terme" aria-controls="lex-sugg" value="${esc(lexQuery)}">
       <ul id="lex-sugg" class="sugg" role="listbox" hidden></ul>
     </div>
-    <h2>Sommaire</h2>
-    <p class="muted small">Touchez une partie pour voir ses sous-parties, puis un titre pour voir ses termes par ordre alphabétique.</p>`;
-  for (const p of tree) {
+    <div class="lex-tabs" role="tablist">
+      <button role="tab" data-mode="chap" aria-selected="${lexMode === 'chap'}">Par chapitre</button>
+      <button role="tab" data-mode="az" aria-selected="${lexMode === 'az'}">De A à Z</button>
+    </div>`;
+  if (lexMode === 'az') {
+    const counts = {};
+    deck.cards.forEach(c => { const l = letterOf(c); counts[l] = (counts[l] || 0) + 1; });
+    const letters = [...'ABCDEFGHIJKLMNOPQRSTUVWXYZ', '#'];
+    html += `<p class="muted small">Touchez une lettre pour voir ses termes, tous chapitres confondus.</p>
+      <div class="letters">${letters.map(l => `<button data-letter="${l}" ${counts[l] ? '' : 'disabled'} aria-pressed="${lexLetter === l}">${l}</button>`).join('')}</div>
+      ${lexLetter && counts[lexLetter] ? `<h2>${lexLetter === '#' ? 'Autres (lettres grecques…)' : lexLetter} <span class="muted small">${plural(counts[lexLetter], 'terme', 'termes')}</span></h2>${termList('L:' + lexLetter)}` : ''}`;
+  } else html += `<p class="muted small">Touchez une partie pour voir ses sous-parties, puis un titre pour voir ses termes par ordre alphabétique.</p>`;
+  for (const p of lexMode === 'az' ? [] : tree) {
     const title = `<b>${p.code === NO_CODE ? '' : esc(p.code)}</b> ${esc(chapterTitle[p.code] || '')}`;
     if (!p.subs.length) { html += `<div class="chap">${item(p.code, title)}</div>`; continue; }
     const open = lexOpenParts.has(p.code);
@@ -1536,6 +1614,8 @@ function renderLexicon() {
   app.innerHTML = html;
 
   const byId = new Map(deck.cards.map(c => [c.id, c]));
+  app.querySelectorAll('[data-mode]').forEach(b => { b.onclick = () => { lexMode = b.dataset.mode; render(); }; });
+  app.querySelectorAll('[data-letter]').forEach(b => { b.onclick = () => { lexLetter = lexLetter === b.dataset.letter ? '' : b.dataset.letter; render(); }; });
   app.querySelectorAll('[data-part]').forEach(b => {
     b.onclick = () => { const c = b.dataset.part; lexOpenParts.has(c) ? lexOpenParts.delete(c) : lexOpenParts.add(c); render(); };
   });
@@ -1546,7 +1626,7 @@ function renderLexicon() {
   app.querySelectorAll('input.pick').forEach(cb => { cb.onchange = () => { setPicked([cb.dataset.id], cb.checked); render(); }; });
   app.querySelectorAll('[data-pickall]').forEach(b => {
     b.onclick = () => {
-      const ids = deck.cards.filter(c => matchesSelection(c, [b.dataset.pickall])).map(c => c.id);
+      const ids = lexCards(b.dataset.pickall).map(c => c.id);
       setPicked(ids, b.dataset.on === '1');
       render();
     };
@@ -1793,6 +1873,7 @@ function renderSettings() {
       <label class="file">Restaurer une sauvegarde<input type="file" id="import" accept=".json,application/json"></label>
       <button class="danger" id="reset">Effacer toute ma progression</button>
     </section>
+    <button class="link" id="install-page">Installer l’application, rappel quotidien</button>
     <button class="link" id="privacy">Données et confidentialité</button>
     <p><a class="link" href="prof.html">Espace enseignant : regrouper les bilans des élèves</a></p>
     <p><a class="link" href="chapitres.html">Espace enseignant : chapitres vus en cours</a></p>`;
@@ -1825,6 +1906,7 @@ function renderSettings() {
     toast('Progression effacée.');
   };
   document.getElementById('privacy').onclick = () => go('privacy');
+  document.getElementById('install-page').onclick = () => go('install');
 }
 
 function describeChange(oldCards, newCards) {
@@ -1972,6 +2054,20 @@ function icsReminder(time) {
     'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
 }
 
+// Bouton de l'accueil : disparaît quand l'application est installée (ouverte par son icône) et que le rappel a été
+// ajouté. L'application ne peut pas lire le calendrier : « rappel ajouté » veut dire que l'élève a téléchargé le
+// fichier du rappel, ou a indiqué en avoir déjà un. La page reste accessible depuis les réglages.
+function installLabel() {
+  const reminder = !!store.ui.reminderAdded;
+  if (!isStandalone()) return reminder ? 'Installer l’application' : 'Installer l’application et les rappels';
+  return reminder ? '' : 'Ajouter le rappel quotidien';
+}
+
+function markReminder() {
+  store.ui.reminderAdded = new Date().toISOString();
+  persist();
+}
+
 function renderInstall() {
   const standalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
   const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
@@ -1991,11 +2087,15 @@ function renderInstall() {
       <label>Heure du rappel <input type="time" id="rtime" value="${store.settings.reminderTime}"></label>
       <button id="ics">Ajouter le rappel au calendrier</button>
       <p class="muted small">Le fichier téléchargé s’ouvre avec l’application Calendrier. Pour arrêter le rappel, supprimez l’événement dans votre calendrier.</p>
+      ${store.ui.reminderAdded ? '<p class="muted small">Rappel déjà ajouté sur cet appareil : inutile de recommencer, sauf pour changer d’heure (supprimez alors l’ancien).</p>'
+        : '<button class="link" id="ics-done">J’ai déjà un rappel dans mon calendrier</button>'}
     </section>`;
   const i = document.getElementById('install');
   if (i) i.onclick = async () => { installPrompt.prompt(); await installPrompt.userChoice; installPrompt = null; render(); };
   document.getElementById('rtime').onchange = e => { store.settings.reminderTime = e.target.value || '20:00'; store.settings.reminderChosen = true; persist(); };
-  document.getElementById('ics').onclick = () => download('rappel-flashcards-bcpst.ics', icsReminder(store.settings.reminderTime), 'text/calendar');
+  document.getElementById('ics').onclick = () => { download('rappel-flashcards-bcpst.ics', icsReminder(store.settings.reminderTime), 'text/calendar'); markReminder(); render(); };
+  const done = document.getElementById('ics-done');
+  if (done) done.onclick = () => { markReminder(); toast('C’est noté.'); render(); };
 }
 
 function renderPrivacy() {

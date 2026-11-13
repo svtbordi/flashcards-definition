@@ -73,12 +73,14 @@ body {
   padding: calc(env(safe-area-inset-top) + 8px) 16px 8px;
   background: var(--accent); color: var(--accent-text);
 }
-.top h1 { flex: 1; font-size: 18px; margin: 0; font-weight: 600; }
+.top h1 { flex: 1; min-width: 0; overflow-wrap: anywhere; font-size: 18px; margin: 0; font-weight: 600; }
 .icon-btn {
   background: none; border: 0; color: inherit; font-size: 22px;
   width: 40px; height: 40px; border-radius: 8px; cursor: pointer;
 }
 .icon-btn:focus-visible { outline: 2px solid var(--accent-text); }
+.icon-btn.lex-btn { width: auto; padding: 0 8px; display: flex; align-items: center; gap: 6px; }
+.lex-btn span { font-size: 16px; font-weight: 600; }
 main { max-width: 640px; margin: 0 auto; padding: 16px; }
 h2 { font-size: 17px; margin: 20px 0 8px; }
 .card {
@@ -247,7 +249,7 @@ h2.section { font-size: 17px; margin: 8px 0 4px; }
 .tag-open { font-size: 12px; font-weight: 600; color: var(--accent); white-space: nowrap; }
 
 /* Mots-clés à vérifier au verso */
-.def mark { background: none; color: inherit; font-weight: 700; text-decoration: underline; text-decoration-color: var(--due); text-decoration-thickness: 2px; text-underline-offset: 3px; }
+.def mark, .typed-answer mark { background: none; color: inherit; font-weight: 700; text-decoration: underline; text-decoration-color: var(--due); text-decoration-thickness: 2px; text-underline-offset: 3px; }
 .keys { border: 0; border-top: 1px solid var(--line); margin: 16px 0 0; padding: 12px 0 0; display: grid; gap: 2px; }
 .keys legend { padding: 0; font-size: 14px; color: var(--muted); }
 .keys label { display: flex; align-items: center; gap: 10px; min-height: 40px; }
@@ -267,3 +269,20 @@ h2.section { font-size: 17px; margin: 8px 0 4px; }
 .step { text-align: center; border-width: 2px; }
 .step.good { border-color: var(--accent); }
 .step.boost { border-color: var(--line); }
+
+/* Lexique : onglets et index alphabétique */
+.lex-tabs { display: flex; gap: 6px; margin: 12px 0 8px; }
+.lex-tabs button { flex: 1; padding: 10px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--text); font: inherit; }
+.lex-tabs button[aria-selected=true] { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+.letters { display: grid; grid-template-columns: repeat(auto-fill, minmax(40px, 1fr)); gap: 6px; margin: 8px 0 12px; }
+.letters button { min-height: 44px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--accent); font: inherit; font-weight: 600; }
+.letters button:disabled { color: var(--muted); opacity: .4; }
+.letters button[aria-pressed=true] { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+/* Réponse écrite (facultative) */
+textarea.typed { display: block; width: 100%; min-width: 0; box-sizing: border-box; font: inherit; font-size: 16px; padding: 10px; margin: 4px 0 6px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--text); resize: vertical; }
+button.write-toggle { font-size: 14px; }
+.typed-answer { border-left: 3px solid var(--learning); padding: 0 0 0 10px; margin: 0 0 12px; overflow-wrap: anywhere; }
+.typed-answer p { margin: 0 0 4px; white-space: pre-wrap; }
+.typed-label { margin: 0 0 6px; }
+.typed-label + .def { border-top: 0; padding-top: 0; }

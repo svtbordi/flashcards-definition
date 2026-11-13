@@ -1,0 +1,21 @@
+// Entraînement libre : jusqu'à 50 nouvelles cartes par jour (contre 20 en révisions espacées).
+import { chromium, devices } from 'playwright';
+const base = process.env.BASE_URL || 'http://localhost:8765';
+const browser = await chromium.launch();
+const p = await (await browser.newContext({ ...devices['iPhone 13'] })).newPage();
+const errors = [];
+p.on('pageerror', e => errors.push(e.message));
+const check = (label, ok) => { console.log(ok ? 'OK   ' : 'ÉCHEC', label); if (!ok) errors.push(label); };
+await p.goto(`${base}/`);
+await p.waitForSelector('#go-all');
+const n = await p.evaluate(() => buildSession(['SV-A'], {}).queue.length);
+check(`libre, rien fait aujourd'hui : ${n} nouvelles`, n === 50);
+const r = await p.evaluate(() => buildSession(openChapters(), { reviews: true }).queue.length);
+check(`révisions espacées : ${r} nouvelles`, r === 20);
+const after = await p.evaluate(() => { today().newCards = 45; return buildSession(['SV-A'], {}).queue.length; });
+check(`libre, 45 déjà faites : ${after}`, after === 5);
+const picked = await p.evaluate(() => { setPicked(deck.cards.slice(0, 30).map(c => c.id), true); today().newCards = 60; return buildSession([PICKED], {}).queue.length; });
+check(`cochées, limite dépassée : ${picked} (20 par séance)`, picked === 20);
+console.log('erreurs :', errors);
+await browser.close();
+if (errors.length) process.exit(1);
