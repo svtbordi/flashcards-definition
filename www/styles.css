@@ -73,12 +73,14 @@ body {
   padding: calc(env(safe-area-inset-top) + 8px) 16px 8px;
   background: var(--accent); color: var(--accent-text);
 }
-.top h1 { flex: 1; font-size: 18px; margin: 0; font-weight: 600; }
+.top h1 { flex: 1; min-width: 0; overflow-wrap: anywhere; font-size: 18px; margin: 0; font-weight: 600; }
 .icon-btn {
   background: none; border: 0; color: inherit; font-size: 22px;
   width: 40px; height: 40px; border-radius: 8px; cursor: pointer;
 }
 .icon-btn:focus-visible { outline: 2px solid var(--accent-text); }
+.icon-btn.lex-btn { width: auto; padding: 0 8px; display: flex; align-items: center; gap: 6px; }
+.lex-btn span { font-size: 16px; font-weight: 600; }
 main { max-width: 640px; margin: 0 auto; padding: 16px; }
 h2 { font-size: 17px; margin: 20px 0 8px; }
 .card {

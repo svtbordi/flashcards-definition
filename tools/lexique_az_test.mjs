@@ -10,7 +10,7 @@ const errors = [];
 p.on('pageerror', e => errors.push(e.message));
 const check = (label, ok) => { console.log(ok ? 'OK   ' : 'ÉCHEC', label); if (!ok) errors.push(label); };
 await p.goto(`${base}/`);
-await p.click('#go-lexicon');
+await p.click('#btn-lexicon');
 await p.click('[data-mode="az"]');
 const disabled = await p.$$eval('.letters button:disabled', bs => bs.map(b => b.textContent));
 console.log('lettres sans terme :', disabled);

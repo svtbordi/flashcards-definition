@@ -623,8 +623,7 @@ function renderHome() {
     </div>
     <div class="actions secondary">
       <button id="go-progress">Ma progression</button>
-      <button id="go-lexicon">Lexique : chercher une définition</button>
-      <button id="go-install">Installer l’application et les rappels</button>
+      ${installLabel() ? `<button id="go-install">${installLabel()}</button>` : ''}
       ${canReport() ? '<button id="go-suggest">Suggérer une amélioration ou faire une demande</button>' : ''}
     </div>
     <p class="muted small">${deck.cards.length} définitions · version ${esc(deck.version)}</p>`;
@@ -642,8 +641,8 @@ function renderHome() {
   const methods = document.getElementById('go-methods');
   if (methods) methods.onclick = () => startSession([METHODS], 'Méthodes et techniques');
   document.getElementById('go-progress').onclick = () => go('progress');
-  document.getElementById('go-lexicon').onclick = () => go('lexicon');
-  document.getElementById('go-install').onclick = () => go('install');
+  const inst = document.getElementById('go-install');
+  if (inst) inst.onclick = () => go('install');
   const suggest = document.getElementById('go-suggest');
   if (suggest) suggest.onclick = openSuggestion;
 }
@@ -1821,6 +1820,7 @@ function renderSettings() {
       <label class="file">Restaurer une sauvegarde<input type="file" id="import" accept=".json,application/json"></label>
       <button class="danger" id="reset">Effacer toute ma progression</button>
     </section>
+    <button class="link" id="install-page">Installer l’application, rappel quotidien</button>
     <button class="link" id="privacy">Données et confidentialité</button>
     <p><a class="link" href="prof.html">Espace enseignant : regrouper les bilans des élèves</a></p>
     <p><a class="link" href="chapitres.html">Espace enseignant : chapitres vus en cours</a></p>`;
@@ -1853,6 +1853,7 @@ function renderSettings() {
     toast('Progression effacée.');
   };
   document.getElementById('privacy').onclick = () => go('privacy');
+  document.getElementById('install-page').onclick = () => go('install');
 }
 
 function describeChange(oldCards, newCards) {
@@ -2000,6 +2001,20 @@ function icsReminder(time) {
     'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
 }
 
+// Bouton de l'accueil : disparaît quand l'application est installée (ouverte par son icône) et que le rappel a été
+// ajouté. L'application ne peut pas lire le calendrier : « rappel ajouté » veut dire que l'élève a téléchargé le
+// fichier du rappel, ou a indiqué en avoir déjà un. La page reste accessible depuis les réglages.
+function installLabel() {
+  const reminder = !!store.ui.reminderAdded;
+  if (!isStandalone()) return reminder ? 'Installer l’application' : 'Installer l’application et les rappels';
+  return reminder ? '' : 'Ajouter le rappel quotidien';
+}
+
+function markReminder() {
+  store.ui.reminderAdded = new Date().toISOString();
+  persist();
+}
+
 function renderInstall() {
   const standalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
   const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
@@ -2019,11 +2034,15 @@ function renderInstall() {
       <label>Heure du rappel <input type="time" id="rtime" value="${store.settings.reminderTime}"></label>
       <button id="ics">Ajouter le rappel au calendrier</button>
       <p class="muted small">Le fichier téléchargé s’ouvre avec l’application Calendrier. Pour arrêter le rappel, supprimez l’événement dans votre calendrier.</p>
+      ${store.ui.reminderAdded ? '<p class="muted small">Rappel déjà ajouté sur cet appareil : inutile de recommencer, sauf pour changer d’heure (supprimez alors l’ancien).</p>'
+        : '<button class="link" id="ics-done">J’ai déjà un rappel dans mon calendrier</button>'}
     </section>`;
   const i = document.getElementById('install');
   if (i) i.onclick = async () => { installPrompt.prompt(); await installPrompt.userChoice; installPrompt = null; render(); };
   document.getElementById('rtime').onchange = e => { store.settings.reminderTime = e.target.value || '20:00'; store.settings.reminderChosen = true; persist(); };
-  document.getElementById('ics').onclick = () => download('rappel-flashcards-bcpst.ics', icsReminder(store.settings.reminderTime), 'text/calendar');
+  document.getElementById('ics').onclick = () => { download('rappel-flashcards-bcpst.ics', icsReminder(store.settings.reminderTime), 'text/calendar'); markReminder(); render(); };
+  const done = document.getElementById('ics-done');
+  if (done) done.onclick = () => { markReminder(); toast('C’est noté.'); render(); };
 }
 
 function renderPrivacy() {

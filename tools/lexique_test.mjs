@@ -9,7 +9,7 @@ const p = await ctx.newPage();
 const errors = [];
 p.on('pageerror', e => errors.push(e.message));
 await p.goto(`${base}/`);
-await p.waitForSelector('#go-lexicon');
+await p.waitForSelector('#go-all');
 await p.click('#btn-lexicon');
 await p.waitForSelector('#lex-q');
 // saisie sans accent : la complétion doit proposer les termes accentués
