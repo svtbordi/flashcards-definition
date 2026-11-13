@@ -267,3 +267,12 @@ h2.section { font-size: 17px; margin: 8px 0 4px; }
 .step { text-align: center; border-width: 2px; }
 .step.good { border-color: var(--accent); }
 .step.boost { border-color: var(--line); }
+
+/* Lexique : onglets et index alphabétique */
+.lex-tabs { display: flex; gap: 6px; margin: 12px 0 8px; }
+.lex-tabs button { flex: 1; padding: 10px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--text); font: inherit; }
+.lex-tabs button[aria-selected=true] { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+.letters { display: grid; grid-template-columns: repeat(auto-fill, minmax(40px, 1fr)); gap: 6px; margin: 8px 0 12px; }
+.letters button { min-height: 44px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--accent); font: inherit; font-weight: 600; }
+.letters button:disabled { color: var(--muted); opacity: .4; }
+.letters button[aria-pressed=true] { background: var(--accent); color: #fff; border-color: var(--accent); }

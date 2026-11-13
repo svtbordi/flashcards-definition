@@ -1453,6 +1453,21 @@ function bindSuivi(rerender) {
 let lexQuery = '';
 let lexOpenParts = new Set();
 let lexShown = ''; // code dont la liste des termes est affichée
+let lexMode = 'chap'; // sommaire par chapitre, ou index alphabétique ('az')
+let lexLetter = ''; // lettre affichée dans l'index alphabétique
+
+// Initiale d'un terme, sans accent ; les termes qui commencent par une lettre grecque ou un chiffre vont dans « # ».
+function letterOf(c) {
+  const l = normTerm(c.term).charAt(0).toUpperCase();
+  return /[A-Z]/.test(l) ? l : '#';
+}
+
+// Termes d'un code de chapitre, ou d'une lettre (clé « L:A »).
+// Pas de « Tout cocher » pour une lettre : cocher 160 termes qui commencent par M n'a pas de sens pour réviser.
+function lexCards(key) {
+  if (key.startsWith('L:')) return deck.cards.filter(c => letterOf(c) === key.slice(2));
+  return deck.cards.filter(c => matchesSelection(c, [key]));
+}
 
 const byTerm = (a, b) => a.term.localeCompare(b.term, 'fr', { sensitivity: 'base' });
 
@@ -1495,11 +1510,12 @@ function showDefinition(card) {
 }
 
 function termList(code) {
-  const cards = deck.cards.filter(c => matchesSelection(c, [code])).sort(byTerm);
+  const cards = lexCards(code).sort(byTerm);
+  const withCodes = code.startsWith('L:'); // index alphabétique : rappeler le chapitre de chaque terme
   const n = cards.filter(c => pickedSet.has(c.id)).length;
   return `<div class="terms">
-    <p class="pick-all small">${n ? `${n} cochée${n > 1 ? 's' : ''} sur ${cards.length} · ` : ''}<button class="link" data-pickall="${code}" data-on="${n < cards.length ? 1 : 0}">${n < cards.length ? 'Tout cocher' : 'Tout décocher'}</button></p>
-    <ul>${cards.map(c => `<li class="pick-row"><input type="checkbox" class="pick" data-id="${esc(c.id)}" aria-label="Réviser « ${esc(c.term)} »" ${pickedSet.has(c.id) ? 'checked' : ''}><button class="term" data-id="${esc(c.id)}">${esc(c.term)}</button></li>`).join('')}</ul></div>`;
+    <p class="pick-all small">${n ? `${n} cochée${n > 1 ? 's' : ''} sur ${cards.length} · ` : ''}${withCodes ? (n ? `<button class="link" data-pickall="${code}" data-on="0">Décocher ces ${n}</button>` : '') : `<button class="link" data-pickall="${code}" data-on="${n < cards.length ? 1 : 0}">${n < cards.length ? 'Tout cocher' : 'Tout décocher'}</button>`}</p>
+    <ul>${cards.map(c => `<li class="pick-row"><input type="checkbox" class="pick" data-id="${esc(c.id)}" aria-label="Réviser « ${esc(c.term)} »" ${pickedSet.has(c.id) ? 'checked' : ''}><button class="term" data-id="${esc(c.id)}">${esc(c.term)}${withCodes ? ` <small class="muted">${esc(cardCodes(c).join(', '))}</small>` : ''}</button></li>`).join('')}</ul></div>`;
 }
 
 function pickedBanner() {
@@ -1522,9 +1538,19 @@ function renderLexicon() {
       <input type="search" id="lex-q" placeholder="Tapez un terme…" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Chercher un terme" aria-controls="lex-sugg" value="${esc(lexQuery)}">
       <ul id="lex-sugg" class="sugg" role="listbox" hidden></ul>
     </div>
-    <h2>Sommaire</h2>
-    <p class="muted small">Touchez une partie pour voir ses sous-parties, puis un titre pour voir ses termes par ordre alphabétique.</p>`;
-  for (const p of tree) {
+    <div class="lex-tabs" role="tablist">
+      <button role="tab" data-mode="chap" aria-selected="${lexMode === 'chap'}">Par chapitre</button>
+      <button role="tab" data-mode="az" aria-selected="${lexMode === 'az'}">De A à Z</button>
+    </div>`;
+  if (lexMode === 'az') {
+    const counts = {};
+    deck.cards.forEach(c => { const l = letterOf(c); counts[l] = (counts[l] || 0) + 1; });
+    const letters = [...'ABCDEFGHIJKLMNOPQRSTUVWXYZ', '#'];
+    html += `<p class="muted small">Touchez une lettre pour voir ses termes, tous chapitres confondus.</p>
+      <div class="letters">${letters.map(l => `<button data-letter="${l}" ${counts[l] ? '' : 'disabled'} aria-pressed="${lexLetter === l}">${l}</button>`).join('')}</div>
+      ${lexLetter && counts[lexLetter] ? `<h2>${lexLetter === '#' ? 'Autres (lettres grecques…)' : lexLetter} <span class="muted small">${plural(counts[lexLetter], 'terme', 'termes')}</span></h2>${termList('L:' + lexLetter)}` : ''}`;
+  } else html += `<p class="muted small">Touchez une partie pour voir ses sous-parties, puis un titre pour voir ses termes par ordre alphabétique.</p>`;
+  for (const p of lexMode === 'az' ? [] : tree) {
     const title = `<b>${p.code === NO_CODE ? '' : esc(p.code)}</b> ${esc(chapterTitle[p.code] || '')}`;
     if (!p.subs.length) { html += `<div class="chap">${item(p.code, title)}</div>`; continue; }
     const open = lexOpenParts.has(p.code);
@@ -1536,6 +1562,8 @@ function renderLexicon() {
   app.innerHTML = html;
 
   const byId = new Map(deck.cards.map(c => [c.id, c]));
+  app.querySelectorAll('[data-mode]').forEach(b => { b.onclick = () => { lexMode = b.dataset.mode; render(); }; });
+  app.querySelectorAll('[data-letter]').forEach(b => { b.onclick = () => { lexLetter = lexLetter === b.dataset.letter ? '' : b.dataset.letter; render(); }; });
   app.querySelectorAll('[data-part]').forEach(b => {
     b.onclick = () => { const c = b.dataset.part; lexOpenParts.has(c) ? lexOpenParts.delete(c) : lexOpenParts.add(c); render(); };
   });
@@ -1546,7 +1574,7 @@ function renderLexicon() {
   app.querySelectorAll('input.pick').forEach(cb => { cb.onchange = () => { setPicked([cb.dataset.id], cb.checked); render(); }; });
   app.querySelectorAll('[data-pickall]').forEach(b => {
     b.onclick = () => {
-      const ids = deck.cards.filter(c => matchesSelection(c, [b.dataset.pickall])).map(c => c.id);
+      const ids = lexCards(b.dataset.pickall).map(c => c.id);
       setPicked(ids, b.dataset.on === '1');
       render();
     };
