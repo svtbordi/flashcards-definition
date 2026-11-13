@@ -15,7 +15,7 @@ let p = await ctx.newPage();
 p.on('pageerror', e => errors.push(e.message));
 await p.goto(`${base}/`);
 await p.waitForSelector('#go-all');
-check('en-tête : « Lexique » cliquable', (await p.textContent('#btn-lexicon')).includes('Lexique'));
+check('en-tête : « Déf. » cliquable', (await p.textContent('#btn-lexicon')).includes('Déf.'));
 check('plus de bouton Lexique sur l’accueil', !(await p.$('#go-lexicon')));
 await p.screenshot({ path: `${out}/inst-1-entete.png`, clip: { x: 0, y: 0, width: 390, height: 120 } });
 check('navigateur : ' + await label(p), (await label(p)) === 'Installer l’application et les rappels');
