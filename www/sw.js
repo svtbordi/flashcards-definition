@@ -26,11 +26,14 @@ self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET' || url.origin !== location.origin) return;
   if (url.pathname.includes('/data/') || url.pathname.endsWith('/config.json')) {
     // réseau d'abord pour les définitions et la configuration (adresse des signalements), cache si hors connexion
+    // une réponse en erreur (site indisponible, page 404) ne remplace jamais la copie en cache
+    const cached = () => caches.match(e.request, { ignoreSearch: true });
     e.respondWith(fetch(e.request).then(res => {
+      if (!res.ok) return cached().then(hit => hit || res);
       const copy = res.clone();
       caches.open(CACHE).then(c => c.put(e.request, copy));
       return res;
-    }).catch(() => caches.match(e.request, { ignoreSearch: true })));
+    }).catch(cached));
     return;
   }
   e.respondWith(caches.match(e.request, { ignoreSearch: true }).then(hit => hit || fetch(e.request)));

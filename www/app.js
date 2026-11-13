@@ -47,7 +47,7 @@ function saveJSON(key, value) {
 }
 
 const store = Object.assign(
-  { cards: {}, log: [], days: {}, settings: {}, selection: [], qcmLog: [], revLog: [], pendingReports: [] },
+  { cards: {}, log: [], days: {}, settings: {}, selection: [], picked: [], qcmLog: [], revLog: [], pendingReports: [] },
   loadJSON(STORE_KEY, {})
 );
 store.settings = Object.assign({}, DEFAULT_SETTINGS, store.settings);
@@ -153,8 +153,23 @@ function cardCodes(c) {
 // METHODS dans une sélection : les définitions de méthodes et techniques (colonne E du tableur), tous chapitres confondus
 const METHODS = '@methodes';
 
+// PICKED dans une sélection : les définitions cochées par l'élève dans le lexique. Cocher ajoute des cartes à travailler,
+// décocher ne retire jamais une carte commencée des révisions espacées.
+const PICKED = '@cochees';
+let pickedSet = new Set(Array.isArray(store.picked) ? store.picked : []);
+
+function setPicked(ids, on) {
+  for (const id of ids) on ? pickedSet.add(id) : pickedSet.delete(id);
+  store.picked = [...pickedSet];
+  persist();
+}
+
+// seulement les définitions encore présentes dans le paquet (un terme renommé perd sa coche, comme sa progression)
+const pickedCards = () => deck.cards.filter(c => pickedSet.has(c.id));
+
 function matchesSelection(card, selected) {
   if (card.method && selected.includes(METHODS)) return true;
+  if (selected.includes(PICKED) && pickedSet.has(card.id)) return true;
   return cardCodes(card).some(code => selected.some(sel => code === sel || code.startsWith(sel + '-')));
 }
 
@@ -246,6 +261,54 @@ function dayGoal(plan) {
   return Math.min(store.settings.dailyGoal, today().reviews + plan.due + plan.fresh);
 }
 
+// Progrès depuis une date, d'après le journal des réponses : définitions nouvelles apprises (vues pour la première fois
+// dans la période et dont la dernière réponse n'est pas « Raté »), définitions ratées puis retrouvées, jours de travail.
+function gains(sinceKey) {
+  const firstSeen = {};
+  const last = {};
+  const recovered = new Set();
+  const days = new Set();
+  let answers = 0;
+  for (const e of store.log) {
+    const k = dayKey(new Date(e.t));
+    if (!(e.id in firstSeen)) firstSeen[e.id] = k;
+    if (k >= sinceKey) {
+      answers += 1;
+      days.add(k);
+      if (e.g !== Rating.Again && last[e.id] === Rating.Again) recovered.add(e.id);
+    }
+    last[e.id] = e.g;
+  }
+  let learned = 0;
+  for (const id in firstSeen) if (firstSeen[id] >= sinceKey && last[id] !== Rating.Again) learned += 1;
+  for (const id of recovered) if (firstSeen[id] >= sinceKey || last[id] === Rating.Again) recovered.delete(id); // les nouvelles comptent déjà
+  return { learned, recovered: recovered.size, answers, days: days.size };
+}
+
+const daysAgoKey = n => { const d = new Date(); d.setDate(d.getDate() - n); return dayKey(d); };
+
+function gainsCard() {
+  const y = gains(daysAgoKey(1));
+  const w = gains(daysAgoKey(6));
+  if (!w.answers) return '';
+  const line = g => [
+    g.learned ? plural(g.learned, 'nouvelle définition apprise', 'nouvelles définitions apprises') : '',
+    g.recovered ? plural(g.recovered, 'définition ratée retrouvée', 'définitions ratées retrouvées') : '',
+  ].filter(Boolean).join(', ') || `${plural(g.answers, 'réponse', 'réponses')}`;
+  return `<section class="card gains">
+    <h2>Vos progrès</h2>
+    ${y.answers ? `<p><b>Depuis hier</b> : ${line(y)}.</p>` : ''}
+    <p><b>Sur 7 jours</b> : ${line(w)}, ${plural(w.days, 'jour de travail', 'jours de travail')}.</p>
+  </section>`;
+}
+
+// Nouvelles cartes au-delà de la limite du jour, par paquets de DISCOVER : seulement quand les révisions du jour sont
+// faites et qu'il n'y a pas de retard, car chaque nouvelle carte ajoute des révisions les jours suivants.
+const DISCOVER = 10;
+function canDiscover(plan, revs) {
+  return plan.due + plan.fresh === 0 && !plan.deferred && revs.new > 0;
+}
+
 const reminderHour = () => Number((store.settings.reminderTime || '20:00').split(':')[0]);
 
 function dueCountAll() {
@@ -269,7 +332,7 @@ function inScope(c, selected, reviews) {
   return matchesSelection(c, selected) || (reviews && isStarted(c));
 }
 
-function buildSession(selected, { ahead = false, label = '', reviews = false, dir = 'td', noCap = false } = {}) {
+function buildSession(selected, { ahead = false, label = '', reviews = false, dir = 'td', noCap = false, discover = false } = {}) {
   const now = new Date();
   const endDay = endOfStudyDay(now);
   const pool = deck.cards.filter(c => inScope(c, selected, reviews));
@@ -285,13 +348,18 @@ function buildSession(selected, { ahead = false, label = '', reviews = false, di
   due.sort((a, b) => a.r - b.r);
   let queue;
   let deferred = 0;
-  if (ahead) {
+  if (discover) {
+    queue = QCM.shuffle(fresh).slice(0, DISCOVER);
+  } else if (ahead) {
     notDue.sort((a, b) => a.r - b.r);
     queue = notDue.slice(0, store.settings.dailyGoal).map(x => x.c);
   } else {
     // nouvelles cartes tirées au hasard dans la sélection, pour ne pas revoir toujours les mêmes dans le même ordre
     let nDue = due.length;
     let newLeft = Math.max(0, store.settings.newPerDay - today().newCards);
+    // définitions cochées : choisies une à une, elles ne butent pas sur la limite du jour, mais une séance
+    // n'en présente pas plus de newPerDay nouvelles d'un coup
+    if (selected.includes(PICKED)) newLeft = Math.max(newLeft, store.settings.newPerDay);
     if (reviews && !noCap) {
       // retard étalé : les cartes les plus menacées d'oubli d'abord (due est trié par probabilité de rappel croissante)
       const plan = dailyPlan(due.length, fresh.length);
@@ -522,6 +590,8 @@ function renderHome() {
   const newToday = plan.fresh;
   const lateWarning = d.reviews < goal && new Date().getHours() >= reminderHour();
   const steps = Math.ceil((plan.due + plan.fresh) / STEP);
+  const picked = pickedCards();
+  const pickedStats = picked.length ? statsFor(picked) : null;
   app.innerHTML = `
     ${homeBanners()}
     <section class="card hero">
@@ -533,10 +603,12 @@ function renderHome() {
       <p class="muted">${goal ? `Objectif du jour : ${Math.min(d.reviews, goal)} / ${goal} cartes` : 'Rien à faire aujourd’hui'}${steps > 1 ? ` · ${steps} paliers de ${STEP}` : ''}${st ? ` · ${plural(st, 'jour', 'jours')} d’affilée` : ''}</p>
       ${lateWarning ? `<p class="warn">Il vous reste ${plural(goal - d.reviews, 'carte', 'cartes')} pour atteindre votre objectif du jour.</p>` : ''}
     </section>
+    ${gainsCard()}
     <div class="actions">
       <button class="primary" id="go-all" ${plan.due + newToday ? '' : 'disabled'}>Révisions espacées du jour
         <small>${opened ? `chapitres vus en cours (${plural(opened.chapitres.length, 'partie ou sous-partie', 'parties ou sous-parties')})${openList.includes(METHODS) && methodCards().length ? ' et méthodes' : ''}` : 'tout le programme'}</small></button>
     </div>
+    ${canDiscover(plan, revs) ? `<div class="actions"><button id="go-discover">Découvrir ${DISCOVER} nouvelles définitions <small>en plus de la limite du jour, ${opened ? 'dans les chapitres vus en cours' : 'dans tout le programme'}</small></button></div>` : ''}
     <h2 class="section">Entraînement libre</h2>
     <p class="muted small">N’importe quel chapitre, par exemple pour anticiper une révision. Les cartes commencées ici entrent ensuite dans vos révisions espacées.</p>
     <label class="dir">Sens des cartes
@@ -544,6 +616,7 @@ function renderHome() {
     ${store.settings.direction !== 'td' ? '<p class="muted small">Les cartes « définition → terme » ne modifient pas le calendrier de vos révisions espacées.</p>' : ''}
     <div class="actions">
       <button id="go-choose">Choisir un ou plusieurs chapitres</button>
+      ${pickedStats ? `<button id="go-picked">Réviser mes définitions cochées <small>(${plural(pickedStats.total, 'définition', 'définitions')} : ${pickedStats.due} à revoir, ${plural(pickedStats.new, 'jamais vue', 'jamais vues')})</small></button>` : ''}
       ${store.selection.length ? `<button id="go-last">Reprendre ma dernière sélection <small>(${esc(store.selection.slice(0, 3).join(', '))}${store.selection.length > 3 ? '…' : ''})</small></button>` : ''}
       ${methodCards().length ? `<button id="go-methods">Méthodes et techniques <small>(principe et objectif de ${plural(methodCards().length, 'méthode', 'méthodes')}, tous chapitres)</small></button>` : ''}
       <button id="go-started" ${startedStats ? '' : 'disabled'}>Mes chapitres commencés${startedStats ? ` <small>(${startedStats.due} à revoir)</small>` : ''}</button>
@@ -557,9 +630,13 @@ function renderHome() {
     <p class="muted small">${deck.cards.length} définitions · version ${esc(deck.version)}</p>`;
   document.getElementById('go-all').onclick = () => startSession(openList, 'Révisions espacées', { reviews: true });
   bindBanners();
+  const disc = document.getElementById('go-discover');
+  if (disc) disc.onclick = () => startSession(openList, 'Nouvelles définitions', { discover: true });
   document.getElementById('go-started').onclick = () => startSession(started, 'Mes chapitres commencés');
   document.getElementById('go-choose').onclick = () => go('choose');
   document.getElementById('dir').onchange = e => { store.settings.direction = e.target.value; persist(); render(); };
+  const pk = document.getElementById('go-picked');
+  if (pk) pk.onclick = () => startSession([PICKED], 'Mes définitions cochées');
   const last = document.getElementById('go-last');
   if (last) last.onclick = () => startSession(store.selection, 'Dernière sélection');
   const methods = document.getElementById('go-methods');
@@ -729,9 +806,9 @@ function renderChoose() {
 
 const DIRECTIONS = { td: 'terme → définition', dt: 'définition → terme', mix: 'les deux, mélangés' };
 
-function startSession(selected, label, { ahead = false, reviews = false, noCap = false, offerWarmup = !ahead && !reviews } = {}) {
-  const dir = reviews || ahead ? 'td' : store.settings.direction;
-  session = buildSession(selected, { label, ahead, reviews, dir, noCap });
+function startSession(selected, label, { ahead = false, reviews = false, noCap = false, discover = false, offerWarmup = !ahead && !reviews } = {}) {
+  const dir = reviews || ahead || discover ? 'td' : store.settings.direction;
+  session = buildSession(selected, { label, ahead, reviews, dir, noCap, discover });
   if (dir === 'dt') offerWarmup = false; // le QCM interroge déjà dans ce sens
   // l'échauffement précède toujours des flashcards : proposé seulement s'il y a des cartes à faire ensuite
   if (offerWarmup && session.queue.length && session.pool.length >= 4) session.phase = 'intro';
@@ -1133,7 +1210,7 @@ function renderProgress() {
   const revs = k => (store.days[k] ? store.days[k].reviews : 0);
   const maxRev = Math.max(1, ...days.map(revs));
   const anyDay = days.some(k => revs(k) > 0);
-  let html = `${suiviCard()}<button class="${store.settings.suiviCode ? '' : 'primary '}wide" id="go-bilan">Préparer mon bilan pour le professeur</button>
+  let html = `${gainsCard()}${suiviCard()}<button class="${store.settings.suiviCode ? '' : 'primary '}wide" id="go-bilan">Préparer mon bilan pour le professeur</button>
   <section class="card">
     <div class="legend"><span class="l-mastered">acquises</span><span class="l-learning">en cours</span><span class="l-due">à revoir</span><span class="l-new">jamais vues</span></div>
     <p><b>Tout le programme</b> : ${all.mastered} acquises, ${all.learning} en cours, ${all.due} à revoir, ${all.new} jamais vues.</p>
@@ -1402,14 +1479,16 @@ function showDefinition(card) {
     <h2 id="def-term">${esc(card.term)}</h2>
     <p>${esc(card.def).replace(/\n/g, '<br>')}</p>
     <ul class="def-codes muted small">${codes}</ul>
+    <label class="row pick-def"><input type="checkbox" id="def-pick" ${pickedSet.has(card.id) ? 'checked' : ''}> Ajouter à mes définitions à réviser</label>
     ${canReport() ? reportButton() : ''}
     <button class="primary wide" id="def-close">Fermer</button></div>`;
   document.body.appendChild(box);
-  const close = () => { box.remove(); document.removeEventListener('keydown', onKey); };
+  const close = () => { box.remove(); document.removeEventListener('keydown', onKey); if (view === 'lexicon') render(); };
   const onKey = e => { if (e.key === 'Escape' && !document.querySelector('.report-box')) close(); };
   document.addEventListener('keydown', onKey);
   box.addEventListener('click', e => { if (e.target === box) close(); });
   box.querySelector('#def-close').onclick = close;
+  box.querySelector('#def-pick').onchange = e => setPicked([card.id], e.target.checked);
   box.querySelector('#def-close').focus();
   const rep = box.querySelector('.report-btn');
   if (rep) rep.onclick = () => openReport(card, 'lexique');
@@ -1417,7 +1496,20 @@ function showDefinition(card) {
 
 function termList(code) {
   const cards = deck.cards.filter(c => matchesSelection(c, [code])).sort(byTerm);
-  return `<ul class="terms">${cards.map(c => `<li><button class="term" data-id="${esc(c.id)}">${esc(c.term)}</button></li>`).join('')}</ul>`;
+  const n = cards.filter(c => pickedSet.has(c.id)).length;
+  return `<div class="terms">
+    <p class="pick-all small">${n ? `${n} cochée${n > 1 ? 's' : ''} sur ${cards.length} · ` : ''}<button class="link" data-pickall="${code}" data-on="${n < cards.length ? 1 : 0}">${n < cards.length ? 'Tout cocher' : 'Tout décocher'}</button></p>
+    <ul>${cards.map(c => `<li class="pick-row"><input type="checkbox" class="pick" data-id="${esc(c.id)}" aria-label="Réviser « ${esc(c.term)} »" ${pickedSet.has(c.id) ? 'checked' : ''}><button class="term" data-id="${esc(c.id)}">${esc(c.term)}</button></li>`).join('')}</ul></div>`;
+}
+
+function pickedBanner() {
+  const n = pickedCards().length;
+  return `<div class="card pick-banner">
+    <p class="small">Cochez les définitions que vous voulez travailler en plus : elles s’ajoutent à vos révisions et n’en retirent aucune.</p>
+    ${n ? `<p><b>${plural(n, 'définition cochée', 'définitions cochées')}</b></p>
+      <button class="primary" id="lex-picked">Réviser mes définitions cochées</button>
+      <button class="link" id="lex-unpick">Tout décocher</button>` : ''}
+  </div>`;
 }
 
 function renderLexicon() {
@@ -1426,7 +1518,7 @@ function renderLexicon() {
   const item = (code, label) => `<button class="lex-item ${lexShown === code ? 'open' : ''}" data-show="${code}">
       <span class="chap-name">${label}</span><span class="count">${count(code)}</span></button>
     ${lexShown === code ? termList(code) : ''}`;
-  let html = `<div class="lex-search" role="combobox" aria-expanded="false" aria-owns="lex-sugg" aria-haspopup="listbox">
+  let html = `${pickedBanner()}<div class="lex-search" role="combobox" aria-expanded="false" aria-owns="lex-sugg" aria-haspopup="listbox">
       <input type="search" id="lex-q" placeholder="Tapez un terme…" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Chercher un terme" aria-controls="lex-sugg" value="${esc(lexQuery)}">
       <ul id="lex-sugg" class="sugg" role="listbox" hidden></ul>
     </div>
@@ -1451,6 +1543,22 @@ function renderLexicon() {
     b.onclick = () => { lexShown = lexShown === b.dataset.show ? '' : b.dataset.show; render(); };
   });
   app.querySelectorAll('.term').forEach(b => { b.onclick = () => showDefinition(byId.get(b.dataset.id)); });
+  app.querySelectorAll('input.pick').forEach(cb => { cb.onchange = () => { setPicked([cb.dataset.id], cb.checked); render(); }; });
+  app.querySelectorAll('[data-pickall]').forEach(b => {
+    b.onclick = () => {
+      const ids = deck.cards.filter(c => matchesSelection(c, [b.dataset.pickall])).map(c => c.id);
+      setPicked(ids, b.dataset.on === '1');
+      render();
+    };
+  });
+  const lp = document.getElementById('lex-picked');
+  if (lp) lp.onclick = () => startSession([PICKED], 'Mes définitions cochées');
+  const lu = document.getElementById('lex-unpick');
+  if (lu) lu.onclick = async () => {
+    if (!await askConfirm('Décocher toutes vos définitions ? Celles déjà travaillées restent dans vos révisions espacées.', 'Tout décocher')) return;
+    setPicked([...pickedSet], false);
+    render();
+  };
 
   const input = document.getElementById('lex-q');
   const list = document.getElementById('lex-sugg');
@@ -1711,7 +1819,7 @@ function renderSettings() {
   document.getElementById('import').onchange = e => e.target.files[0] && importBackup(e.target.files[0]);
   document.getElementById('reset').onclick = async () => {
     if (!await askConfirm('Effacer toute votre progression sur cet appareil ? Cette action est définitive.', 'Tout effacer')) return;
-    store.cards = {}; store.log = []; store.days = {}; store.selection = [];
+    store.cards = {}; store.log = []; store.days = {}; store.selection = []; store.picked = []; pickedSet = new Set();
     persist();
     updateBadge();
     toast('Progression effacée.');
@@ -1828,7 +1936,8 @@ async function importBackup(file) {
     const data = JSON.parse(await file.text());
     if (data.app !== 'flashcards-bcpst' || !data.store || typeof data.store.cards !== 'object') throw new Error('fichier non reconnu');
     if (!await askConfirm(`Restaurer la sauvegarde du ${data.exported.slice(0, 10)} ? Elle remplace la progression actuelle de cet appareil.`, 'Restaurer')) return;
-    Object.assign(store, { cards: {}, log: [], days: {}, selection: [] }, data.store);
+    Object.assign(store, { cards: {}, log: [], days: {}, selection: [], picked: [] }, data.store);
+    pickedSet = new Set(store.picked);
     store.settings = Object.assign({}, DEFAULT_SETTINGS, store.settings);
     store.ui = Object.assign({ installLater: '', backupLater: '' }, store.ui, { lastBackup: data.exported, restoreSeen: true });
     persist();
