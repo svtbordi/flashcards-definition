@@ -78,6 +78,32 @@ await page.keyboard.type('Noyau');
 await page.keyboard.press('Enter');
 let r = await page.evaluate(() => drawRun.items.map(i => i.k + (i.s ? ':' + i.s : '') + ':' + i.c));
 check(r.length === 3 && r[1] === 'line:#d62828' && r[2] === 'text:Noyau:#d62828', `éléments : ${r.join(', ')}`);
+check(/Dessinez un neurone entier/.test(await page.textContent('.consigne')), 'consigne affichée sous le titre');
+// légende longue tapée près du bord droit : retour à la ligne automatique
+await page.touchscreen.tap(b.x + b.width * 0.6, b.y + b.height * 0.42);
+await page.waitForSelector('.draw-input');
+await page.keyboard.type('Cône d’implantation zone gâchette');
+const h = await page.$eval('.draw-input', e => e.getBoundingClientRect().height);
+await page.keyboard.press('Enter');
+const lines = await page.evaluate(() => { const it = drawRun.items[drawRun.items.length - 1]; return Math.round((it.box[3] - it.box[1]) * 400 / 24); });
+const right = await page.evaluate(() => drawRun.items[drawRun.items.length - 1].box[2]);
+check(lines >= 2 && right <= 1 && h > 40, `légende longue sur ${lines} lignes, dans le cadre (bord droit à ${Math.round(right * 100)} %, zone de saisie ${Math.round(h)} px)`);
+await page.screenshot({ path: '/tmp/d5-retour-ligne.png' });
+// toucher une légende écrite pour la corriger
+await page.touchscreen.tap(b.x + b.width * 0.57, b.y + b.height * 0.15);
+await page.waitForSelector('.draw-input');
+check(await page.$eval('.draw-input', e => e.value) === 'Noyau', 'toucher « Noyau » ouvre la légende pour la corriger');
+await page.keyboard.press('End');
+await page.keyboard.type(' cellulaire');
+await page.keyboard.press('Enter');
+const texts = await page.evaluate(() => drawRun.items.filter(i => i.k === 'text').map(i => i.s));
+check(texts.length === 2 && texts[0] === 'Noyau cellulaire', `légende corrigée : ${texts.join(' | ')}`);
+// légende vidée : supprimée
+await page.touchscreen.tap(b.x + b.width * 0.62, b.y + b.height * 0.42);
+await page.waitForSelector('.draw-input');
+await page.fill('.draw-input', '');
+await page.keyboard.press('Enter');
+check(await page.evaluate(() => drawRun.items.filter(i => i.k === 'text').length) === 1, 'légende vidée : supprimée');
 await page.click('[data-tool="eraser"]');
 await stroke(page, [[0.2, 0.3], [0.4, 0.35]], true);
 const ink2 = await inkPixels(page);

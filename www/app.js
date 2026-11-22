@@ -2617,7 +2617,8 @@ function renderDessin() {
   const drawing = r.phase === 'draw';
   app.innerHTML = `
     <h2 class="section">${esc(r.sc.dessin || r.sc.titre)}</h2>
-    ${drawing ? `<p class="muted small">Dessinez le schéma avec ses légendes (${plural(labels.length, 'légende attendue', 'légendes attendues')}), puis touchez « Correction ».</p>
+    ${r.sc.consigne ? `<p class="consigne">${esc(r.sc.consigne)}</p>` : ''}
+    ${drawing ? `<p class="muted small">${plural(labels.length, 'légende attendue', 'légendes attendues')}. Touchez « Correction » quand vous avez fini. Avec l’outil Texte, touchez une légende déjà écrite pour la corriger.</p>
     <div class="draw-tools" role="toolbar" aria-label="Outils de dessin">
       ${tools.map(([k, ic, name]) => `<button data-tool="${k}" aria-pressed="${r.tool === k}" title="${name}"><span aria-hidden="true">${ic}</span> ${name}</button>`).join('')}
       <button id="d-undo" title="Annuler le dernier trait" ${r.items.length ? '' : 'disabled'}>↶ Annuler</button>
@@ -2694,7 +2695,7 @@ function setupCanvas() {
     if (document.querySelector('.draw-input')) return;
     e.preventDefault();
     const p = pos(e);
-    if (r.tool === 'text') return openTextInput(p);
+    if (r.tool === 'text') return openTextInput(p, textAt(p));
     pid = e.pointerId;
     cv.setPointerCapture(pid);
     cur = r.tool === 'line' ? { k: 'line', c: r.color, w: 2, a: p, b: p }
@@ -2734,9 +2735,14 @@ function drawAll() {
     ctx.strokeStyle = it.c;
     ctx.fillStyle = it.c;
     if (it.k === 'text') {
-      ctx.font = `${16 * u}px system-ui, -apple-system, "Segoe UI", sans-serif`;
+      if (it === drawRun.editing) continue; // en cours de correction : affiché dans la zone de saisie
+      ctx.font = `${19 * u}px system-ui, -apple-system, "Segoe UI", sans-serif`;
       ctx.textBaseline = 'middle';
-      ctx.fillText(it.s, it.x * W, it.y * W);
+      const lines = wrapLines(ctx, it.s, (1 - it.x) * W - 8 * u);
+      const lh = 24 * u;
+      lines.forEach((line, i) => ctx.fillText(line, it.x * W, it.y * W + i * lh));
+      // zone occupée, en fraction de la largeur, pour retrouver la légende quand on la touche
+      it.box = [it.x, it.y - 12 / 400, it.x + Math.max(...lines.map(l => ctx.measureText(l).width)) / W, it.y + (lines.length * 24 - 12) / 400];
       continue;
     }
     ctx.lineWidth = it.w * u;
@@ -2750,30 +2756,75 @@ function drawAll() {
   ctx.globalCompositeOperation = 'source-over';
 }
 
-function openTextInput(p) {
+// découpe le texte en lignes qui tiennent jusqu'au bord droit du cadre (mots trop longs coupés)
+function wrapLines(ctx, text, maxW) {
+  const out = [];
+  for (const para of String(text).split('\n')) {
+    let line = '';
+    for (const word of para.split(/\s+/).filter(Boolean)) {
+      let w = word;
+      while (ctx.measureText(w).width > maxW && w.length > 1) {
+        if (line) { out.push(line); line = ''; }
+        let k = w.length - 1;
+        while (k > 1 && ctx.measureText(w.slice(0, k)).width > maxW) k -= 1;
+        out.push(w.slice(0, k));
+        w = w.slice(k);
+      }
+      const test = line ? `${line} ${w}` : w;
+      if (line && ctx.measureText(test).width > maxW) { out.push(line); line = w; } else line = test;
+    }
+    out.push(line);
+  }
+  return out;
+}
+
+const textAt = p => [...drawRun.items].reverse().find(it => it.k === 'text' && it.box
+  && p[0] >= it.box[0] - 0.02 && p[0] <= it.box[2] + 0.02 && p[1] >= it.box[1] - 0.02 && p[1] <= it.box[3] + 0.02);
+
+function openTextInput(p, item) {
   const r = drawRun;
   const wrap = document.getElementById('draw-wrap');
   const cv = document.getElementById('draw');
   const b = cv.getBoundingClientRect();
-  const inp = document.createElement('input');
+  if (item) p = [item.x, item.y];
+  else p = [Math.min(p[0], 0.7), p[1]]; // au moins 30 % de la largeur pour écrire
+  const u = b.width / 400;
+  const inp = document.createElement('textarea');
   inp.className = 'draw-input';
-  inp.type = 'text';
-  inp.setAttribute('aria-label', 'Texte de la légende');
+  inp.rows = 1;
+  inp.setAttribute('aria-label', item ? 'Corriger la légende' : 'Texte de la légende');
   inp.placeholder = 'Légende…';
-  inp.style.left = `${Math.min(p[0] * b.width, b.width - 160)}px`;
-  inp.style.top = `${p[1] * b.width}px`;
-  inp.style.color = r.color;
-  inp.style.fontSize = `${Math.max(16, 16 * b.width / 400)}px`; // 16 px au moins : pas de zoom automatique sur iPhone
+  inp.value = item ? item.s : '';
+  // même largeur que le texte dessiné : le retour à la ligne se fait au même endroit, au bord du cadre
+  inp.style.left = `${p[0] * b.width}px`;
+  inp.style.top = `${p[1] * b.width - 12 * u}px`;
+  inp.style.width = `${(1 - p[0]) * b.width - 4}px`;
+  inp.style.color = item ? item.c : r.color;
+  inp.style.fontSize = `${19 * u}px`; // 19/400 de la largeur : au moins 16 px sur téléphone, sans zoom automatique
+  inp.style.lineHeight = `${24 * u}px`;
+  const grow = () => { inp.style.height = 'auto'; inp.style.height = `${inp.scrollHeight}px`; };
+  inp.oninput = grow;
   wrap.appendChild(inp);
+  if (item) { r.editing = item; drawAll(); }
+  grow();
   let done = false;
   const commit = () => {
     if (done) return;
     done = true;
     const s = inp.value.trim();
     inp.remove();
-    if (s && drawRun === r) { r.items.push({ k: 'text', c: r.color, s, x: p[0], y: p[1] }); drawAll(); renderTools(); }
+    if (drawRun !== r) return;
+    r.editing = null;
+    if (item) {
+      if (s) item.s = s; else r.items.splice(r.items.indexOf(item), 1); // légende vidée : supprimée
+    } else if (s) r.items.push({ k: 'text', c: r.color, s, x: p[0], y: p[1] });
+    drawAll();
+    renderTools();
   };
-  inp.onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); commit(); } if (e.key === 'Escape') { inp.value = ''; commit(); } };
+  inp.onkeydown = e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); commit(); }
+    if (e.key === 'Escape') { if (!item) inp.value = ''; else inp.value = item.s; commit(); }
+  };
   inp.onblur = commit;
   inp.focus(); // dans le geste de l'élève : sinon le clavier ne s'ouvre pas sur iPhone
 }
