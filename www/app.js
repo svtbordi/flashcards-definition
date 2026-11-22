@@ -50,7 +50,7 @@ function saveJSON(key, value) {
 }
 
 const store = Object.assign(
-  { cards: {}, log: [], days: {}, settings: {}, selection: [], picked: [], qcmLog: [], revLog: [], pendingReports: [], schemaCards: {}, schemaLog: [] },
+  { cards: {}, log: [], days: {}, settings: {}, selection: [], picked: [], qcmLog: [], revLog: [], pendingReports: [], schemaCards: {}, schemaLog: [], schemaDraw: {} },
   loadJSON(STORE_KEY, {})
 );
 store.settings = Object.assign({}, DEFAULT_SETTINGS, store.settings);
@@ -569,6 +569,10 @@ function go(next, push = true) {
 function back() {
   if (view === 'session') session = null;
   if (view === 'schema') schemaRun = null;
+  if (view === 'dessin') {
+    if (drawRun && drawRun.phase === 'draw' && drawRun.items.length && !confirm('Abandonner ce dessin ? Il n’est pas enregistré.')) return;
+    drawRun = null;
+  }
   view = viewStack.pop() || 'home';
   if (view === 'home' && !session && updateReady) return location.reload();
   render();
@@ -621,10 +625,10 @@ function render() {
   // pas de lexique pendant une séance : chercher la réponse avant de la donner annule l'effet du test
   document.getElementById('btn-lexicon').hidden = view === 'session' || view === 'lexicon' || view === 'schema';
   renderDiscToggle();
-  const titles = { home: 'Flashcards BCPST', choose: 'Choisir des chapitres', mine: 'Mes chapitres', session: 'Entraînement', progress: 'Ma progression', settings: 'Réglages', privacy: 'Données et confidentialité', install: 'Installer l’application', bilan: 'Mon bilan', lexicon: 'Lexique', schemas: 'Schémas', schema: 'Schéma' };
+  const titles = { home: 'Flashcards BCPST', choose: 'Choisir des chapitres', mine: 'Mes chapitres', session: 'Entraînement', progress: 'Ma progression', settings: 'Réglages', privacy: 'Données et confidentialité', install: 'Installer l’application', bilan: 'Mon bilan', lexicon: 'Lexique', schemas: 'Schémas', schema: 'Schéma', dessin: 'Dessin' };
   // petit écran : la bascule Bio / Géol prend de la place dans le bandeau
   titleEl.textContent = view === 'home' && window.innerWidth < 400 ? 'Flashcards' : (titles[view] || 'Flashcards BCPST');
-  ({ home: renderHome, choose: renderChoose, mine: renderMine, session: renderSession, progress: renderProgress, settings: renderSettings, privacy: renderPrivacy, install: renderInstall, bilan: renderBilan, lexicon: renderLexicon, schemas: renderSchemas, schema: renderSchema })[view]();
+  ({ home: renderHome, choose: renderChoose, mine: renderMine, session: renderSession, progress: renderProgress, settings: renderSettings, privacy: renderPrivacy, install: renderInstall, bilan: renderBilan, lexicon: renderLexicon, schemas: renderSchemas, schema: renderSchema, dessin: renderDessin })[view]();
 }
 
 function renderHome() {
@@ -1639,7 +1643,7 @@ const suiviOn = () => !!store.settings.suiviCode && canSuivi();
 function queueSuivi(force = false) {
   if (!suiviOn()) return;
   const last = store.suivi || {};
-  if (!force && (last.n === store.log.length || Date.now() - (last.t ? Date.parse(last.t) : 0) < SUIVI_GAP)) return;
+  if (!force && (last.n === activityCount() || Date.now() - (last.t ? Date.parse(last.t) : 0) < SUIVI_GAP)) return;
   // un seul bilan en attente : le plus récent remplace le précédent
   store.pendingReports = store.pendingReports.filter(x => x.nature !== 'suivi');
   const bilan = buildBilan(store.settings.suiviCode);
@@ -1648,7 +1652,7 @@ function queueSuivi(force = false) {
     bilan.evolution = bilan.evolution.filter((x, i, a) => i % 2 === 1 || i >= a.length - 4);
   }
   store.pendingReports.push({ nature: 'suivi', code: store.settings.suiviCode, bilan });
-  store.suivi = { t: new Date().toISOString(), n: store.log.length };
+  store.suivi = { t: new Date().toISOString(), n: activityCount() };
   persist();
   flushReports();
 }
@@ -1973,7 +1977,7 @@ function buildBilan(name) {
       ratees_total: store.log.filter(x => x.g === Rating.Again).length,
       jours_actifs_total: Object.keys(store.days).filter(k => store.days[k].reviews > 0).length,
       premiere_utilisation: store.log.length ? store.log[0].t : null,
-      derniere_utilisation: store.log.length ? store.log[store.log.length - 1].t : null,
+      derniere_utilisation: [store.log.length ? store.log[store.log.length - 1].t : null, schemasLastUse()].filter(Boolean).sort().pop() || null,
       cartes_vues: all.seen,
       cartes_acquises: all.mastered,
       cartes_a_revoir: all.due,
@@ -1985,6 +1989,7 @@ function buildBilan(name) {
     plus_ratees_total: mostFailed(store.log).slice(0, 20).map(x => ({ terme: x.c.term, ratees: x.n })),
     evolution: evo,
     jours,
+    schemas: schemasBilan(),
   };
 }
 
@@ -2222,7 +2227,7 @@ async function importBackup(file) {
     const data = JSON.parse(await file.text());
     if (data.app !== 'flashcards-bcpst' || !data.store || typeof data.store.cards !== 'object') throw new Error('fichier non reconnu');
     if (!await askConfirm(`Restaurer la sauvegarde du ${data.exported.slice(0, 10)} ? Elle remplace la progression actuelle de cet appareil.`, 'Restaurer')) return;
-    Object.assign(store, { cards: {}, log: [], days: {}, selection: [], picked: [], mesChapitres: undefined, schemaCards: {}, schemaLog: [] }, data.store);
+    Object.assign(store, { cards: {}, log: [], days: {}, selection: [], picked: [], mesChapitres: undefined, schemaCards: {}, schemaLog: [], schemaDraw: {} }, data.store);
     pickedSet = new Set(store.picked);
     // sauvegarde faite avant « Mes chapitres » : la liste est recréée comme pour une mise à jour
     if (!Array.isArray(store.mesChapitres)) { delete store.mesChapitres; migrateChapters(true); }
@@ -2376,26 +2381,39 @@ function renderSchemas() {
   const mineList = here.filter(schemaInMine);
   if (!schemaScope) schemaScope = mineList.length ? 'mine' : 'all';
   const list = schemaScope === 'mine' ? mineList : here;
+  const mode = schemaMode();
   const byChap = {};
   for (const sc of list) (byChap[sc.chapitre] = byChap[sc.chapitre] || []).push(sc);
   const codes = Object.keys(byChap).sort((a, b) => (chapterOrder[a] ?? 999) - (chapterOrder[b] ?? 999) || a.localeCompare(b));
   app.innerHTML = `
-    <p class="muted">Touchez un numéro du schéma, puis choisissez sa légende dans le menu. Une légende ratée revient plus vite, une légende sue de plus en plus tard.</p>
+    <div class="seg mode" role="radiogroup" aria-label="Façon de s’entraîner">
+      <button role="radio" data-mode="fill" aria-checked="${mode === 'fill'}">Compléter les légendes</button>
+      <button role="radio" data-mode="draw" aria-checked="${mode === 'draw'}">Dessiner</button>
+    </div>
+    <p class="muted">${mode === 'fill' ? 'Touchez un numéro du schéma, puis choisissez sa légende dans le menu. Une légende ratée revient plus vite, une légende sue de plus en plus tard.'
+      : 'Dessinez le schéma de mémoire avec ses légendes, puis touchez « Correction » : le schéma légendé s’affiche et vous cochez les légendes justes de votre dessin.'}</p>
     <div class="seg" role="radiogroup" aria-label="Schémas proposés">
       <button role="radio" data-scope="mine" aria-checked="${schemaScope === 'mine'}">Mes chapitres (${mineList.length})</button>
       <button role="radio" data-scope="all" aria-checked="${schemaScope === 'all'}">Tous les chapitres (${here.length})</button>
     </div>
     ${list.length ? codes.map(code => `<h2 class="section">${esc(code)} · ${esc(chapterTitle[code] || chapterTitle[partOf(code)] || '')}</h2>
       <div class="actions">${byChap[code].map(sc => {
+        if (mode === 'draw') {
+          const d = schemaDrawStats(sc);
+          const info = d.n ? `${plural(d.n, 'essai', 'essais')} · dernier ${d.lastPct} %${d.n > 1 ? ` · meilleur ${d.best} %` : ''}` : `${plural(drawLabels(sc).length, 'légende', 'légendes')} à placer, jamais dessiné`;
+          return `<button data-sc="${esc(sc.id)}">${esc(sc.dessin || sc.titre)} <small>${info}</small></button>`;
+        }
         const st = schemaStats(sc);
-        const info = st.fresh === st.total ? `${plural(st.total, 'légende', 'légendes')}, jamais fait`
+        const f = schemaFillStats(sc);
+        const info = (st.fresh === st.total ? `${plural(st.total, 'légende', 'légendes')}, jamais fait`
           : st.due ? `${plural(st.due, 'légende à revoir', 'légendes à revoir')}${st.fresh ? `, ${st.fresh} jamais vue${st.fresh > 1 ? 's' : ''}` : ''}`
-          : `à jour (${plural(st.total, 'légende', 'légendes')})`;
+          : `à jour (${plural(st.total, 'légende', 'légendes')})`) + (f.n ? ` · ${f.pct} % de réponses justes` : '');
         return `<button data-sc="${esc(sc.id)}" class="${st.due || st.fresh ? '' : 'done'}">${esc(sc.titre)} <small>${info}</small></button>`;
       }).join('')}</div>`).join('')
       : `<p class="card">Aucun schéma dans vos chapitres de ${DISC_NAME[disc()]} pour l’instant. Ajoutez des chapitres, ou choisissez « Tous les chapitres ».</p>`}`;
   app.querySelectorAll('[data-scope]').forEach(b => { b.onclick = () => { schemaScope = b.dataset.scope; render(); }; });
-  app.querySelectorAll('[data-sc]').forEach(b => { b.onclick = () => startSchema(b.dataset.sc); });
+  app.querySelectorAll('[data-mode]').forEach(b => { b.onclick = () => { store.ui.schemaMode = b.dataset.mode; persist(); render(); }; });
+  app.querySelectorAll('[data-sc]').forEach(b => { b.onclick = () => (mode === 'draw' ? startDraw(b.dataset.sc) : startSchema(b.dataset.sc)); });
 }
 
 function schemaOptions(sc, l) {
@@ -2524,6 +2542,240 @@ function schemaNextId() {
   const todo = list.map(sc => ({ sc, st: schemaStats(sc) })).filter(x => x.st.due || x.st.fresh);
   todo.sort((a, b) => b.st.due - a.st.due);
   return todo.length ? todo[0].sc.id : '';
+}
+
+/* ---------- Schémas : dessiner de mémoire ---------- */
+// L'élève dessine le schéma (stylo 8 couleurs, gomme, trait de légende, texte au clavier), puis affiche le schéma
+// légendé et coche les légendes justes de son dessin. Seul le score est gardé (store.schemaDraw), jamais le dessin.
+// Ce score est auto-évalué : il reste séparé du calendrier et des statistiques du mode « Compléter ».
+const DRAW_COLORS = [['#1d2321', 'noir'], ['#d62828', 'rouge'], ['#f77f00', 'orange'], ['#e6b800', 'jaune'],
+  ['#2a9d4f', 'vert'], ['#1d4ed8', 'bleu'], ['#7b2cbf', 'violet'], ['#8b5a2b', 'marron']];
+const DRAW_KEEP = 30; // essais gardés par schéma
+let drawRun = null;
+
+const schemaMode = () => (store.ui.schemaMode === 'draw' ? 'draw' : 'fill');
+const activityCount = () => store.log.length + store.schemaLog.length + Object.values(store.schemaDraw).reduce((n, h) => n + h.length, 0);
+
+// légendes à évaluer en dessin : celles que le titre à dessiner ne donne pas déjà (« Capillaire »…)
+const drawLabels = sc => sc.legendes.filter(l => !normTerm(sc.dessin || '').includes(normTerm(l.terme)));
+
+function schemaFillStats(sc) {
+  const pre = sc.id + '#';
+  let n = 0, ok = 0, last = null;
+  for (const x of store.schemaLog) if (x.id.startsWith(pre)) { n += 1; ok += x.ok; last = x.t; }
+  return { n, ok, last, pct: n ? Math.round(100 * ok / n) : 0 };
+}
+
+function schemaDrawStats(sc) {
+  const h = store.schemaDraw[sc.id] || [];
+  const pct = x => Math.round(100 * x.ok / Math.max(1, x.n));
+  return {
+    n: h.length,
+    last: h.length ? h[h.length - 1].t : null,
+    lastPct: h.length ? pct(h[h.length - 1]) : 0,
+    best: h.length ? Math.max(...h.map(pct)) : 0,
+    mean: h.length ? Math.round(h.reduce((a, x) => a + pct(x), 0) / h.length) : 0,
+  };
+}
+
+function schemasLastUse() {
+  const t = [];
+  for (const sc of schemaList) {
+    const f = schemaFillStats(sc), d = schemaDrawStats(sc);
+    if (f.last) t.push(f.last);
+    if (d.last) t.push(d.last);
+  }
+  return t.sort().pop() || null;
+}
+
+// pour le bilan envoyé à l'enseignant : un élément par schéma travaillé, les deux modes séparés
+function schemasBilan() {
+  return schemaList.map(sc => {
+    const f = schemaFillStats(sc), d = schemaDrawStats(sc);
+    if (!f.n && !d.n) return null;
+    const sues = sc.legendes.filter(l => { const st = store.schemaCards[schemaLabelId(sc, l)]; return st && st.state === State.Review; }).length;
+    return {
+      id: sc.id, titre: sc.dessin || sc.titre, chapitre: sc.chapitre, legendes: sc.legendes.length,
+      completer: { reponses: f.n, justes: f.ok, legendes_sues: sues, derniere: f.last },
+      dessin: { essais: d.n, dernier: d.n ? d.lastPct : null, meilleur: d.n ? d.best : null, moyenne: d.n ? d.mean : null, derniere: d.last },
+    };
+  }).filter(Boolean);
+}
+
+function startDraw(id) {
+  const sc = schemaList.find(x => x.id === id);
+  if (!sc) return;
+  drawRun = { sc, items: [], tool: 'pen', color: DRAW_COLORS[0][0], phase: 'draw', ratio: window.innerWidth < 700 ? 1.2 : 0.68, checks: new Set() };
+  go('dessin');
+}
+
+function renderDessin() {
+  const r = drawRun;
+  if (!r) { view = 'schemas'; return render(); }
+  const labels = drawLabels(r.sc);
+  const tools = [['pen', '✏️', 'Stylo'], ['eraser', '🧽', 'Gomme'], ['line', '╱', 'Trait de légende'], ['text', 'T', 'Texte']];
+  const drawing = r.phase === 'draw';
+  app.innerHTML = `
+    <h2 class="section">${esc(r.sc.dessin || r.sc.titre)}</h2>
+    ${drawing ? `<p class="muted small">Dessinez le schéma avec ses légendes (${plural(labels.length, 'légende attendue', 'légendes attendues')}), puis touchez « Correction ».</p>
+    <div class="draw-tools" role="toolbar" aria-label="Outils de dessin">
+      ${tools.map(([k, ic, name]) => `<button data-tool="${k}" aria-pressed="${r.tool === k}" title="${name}"><span aria-hidden="true">${ic}</span> ${name}</button>`).join('')}
+      <button id="d-undo" title="Annuler le dernier trait" ${r.items.length ? '' : 'disabled'}>↶ Annuler</button>
+      <button id="d-clear" title="Tout effacer" ${r.items.length ? '' : 'disabled'}>Tout effacer</button>
+    </div>
+    <div class="draw-colors" role="radiogroup" aria-label="Couleur">
+      ${DRAW_COLORS.map(([c, name]) => `<button role="radio" data-color="${c}" aria-checked="${r.color === c}" aria-label="${name}" title="${name}" style="background:${c}"></button>`).join('')}
+    </div>` : ''}
+    <div class="draw-grid ${drawing ? '' : 'two'}">
+      <div><div class="draw-wrap" id="draw-wrap"><canvas id="draw" aria-label="Zone de dessin"></canvas></div>
+        ${drawing ? '' : '<p class="muted small center">Votre dessin</p>'}</div>
+      ${drawing ? '' : `<div><div class="plate">${r.sc.corrige}</div><p class="muted small center">Le schéma légendé</p></div>`}
+    </div>
+    ${drawing ? `<div class="actions"><button class="primary" id="d-correct">Correction</button></div>`
+      : r.phase === 'check' ? `<fieldset class="keys"><legend>Cochez les légendes justes de votre dessin (bien placées, bien écrites) :</legend>
+        ${labels.map((l, i) => `<label><input type="checkbox" data-k="${i}" ${r.checks.has(i) ? 'checked' : ''}> ${esc(l.terme)}</label>`).join('')}</fieldset>
+        <div class="actions"><button class="primary" id="d-save">Enregistrer : ${r.checks.size} / ${labels.length}</button></div>`
+      : `<section class="card center"><p class="big">${r.result.ok} / ${r.result.n} légendes justes (${Math.round(100 * r.result.ok / Math.max(1, r.result.n))} %)</p>
+        <p class="muted">${drawSummary(r.sc)}</p></section>
+        <div class="actions"><button class="primary" id="d-again">Redessiner ce schéma</button><button id="d-list">Retour aux schémas</button></div>`}`;
+  setupCanvas();
+  app.querySelectorAll('[data-tool]').forEach(b => { b.onclick = () => { r.tool = b.dataset.tool; renderTools(); }; });
+  app.querySelectorAll('[data-color]').forEach(b => { b.onclick = () => { r.color = b.dataset.color; if (r.tool === 'eraser') r.tool = 'pen'; renderTools(); }; });
+  const on = (id, f) => { const el = document.getElementById(id); if (el) el.onclick = f; };
+  on('d-undo', () => { r.items.pop(); drawAll(); renderTools(); });
+  on('d-clear', () => { if (confirm('Effacer tout le dessin ?')) { r.items = []; drawAll(); renderTools(); } });
+  on('d-correct', () => {
+    if (!r.items.length && !confirm('Votre dessin est vide. Afficher quand même la correction ?')) return;
+    r.phase = 'check'; render(); window.scrollTo(0, 0);
+  });
+  app.querySelectorAll('[data-k]').forEach(cb => { cb.onchange = () => { if (cb.checked) r.checks.add(+cb.dataset.k); else r.checks.delete(+cb.dataset.k); document.getElementById('d-save').textContent = `Enregistrer : ${r.checks.size} / ${labels.length}`; }; });
+  on('d-save', () => {
+    r.result = { t: new Date().toISOString(), ok: r.checks.size, n: labels.length };
+    const h = store.schemaDraw[r.sc.id] || (store.schemaDraw[r.sc.id] = []);
+    h.push(r.result);
+    if (h.length > DRAW_KEEP) h.splice(0, h.length - DRAW_KEEP);
+    persist();
+    r.phase = 'done'; render();
+  });
+  on('d-again', () => { viewStack = viewStack.filter(v => v !== 'dessin'); view = 'schemas'; startDraw(r.sc.id); });
+  on('d-list', () => { drawRun = null; viewStack = viewStack.filter(v => v !== 'dessin'); view = 'schemas'; render(); });
+}
+
+function drawSummary(sc) {
+  const d = schemaDrawStats(sc);
+  return d.n > 1 ? `${plural(d.n, 'essai', 'essais')} sur ce schéma · meilleur ${d.best} % · moyenne ${d.mean} %` : 'Premier essai sur ce schéma. Redessinez-le dans quelques jours pour voir vos progrès.';
+}
+
+function renderTools() {
+  const r = drawRun;
+  app.querySelectorAll('[data-tool]').forEach(b => b.setAttribute('aria-pressed', String(r.tool === b.dataset.tool)));
+  app.querySelectorAll('[data-color]').forEach(b => b.setAttribute('aria-checked', String(r.color === b.dataset.color)));
+  for (const id of ['d-undo', 'd-clear']) { const el = document.getElementById(id); if (el) el.disabled = !r.items.length; }
+  const cv = document.getElementById('draw');
+  if (cv) cv.dataset.tool = r.tool;
+}
+
+// Coordonnées enregistrées en fraction de la largeur : le dessin garde sa forme si l'écran change de taille.
+function setupCanvas() {
+  const r = drawRun;
+  const cv = document.getElementById('draw');
+  const wrap = document.getElementById('draw-wrap');
+  const W = wrap.clientWidth || 360;
+  const dpr = Math.min(window.devicePixelRatio || 1, 3);
+  cv.width = Math.round(W * dpr);
+  cv.height = Math.round(W * r.ratio * dpr);
+  cv.dataset.tool = r.tool;
+  drawAll();
+  if (r.phase !== 'draw') return;
+  let cur = null, pid = null;
+  const pos = e => { const b = cv.getBoundingClientRect(); return [(e.clientX - b.left) / b.width, (e.clientY - b.top) / b.width]; };
+  cv.onpointerdown = e => {
+    if (pid !== null || (e.pointerType === 'mouse' && e.button !== 0)) return;
+    if (document.querySelector('.draw-input')) return;
+    e.preventDefault();
+    const p = pos(e);
+    if (r.tool === 'text') return openTextInput(p);
+    pid = e.pointerId;
+    cv.setPointerCapture(pid);
+    cur = r.tool === 'line' ? { k: 'line', c: r.color, w: 2, a: p, b: p }
+      : { k: r.tool, c: r.color, w: r.tool === 'eraser' ? 18 : 3, pts: [p] };
+    r.items.push(cur);
+    drawAll();
+  };
+  cv.onpointermove = e => {
+    if (e.pointerId !== pid || !cur) return;
+    e.preventDefault();
+    if (cur.k === 'line') cur.b = pos(e);
+    else for (const ev of (e.getCoalescedEvents ? e.getCoalescedEvents() : [e])) cur.pts.push(pos(ev));
+    drawAll();
+  };
+  const end = e => {
+    if (e.pointerId !== pid) return;
+    pid = null;
+    if (cur && cur.k === 'line' && Math.hypot(cur.b[0] - cur.a[0], cur.b[1] - cur.a[1]) < 0.01) r.items.pop();
+    cur = null;
+    drawAll();
+    renderTools();
+  };
+  cv.onpointerup = end;
+  cv.onpointercancel = end;
+}
+
+function drawAll() {
+  const cv = document.getElementById('draw');
+  if (!cv || !drawRun) return;
+  const ctx = cv.getContext('2d');
+  const W = cv.width, u = W / 400; // épaisseurs et police pensées pour une largeur de 400
+  ctx.clearRect(0, 0, cv.width, cv.height);
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  for (const it of drawRun.items) {
+    ctx.globalCompositeOperation = it.k === 'eraser' ? 'destination-out' : 'source-over';
+    ctx.strokeStyle = it.c;
+    ctx.fillStyle = it.c;
+    if (it.k === 'text') {
+      ctx.font = `${16 * u}px system-ui, -apple-system, "Segoe UI", sans-serif`;
+      ctx.textBaseline = 'middle';
+      ctx.fillText(it.s, it.x * W, it.y * W);
+      continue;
+    }
+    ctx.lineWidth = it.w * u;
+    ctx.beginPath();
+    const pts = it.k === 'line' ? [it.a, it.b] : it.pts;
+    ctx.moveTo(pts[0][0] * W, pts[0][1] * W);
+    if (pts.length === 1) ctx.lineTo(pts[0][0] * W + 0.1, pts[0][1] * W);
+    for (const p of pts.slice(1)) ctx.lineTo(p[0] * W, p[1] * W);
+    ctx.stroke();
+  }
+  ctx.globalCompositeOperation = 'source-over';
+}
+
+function openTextInput(p) {
+  const r = drawRun;
+  const wrap = document.getElementById('draw-wrap');
+  const cv = document.getElementById('draw');
+  const b = cv.getBoundingClientRect();
+  const inp = document.createElement('input');
+  inp.className = 'draw-input';
+  inp.type = 'text';
+  inp.setAttribute('aria-label', 'Texte de la légende');
+  inp.placeholder = 'Légende…';
+  inp.style.left = `${Math.min(p[0] * b.width, b.width - 160)}px`;
+  inp.style.top = `${p[1] * b.width}px`;
+  inp.style.color = r.color;
+  inp.style.fontSize = `${Math.max(16, 16 * b.width / 400)}px`; // 16 px au moins : pas de zoom automatique sur iPhone
+  wrap.appendChild(inp);
+  let done = false;
+  const commit = () => {
+    if (done) return;
+    done = true;
+    const s = inp.value.trim();
+    inp.remove();
+    if (s && drawRun === r) { r.items.push({ k: 'text', c: r.color, s, x: p[0], y: p[1] }); drawAll(); renderTools(); }
+  };
+  inp.onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); commit(); } if (e.key === 'Escape') { inp.value = ''; commit(); } };
+  inp.onblur = commit;
+  inp.focus(); // dans le geste de l'élève : sinon le clavier ne s'ouvre pas sur iPhone
 }
 
 async function main() {
