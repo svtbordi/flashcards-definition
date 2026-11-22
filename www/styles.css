@@ -286,3 +286,8 @@ button.write-toggle { font-size: 14px; }
 .typed-answer p { margin: 0 0 4px; white-space: pre-wrap; }
 .typed-label { margin: 0 0 6px; }
 .typed-label + .def { border-top: 0; padding-top: 0; }
+
+/* Premier lancement : comment ajouter des chapitres */
+.welcome h2 { font-size: 18px; margin: 0 0 8px; }
+.welcome ol { padding-left: 22px; margin: 8px 0; }
+.welcome li { margin: 6px 0; }
