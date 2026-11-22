@@ -64,8 +64,24 @@ check(JSON.stringify(after.cards) === JSON.stringify(b.cards), 'toutes les carte
 check(JSON.stringify(after.log) === JSON.stringify(b.log), 'journal des réponses intact');
 check(JSON.stringify(after.days) === JSON.stringify(b.days), 'jours de travail intacts');
 check(JSON.stringify(after.mesChapitres) === JSON.stringify([...ouverts.chapitres, '@methodes']), 'Mes chapitres = chapitres proposés par l’enseignant + méthodes');
+// même ensemble de cartes en révisions espacées : biologie ∪ géologie = ancien périmètre
+const same = await page.evaluate(() => {
+  const ids = d => deck.cards.filter(c => inDisc(c, d) && inScope(c, openChapters(), true)).map(c => c.id);
+  const union = new Set([...ids('bio'), ...ids('geol')]);
+  const legacy = deck.cards.filter(c => inScope(c, legacyChapters(), true)).map(c => c.id);
+  return union.size === legacy.length && legacy.every(id => union.has(id));
+});
+check(same, 'révisions espacées : biologie + géologie = exactement les cartes d’avant');
 const heroAfter = await text(page, '.hero');
-check(heroAfter.split('Objectif')[0] === heroBefore.split('Objectif')[0], `mêmes cartes à faire : « ${heroAfter.slice(0, 80)} »`);
+console.log('   accueil Bio :', heroAfter.slice(0, 70));
+check(await page.$('.disc button.on[data-disc="bio"]') !== null, 'bascule Bio / Géol affichée, Bio par défaut');
+await page.click('.disc button[data-disc="geol"]');
+console.log('   accueil Géol :', (await text(page, '.hero')).slice(0, 70), '| bascule :', await text(page, '.disc'));
+const afterToggle = JSON.parse(await page.evaluate(() => localStorage.getItem('fc-bcpst-v1')));
+check(JSON.stringify(afterToggle.cards) === JSON.stringify(b.cards) && afterToggle.settings.discipline === 'geol', 'basculer en Géol ne change aucune carte et est mémorisé');
+await page.reload(); await page.waitForSelector('#go-all');
+check(await page.$('.disc button.on[data-disc="geol"]') !== null, 'Géol retrouvé après relancement');
+await page.click('.disc button[data-disc="bio"]');
 check(await page.$('#ban-chn') !== null, 'bandeau « Nouveau : vous choisissez vos chapitres » affiché');
 console.log('   bouton :', await text(page, '#go-all'), '| avant :', allBefore);
 await page.screenshot({ path: '/tmp/m1-migration.png' });
@@ -125,7 +141,12 @@ const term = await text(p3, '.flash');
 console.log('   première carte :', term.slice(0, 60));
 // entraînement libre puis « Ajouter aussi à mes chapitres »
 await p3.click('#btn-back');
+await p3.click('.disc button[data-disc="geol"]');
+check(await p3.$('#wel-add') !== null, 'Géol sans chapitre de géologie : carte « Ajoutez des chapitres de géologie »');
+check(await p3.$('input[data-code="SV-G"]') === null, 'Géol : pas de chapitres de biologie affichés');
+await p3.screenshot({ path: '/tmp/m5-geol-vide.png' });
 await p3.click('#go-choose');
+check(await p3.$('input[data-code="SV-G"]') === null && await p3.$('input[data-code="BG-A"]') !== null, 'entraînement libre en Géol : ST et BG seulement');
 await p3.check('input[data-code="ST-A"]');
 await p3.click('#add-mine');
 const m3 = JSON.parse(await p3.evaluate(() => localStorage.getItem('fc-bcpst-v1'))).mesChapitres;

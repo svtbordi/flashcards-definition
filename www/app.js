@@ -25,6 +25,7 @@ const DEFAULT_SETTINGS = {
   reminderTime: '20:00',
   writeAnswer: false, // zone pour écrire sa réponse avant de retourner la carte (facultatif)
   direction: 'td', // sens des cartes en entraînement libre : td terme → définition, dt définition → terme, mix les deux
+  discipline: 'bio', // bascule du bandeau : bio (SV + BG) ou geol (ST + BG)
 };
 
 /* ---------- Stockage ---------- */
@@ -232,7 +233,8 @@ function openChapters() {
   return Array.isArray(store.mesChapitres) ? store.mesChapitres : legacyChapters();
 }
 const myChapterCodes = () => openChapters().filter(x => x !== METHODS);
-const myListEmpty = () => !openChapters().length;
+const myCodesHere = () => myChapterCodes().filter(x => codeInDisc(x));
+const myListEmpty = () => !myCodesHere().length && !(openChapters().includes(METHODS) && methodsHere().length);
 
 function setMyChapters(list) {
   store.mesChapitres = list;
@@ -240,6 +242,16 @@ function setMyChapters(list) {
 }
 
 const methodCards = () => deck.cards.filter(c => c.method);
+
+// Bascule Bio / Géol (bandeau) : n'affiche et ne propose que les cartes d'une discipline. Les biogéosciences (BG)
+// sont dans les deux : c'est la même carte, révisée une seule fois. La bascule ne supprime ni ne modifie rien.
+const DISC = { bio: ['SV', 'BG'], geol: ['ST', 'BG'] };
+const DISC_NAME = { bio: 'biologie', geol: 'géologie' };
+const disc = () => (DISC[store.settings.discipline] ? store.settings.discipline : 'bio');
+const otherDisc = () => (disc() === 'bio' ? 'geol' : 'bio');
+const codeInDisc = (code, d = disc()) => DISC[d].includes(code.slice(0, 2));
+const inDisc = (c, d = disc()) => cardCodes(c).some(code => codeInDisc(code, d));
+const methodsHere = () => methodCards().filter(c => inDisc(c));
 
 const isStarted = c => { const st = store.cards[c.id]; return !!st && st.state !== State.New; };
 
@@ -271,7 +283,7 @@ function startedCodes() {
   const codes = new Set();
   for (const c of deck.cards) {
     const st = store.cards[c.id];
-    if (st && st.reps > 0) cardCodes(c).forEach(code => codes.add(code));
+    if (st && st.reps > 0) cardCodes(c).forEach(code => { if (codeInDisc(code)) codes.add(code); });
   }
   return [...codes];
 }
@@ -365,10 +377,10 @@ function inScope(c, selected, reviews) {
   return matchesSelection(c, selected) || (reviews && isStarted(c));
 }
 
-function buildSession(selected, { ahead = false, label = '', reviews = false, dir = 'td', noCap = false, discover = false } = {}) {
+function buildSession(selected, { ahead = false, label = '', reviews = false, dir = 'td', noCap = false, discover = false, inDiscOnly = false } = {}) {
   const now = new Date();
   const endDay = endOfStudyDay(now);
-  const pool = deck.cards.filter(c => inScope(c, selected, reviews));
+  const pool = deck.cards.filter(c => (!inDiscOnly || inDisc(c)) && inScope(c, selected, reviews));
   const due = [];
   const fresh = [];
   const notDue = [];
@@ -606,8 +618,10 @@ function render() {
   backBtn.hidden = view === 'home';
   // pas de lexique pendant une séance : chercher la réponse avant de la donner annule l'effet du test
   document.getElementById('btn-lexicon').hidden = view === 'session' || view === 'lexicon';
+  renderDiscToggle();
   const titles = { home: 'Flashcards BCPST', choose: 'Choisir des chapitres', mine: 'Mes chapitres', session: 'Entraînement', progress: 'Ma progression', settings: 'Réglages', privacy: 'Données et confidentialité', install: 'Installer l’application', bilan: 'Mon bilan', lexicon: 'Lexique' };
-  titleEl.textContent = titles[view] || 'Flashcards BCPST';
+  // petit écran : la bascule Bio / Géol prend de la place dans le bandeau
+  titleEl.textContent = view === 'home' && window.innerWidth < 400 ? 'Flashcards' : (titles[view] || 'Flashcards BCPST');
   ({ home: renderHome, choose: renderChoose, mine: renderMine, session: renderSession, progress: renderProgress, settings: renderSettings, privacy: renderPrivacy, install: renderInstall, bilan: renderBilan, lexicon: renderLexicon })[view]();
 }
 
@@ -615,7 +629,7 @@ function renderHome() {
   queueSuivi();
   const all = statsFor(deck.cards);
   const openList = openChapters();
-  const revs = statsFor(deck.cards.filter(c => inScope(c, openList, true)));
+  const revs = statsFor(deck.cards.filter(c => inDisc(c) && inScope(c, openList, true)));
   const started = startedCodes();
   const startedStats = started.length ? statsFor(deck.cards.filter(c => matchesSelection(c, started))) : null;
   const d = today();
@@ -628,9 +642,9 @@ function renderHome() {
   const steps = Math.ceil((plan.due + plan.fresh) / STEP);
   const picked = pickedCards();
   const pickedStats = picked.length ? statsFor(picked) : null;
-  const mine = myChapterCodes();
-  const mineLabel = mine.length ? `${plural(mine.length, 'chapitre ou sous-partie', 'chapitres ou sous-parties')}${openList.includes(METHODS) && methodCards().length ? ' et méthodes' : ''}`
-    : openList.includes(METHODS) ? 'méthodes et techniques seulement' : 'aucun chapitre choisi';
+  const mine = myCodesHere();
+  const mineLabel = mine.length ? `${plural(mine.length, 'chapitre ou sous-partie', 'chapitres ou sous-parties')}${openList.includes(METHODS) && methodsHere().length ? ' et méthodes' : ''}`
+    : openList.includes(METHODS) && methodsHere().length ? 'méthodes et techniques seulement' : 'aucun chapitre choisi';
   app.innerHTML = `
     ${chaptersNotice()}
     ${myListEmpty() && !plan.due ? '' : homeBanners()}
@@ -645,7 +659,7 @@ function renderHome() {
     </section>`}
     ${gainsCard()}
     <div class="actions">
-      <button class="primary" id="go-all" ${plan.due + newToday ? '' : 'disabled'}>Révisions espacées du jour
+      <button class="primary" id="go-all" ${plan.due + newToday ? '' : 'disabled'}>Révisions espacées du jour : ${DISC_NAME[disc()]}
         <small>dans mes chapitres (${mineLabel})</small></button>
       <button id="go-mine">＋ Ajouter des chapitres à mes révisions <small>Mes chapitres : à compléter à chaque nouveau chapitre vu en cours</small></button>
     </div>
@@ -659,7 +673,7 @@ function renderHome() {
       <button id="go-choose">Choisir un ou plusieurs chapitres</button>
       ${pickedStats ? `<button id="go-picked">Réviser mes définitions cochées <small>(${plural(pickedStats.total, 'définition', 'définitions')} : ${pickedStats.due} à revoir, ${plural(pickedStats.new, 'jamais vue', 'jamais vues')})</small></button>` : ''}
       ${store.selection.length ? `<button id="go-last">Reprendre ma dernière sélection <small>(${esc(store.selection.slice(0, 3).join(', '))}${store.selection.length > 3 ? '…' : ''})</small></button>` : ''}
-      ${methodCards().length ? `<button id="go-methods">Méthodes et techniques <small>(principe et objectif de ${plural(methodCards().length, 'méthode', 'méthodes')}, tous chapitres)</small></button>` : ''}
+      ${methodsHere().length ? `<button id="go-methods">Méthodes et techniques <small>(principe et objectif de ${plural(methodsHere().length, 'méthode', 'méthodes')}, ${DISC_NAME[disc()]})</small></button>` : ''}
       <button id="go-started" ${startedStats ? '' : 'disabled'}>Mes chapitres commencés${startedStats ? ` <small>(${startedStats.due} à revoir)</small>` : ''}</button>
     </div>
     <div class="actions secondary">
@@ -677,9 +691,9 @@ function renderHome() {
   const cm = document.getElementById('chn-mine');
   if (cm) cm.onclick = () => { store.ui.chaptersNoticeSeen = true; persist(); go('mine'); };
   bindBanners();
-  const disc = document.getElementById('go-discover');
-  if (disc) disc.onclick = () => startSession(openList, 'Nouvelles définitions', { discover: true });
-  document.getElementById('go-started').onclick = () => startSession(started, 'Mes chapitres commencés');
+  const discBtn = document.getElementById('go-discover');
+  if (discBtn) discBtn.onclick = () => startSession(openList, 'Nouvelles définitions', { discover: true });
+  document.getElementById('go-started').onclick = () => startSession(started, 'Mes chapitres commencés', { inDiscOnly: true });
   document.getElementById('go-choose').onclick = () => go('choose');
   document.getElementById('dir').onchange = e => { store.settings.direction = e.target.value; persist(); render(); };
   const pk = document.getElementById('go-picked');
@@ -687,7 +701,7 @@ function renderHome() {
   const last = document.getElementById('go-last');
   if (last) last.onclick = () => startSession(store.selection, 'Dernière sélection');
   const methods = document.getElementById('go-methods');
-  if (methods) methods.onclick = () => startSession([METHODS], 'Méthodes et techniques');
+  if (methods) methods.onclick = () => startSession([METHODS], 'Méthodes et techniques', { inDiscOnly: true });
   document.getElementById('go-progress').onclick = () => go('progress');
   const inst = document.getElementById('go-install');
   if (inst) inst.onclick = () => go('install');
@@ -755,19 +769,56 @@ function bindBanners() {
   on('ban-rest-no', () => { store.ui.restoreSeen = true; persist(); render(); });
 }
 
+/* ---------- Bascule Bio / Géol ---------- */
+
+// Cartes à revoir aujourd'hui dans l'autre discipline (hors biogéosciences, déjà comptées ici) : affichées sur la
+// bascule pour qu'elles ne s'accumulent pas sans qu'on le voie.
+function otherDue() {
+  const o = otherDisc();
+  return statsFor(deck.cards.filter(c => inDisc(c, o) && !inDisc(c) && isStarted(c))).due;
+}
+
+function renderDiscToggle() {
+  let box = document.getElementById('disc');
+  if (!box) {
+    box = document.createElement('div');
+    box.id = 'disc';
+    box.className = 'disc';
+    box.setAttribute('role', 'group');
+    box.setAttribute('aria-label', 'Discipline');
+    document.querySelector('.top').insertBefore(box, document.getElementById('btn-lexicon'));
+    box.addEventListener('click', e => {
+      const b = e.target.closest('button[data-disc]');
+      if (!b || b.dataset.disc === disc()) return;
+      store.settings.discipline = b.dataset.disc;
+      persist();
+      chooseSel.clear();
+      toast(b.dataset.disc === 'bio' ? 'Biologie : révisions, chapitres et entraînement de biologie (biogéosciences comprises).'
+        : 'Géologie : révisions, chapitres et entraînement de géologie (biogéosciences comprises).');
+      render();
+    });
+  }
+  box.hidden = view === 'session' || !deck.cards.length;
+  if (box.hidden) return;
+  const n = otherDue();
+  const btn = d => `<button data-disc="${d}" class="${d === disc() ? 'on' : ''}" aria-pressed="${d === disc()}">${d === 'bio' ? 'Bio' : 'Géol'}${d !== disc() && n ? `<span class="disc-n" aria-label="${n} à revoir">${n}</span>` : ''}</button>`;
+  box.innerHTML = btn('bio') + btn('geol');
+}
+
 /* ---------- Mes chapitres : choisis par l'élève ---------- */
 
 // Premier lancement (ou liste vide) : on explique comment ajouter des chapitres, à la place du bloc des révisions.
 function welcomeCard() {
   const first = !hasStarted();
   return `<section class="card hero welcome">
-    <h2>${first ? 'Bienvenue ! Choisissez ce que vous travaillez' : 'Ajoutez des chapitres à vos révisions'}</h2>
-    <p>Vos révisions du jour piochent leurs nouvelles définitions dans <b>vos chapitres</b>. Pour l’instant, vous n’en avez choisi aucun.</p>
+    <h2>${first ? 'Bienvenue ! Choisissez ce que vous travaillez' : `Ajoutez des chapitres de ${DISC_NAME[disc()]}`}</h2>
+    <p>Vos révisions du jour piochent leurs nouvelles définitions dans <b>vos chapitres</b>. Pour l’instant, vous n’en avez choisi aucun en ${DISC_NAME[disc()]}.</p>
     <ol>
       <li>Touchez <b>« Ajouter des chapitres »</b> ci-dessous (ou plus tard <b>« ＋ Ajouter des chapitres à mes révisions »</b> sur l’accueil).</li>
       <li>Cochez les chapitres ou sous-parties déjà vus en cours. Touchez « Voir les sous-parties » pour choisir plus finement.</li>
       <li>Touchez <b>« Terminé »</b> : vos révisions espacées du jour sont prêtes.</li>
     </ol>
+    <p class="muted small">La bascule <b>Bio / Géol</b> en haut de l’écran change de discipline ; les biogéosciences sont dans les deux. Ajoutez vos chapitres dans chacune.</p>
     <p class="muted small">Au fil de l’année, revenez ajouter chaque nouveau chapitre dès qu’il est traité en cours. Retirer un chapitre ne fait rien perdre : les cartes déjà vues continuent d’être révisées.</p>
     <button class="primary" id="wel-add">Ajouter des chapitres</button>
   </section>`;
@@ -788,15 +839,15 @@ function renderMine() {
   const tree = chapterTree();
   const groups = { SV: 'Sciences de la vie', BG: 'Biogéosciences', ST: 'Sciences de la Terre', NC: 'Autres' };
   const save = () => setMyChapters([...mine]);
-  let html = `<p class="muted">Cochez les chapitres (ou les sous-parties) vus en cours : les révisions espacées du jour y prennent leurs nouvelles définitions, ${store.settings.newPerDay} au plus par jour. Ajoutez-en à chaque nouveau chapitre. Décocher n’efface rien : les cartes déjà vues continuent d’être révisées.</p>`;
-  if (methodCards().length) {
+  let html = `<p class="muted">Cochez les chapitres de <b>${DISC_NAME[disc()]}</b> (biogéosciences comprises) vus en cours : vos révisions du jour y prennent leurs nouvelles définitions. Ajoutez-en à chaque nouveau chapitre. Décocher n’efface rien : les cartes déjà vues continuent d’être révisées. Pour ${DISC_NAME[otherDisc()]}, touchez <b>${otherDisc() === 'bio' ? 'Bio' : 'Géol'}</b> en haut.</p>`;
+  if (methodsHere().length) {
     html += `<div class="chap"><label class="row"><input type="checkbox" data-code="${METHODS}" ${mine.has(METHODS) ? 'checked' : ''}>
-      <span class="chap-name"><b>Méthodes et techniques</b> <small class="muted">principe et objectif des méthodes, tous chapitres</small></span>
-      <span class="count">${methodCards().length}</span></label></div>`;
+      <span class="chap-name"><b>Méthodes et techniques</b> <small class="muted">principe et objectif des méthodes</small></span>
+      <span class="count">${methodsHere().length}</span></label></div>`;
   }
   let lastGroup = '';
   for (const p of tree) {
-    if (p.code === NO_CODE) continue;
+    if (p.code === NO_CODE || !codeInDisc(p.code)) continue;
     const g = p.code.slice(0, 2);
     if (g !== lastGroup) { html += `<h2>${groups[g] || ''}</h2>`; lastGroup = g; }
     const checked = mine.has(p.code);
@@ -816,7 +867,7 @@ function renderMine() {
       }).join('') + '</div>' : ''}
     </div>`;
   }
-  const codes = [...mine].filter(x => x !== METHODS);
+  const codes = [...mine].filter(x => x !== METHODS && codeInDisc(x));
   const n = codes.length ? deck.cards.filter(c => matchesSelection(c, codes)).length : 0;
   html += `<div class="sticky">
     <p>${codes.length ? `${plural(codes.length, 'chapitre ou sous-partie', 'chapitres ou sous-parties')} (${plural(n, 'définition', 'définitions')})` : 'Aucun chapitre choisi'}${mine.has(METHODS) ? ' + méthodes' : ''}</p>
@@ -880,11 +931,13 @@ function openTag(code) {
 
 function renderChoose() {
   if (!chooseSel.size && store.selection.length) chooseSel = new Set(store.selection);
+  for (const x of [...chooseSel]) if (!codeInDisc(x)) chooseSel.delete(x); // l'autre discipline n'est pas affichée
   const tree = chapterTree();
   const groups = { SV: 'Sciences de la vie', BG: 'Biogéosciences', ST: 'Sciences de la Terre', NC: 'Autres' };
   let html = '<p class="muted">Cochez une partie entière ou des sous-parties. Les nombres indiquent les cartes à revoir aujourd’hui et le total.</p>';
   let lastGroup = '';
   for (const p of tree) {
+    if (p.code !== NO_CODE && !codeInDisc(p.code)) continue;
     const g = p.code.slice(0, 2);
     if (g !== lastGroup) { html += `<h2>${groups[g] || ''}</h2>`; lastGroup = g; }
     const cards = deck.cards.filter(c => matchesSelection(c, [p.code]));
@@ -955,9 +1008,9 @@ function renderChoose() {
 
 const DIRECTIONS = { td: 'terme → définition', dt: 'définition → terme', mix: 'les deux, mélangés' };
 
-function startSession(selected, label, { ahead = false, reviews = false, noCap = false, discover = false, offerWarmup = !ahead && !reviews } = {}) {
+function startSession(selected, label, { ahead = false, reviews = false, noCap = false, discover = false, inDiscOnly = reviews || discover || ahead, offerWarmup = !ahead && !reviews } = {}) {
   const dir = reviews || ahead || discover ? 'td' : store.settings.direction;
-  session = buildSession(selected, { label, ahead, reviews, dir, noCap, discover });
+  session = buildSession(selected, { label, ahead, reviews, dir, noCap, discover, inDiscOnly });
   if (dir === 'dt') offerWarmup = false; // le QCM interroge déjà dans ce sens
   // l'échauffement précède toujours des flashcards : proposé seulement s'il y a des cartes à faire ensuite
   if (offerWarmup && session.queue.length && session.pool.length >= 4) session.phase = 'intro';
