@@ -2617,8 +2617,7 @@ function renderDessin() {
   const drawing = r.phase === 'draw';
   app.innerHTML = `
     <h2 class="section">${esc(r.sc.dessin || r.sc.titre)}</h2>
-    ${r.sc.consigne ? `<p class="consigne">${esc(r.sc.consigne)}</p>` : ''}
-    ${drawing ? `<p class="muted small">${plural(labels.length, 'légende attendue', 'légendes attendues')}. Touchez « Correction » quand vous avez fini. Avec l’outil Texte, touchez une légende déjà écrite pour la corriger.</p>
+    ${drawing ? `<p class="muted small">${plural(labels.length, 'légende attendue', 'légendes attendues')} · outil Texte : touchez une légende pour la corriger</p>
     <div class="draw-tools" role="toolbar" aria-label="Outils de dessin">
       ${tools.map(([k, ic, name]) => `<button data-tool="${k}" aria-pressed="${r.tool === k}" title="${name}"><span aria-hidden="true">${ic}</span> ${name}</button>`).join('')}
       <button id="d-undo" title="Annuler le dernier trait" ${r.items.length ? '' : 'disabled'}>↶ Annuler</button>

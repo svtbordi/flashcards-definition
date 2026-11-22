@@ -340,6 +340,5 @@ button.done { opacity: .7; }
 .draw-wrap canvas { display: block; width: 100%; height: auto; touch-action: none; cursor: crosshair; }
 .draw-wrap canvas[data-tool="text"] { cursor: text; }
 .draw-input { position: absolute; z-index: 2; box-sizing: border-box; margin: 0; padding: 0 2px; border: 1px dashed #888; border-radius: 4px; background: rgba(255, 255, 255, .92); font-family: system-ui, -apple-system, "Segoe UI", sans-serif; resize: none; overflow: hidden; white-space: pre-wrap; overflow-wrap: anywhere; }
-.consigne { margin: -4px 0 10px; padding: 10px 12px; border-left: 4px solid var(--accent); background: var(--surface); border-radius: 0 8px 8px 0; }
 .draw-grid { display: grid; gap: 12px; margin: 0 0 12px; }
 @media (min-width: 900px) { .draw-grid.two { grid-template-columns: 1fr 1fr; align-items: start; } }

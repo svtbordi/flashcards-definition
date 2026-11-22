@@ -78,7 +78,7 @@ await page.keyboard.type('Noyau');
 await page.keyboard.press('Enter');
 let r = await page.evaluate(() => drawRun.items.map(i => i.k + (i.s ? ':' + i.s : '') + ':' + i.c));
 check(r.length === 3 && r[1] === 'line:#d62828' && r[2] === 'text:Noyau:#d62828', `éléments : ${r.join(', ')}`);
-check(/Dessinez un neurone entier/.test(await page.textContent('.consigne')), 'consigne affichée sous le titre');
+check((await page.textContent('h2.section')).trim() === 'Schéma d’un neurone', 'titre à dessiner tiré du catalogue');
 // légende longue tapée près du bord droit : retour à la ligne automatique
 await page.touchscreen.tap(b.x + b.width * 0.6, b.y + b.height * 0.42);
 await page.waitForSelector('.draw-input');
@@ -169,7 +169,7 @@ await prof.goto(URL + 'prof.html');
 await prof.waitForTimeout(500);
 await prof.evaluate(b => { addBilan(b); render(); }, bilan);
 const txt = (await prof.textContent('#results')).replace(/\s+/g, ' ');
-check(/Schémas à légender/.test(txt) && /Neurone/.test(txt) && /86 %/.test(txt), 'page enseignant : section « Schémas à légender »');
+check(/Schémas à légender/.test(txt) && /Schéma d’un neurone/.test(txt) && /86 %/.test(txt), 'page enseignant : section « Schémas à légender »');
 await prof.screenshot({ path: '/tmp/d4-prof.png', fullPage: true });
 
 // 3. Sauvegarde / restauration
