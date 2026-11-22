@@ -8,6 +8,8 @@ source/schemas/catalogue.xlsx, onglet « catalogue » :
   un leurre marqué « non » n'est pas proposé ; vide ou « oui » : proposé.
 source/schemas/<chapitre>_<schema>/<…>-numeros.svg
   version numérotée du schéma : chaque numéro est un <g class="legende" data-n="…">.
+source/schemas/<chapitre>_<schema>/<…>-legendes.svg
+  version légendée, montrée pour la correction du mode « Dessiner ».
 
 Le titre affiché vient de la balise <title> du SVG, sauf s'il contient une légende à trouver (« Artère musculaire »,
 « Double circulation »…) : on prend alors le titre neutre de TITRES, pour ne pas donner la réponse.
@@ -23,6 +25,14 @@ TITRES = {
     'artere-musculaire': 'Paroi d’un vaisseau : coupe 1 (microscopie optique)',
     'arteriole-musculaire': 'Paroi d’un vaisseau : coupe 2 (microscopie électronique)',
     'capillaire': 'Paroi d’un vaisseau : coupe 3 (microscopie électronique)',
+}
+# Mode « Dessiner » : ce que l'élève doit dessiner (le titre du schéma, sauf s'il est trop vague)
+A_DESSINER = {
+    'artere-musculaire': 'Coupe transversale d’une artère musculaire (microscopie optique)',
+    'arteriole-musculaire': 'Coupe transversale d’une artériole musculaire (microscopie électronique)',
+    'capillaire': 'Coupe transversale d’un capillaire (microscopie électronique)',
+    'potentiel-action': 'Potentiel d’action neuronal : enregistrement du potentiel de membrane',
+    'double-circulation': 'Organisation de la double circulation',
 }
 
 
@@ -57,19 +67,26 @@ for slug, s in schemas.items():
     svg = files[0].read_text(encoding='utf8')
     titre = re.search(r'<title>(.*?)</title>', svg, re.S)
     titre = titre.group(1).strip().replace("'", '’') if titre else slug
+    dessin = A_DESSINER.get(slug, titre)
+    corr = list(src.glob(f'*_{slug}/*-legendes.svg'))
+    assert len(corr) == 1, f'{slug} : {len(corr)} fichier(s) SVG légendé(s)'
+    corrige = re.sub(r'<title>.*?</title>', '', corr[0].read_text(encoding='utf8'), flags=re.S)
+    corrige = re.sub(r'\sdata-terme="[^"]*"', '', corrige)
+    corrige = re.sub(r'>\s+<', '><', corrige).strip()
     termes = {norm(l['terme']) for l in s['legendes']}
     if any(t in norm(titre) for t in termes):
         assert slug in TITRES, f'{slug} : le titre « {titre} » donne une réponse ; ajouter un titre neutre dans TITRES'
         titre = TITRES[slug]
     svg = re.sub(r'<title>.*?</title>', '', svg, flags=re.S)
     svg = re.sub(r'\sdata-terme="[^"]*"', '', svg)
+    svg = re.sub(r'>\s+<', '><', svg)
     nums = sorted(int(x) for x in re.findall(r'class="legende" data-n="(\d+)"', svg))
     attendus = sorted(l['n'] for l in s['legendes'])
     assert nums == attendus, f'{slug} : numéros du SVG {nums} ≠ catalogue {attendus}'
     # un leurre ne doit jamais être la bonne réponse d'un autre numéro du même schéma
     s['leurres'] = [x for x in dict.fromkeys(s['leurres']) if norm(x) not in termes]
     s['legendes'].sort(key=lambda l: l['n'])
-    result.append(dict(s, titre=titre, svg=svg.strip()))
+    result.append(dict(s, titre=titre, svg=svg.strip(), dessin=dessin, corrige=corrige))
 
 result.sort(key=lambda s: (s['chapitre'], s['titre']))
 out.write_text(json.dumps({'schemas': result}, ensure_ascii=False, separators=(',', ':')), encoding='utf8')

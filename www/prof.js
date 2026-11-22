@@ -151,11 +151,51 @@ function studentRows() {
       'Cartes ratées': r.cartes_ratees ?? '–',
       'Sues, sur 4 semaines': signed(gain(b)),
       'À revoir': r.cartes_a_revoir,
+      'Schémas travaillés': (b.schemas || []).length,
       'Bilan reçu le': fmtDate(b.genere),
       Suivi: b.suivi_arrete ? `arrêté le ${b.suivi_arrete}` : 'actif',
       _inactive: idle === null || idle >= INACTIF_JOURS,
     };
   });
+}
+
+// Schémas à légender : deux modes séparés (« Compléter » noté par l'application, « Dessiner » auto-évalué)
+const pctOf = (a, n) => (n ? `${Math.round(100 * a / n)} %` : '–');
+function schemaRowsOf(b) {
+  return (b.schemas || []).map(x => ({
+    Schéma: x.titre,
+    Partie: x.chapitre,
+    'Compléter : réponses': x.completer.reponses || '–',
+    'Compléter : justes': pctOf(x.completer.justes, x.completer.reponses),
+    'Légendes sues': x.completer.reponses ? `${x.completer.legendes_sues} / ${x.legendes}` : '–',
+    'Dessin : essais': x.dessin.essais || '–',
+    'Dessin : dernier essai': x.dessin.essais ? `${x.dessin.dernier} %` : '–',
+    'Dessin : meilleur': x.dessin.essais ? `${x.dessin.meilleur} %` : '–',
+    'Dernière fois': fmtDate([x.completer.derniere, x.dessin.derniere].filter(Boolean).sort().pop()),
+  }));
+}
+
+function schemaClassRows() {
+  const agg = {};
+  const n = bilans.size;
+  for (const b of bilans.values()) {
+    for (const x of b.schemas || []) {
+      const a = agg[x.id] || (agg[x.id] = { titre: x.titre, chapitre: x.chapitre, eleves: 0, rep: 0, ok: 0, dessinateurs: 0, essais: 0, dernier: 0 });
+      a.eleves += 1;
+      a.rep += x.completer.reponses || 0;
+      a.ok += x.completer.justes || 0;
+      if (x.dessin.essais) { a.dessinateurs += 1; a.essais += x.dessin.essais; a.dernier += x.dessin.dernier; }
+    }
+  }
+  return Object.values(agg).sort((a, b) => byPart(a.chapitre, b.chapitre) || a.titre.localeCompare(b.titre)).map(a => ({
+    Schéma: a.titre,
+    Partie: a.chapitre,
+    'Élèves qui l’ont travaillé': `${a.eleves} / ${n}`,
+    'Compléter : réponses justes': pctOf(a.ok, a.rep),
+    'Élèves qui l’ont dessiné': a.dessinateurs,
+    'Dessins (essais)': a.essais,
+    'Dessin : dernier essai, en moyenne': a.dessinateurs ? `${Math.round(a.dernier / a.dessinateurs)} %` : '–',
+  }));
 }
 
 // Thèmes (parties du programme) abordés par un élève
@@ -309,11 +349,14 @@ function render() {
       <h3>Toutes les définitions</h3>${lineChart(cls, { title: 'Classe' })}
       <h3>Par thème</h3>${themeCharts(cls)}
       ${table(chapterRows(), { txt: ['Intitulé'] })}</section>
+    ${schemaClassRows().length ? `<section class="card"><h2>Schémas à légender</h2>${table(schemaClassRows(), { txt: ['Schéma'] })}
+      <p class="muted small">« Compléter » : l’élève choisit chaque légende dans un menu, l’application corrige (première réponse seulement). « Dessin » : l’élève dessine le schéma de mémoire puis coche lui-même ses légendes justes ; ce score est auto-évalué.</p></section>` : ''}
     <section class="card"><h2>Définitions les plus ratées dans la classe</h2>${table(hardRows(), { txt: ['Définition'] })}</section>
     <section class="card"><h2>Élève par élève</h2>
       ${list.map(b => `<details class="student"><summary><b>${esc(label(b))}</b> <span class="muted">· ${b.resume.cartes_sues ?? '–'} sues, ${b.resume.cartes_ratees ?? '–'} ratées · ${plural(themeRows(b).length, 'thème abordé', 'thèmes abordés')}</span></summary>
         ${legend}<h3>Toutes les définitions</h3>${lineChart(evo(b), { title: label(b) })}
-        <h3>Par thème</h3>${themeCharts(evo(b))}${table(themeRows(b), { txt: ['Intitulé'] })}</details>`).join('')}
+        <h3>Par thème</h3>${themeCharts(evo(b))}${table(themeRows(b), { txt: ['Intitulé'] })}
+        ${(b.schemas || []).length ? `<h3>Schémas</h3>${table(schemaRowsOf(b), { txt: ['Schéma'] })}` : ''}</details>`).join('')}
     </section>
     <p class="muted small">Les réponses Su ou Raté sont déclarées par les élèves : elles reflètent leur travail dans l’application, pas un contrôle.</p>`;
   document.getElementById('export').onclick = exportXlsx;
@@ -341,6 +384,8 @@ async function exportXlsx() {
     X.utils.book_append_sheet(wb, sheet(students().flatMap(b => themeRows(b).map(r => Object.assign({ Élève: label(b) }, r)))), 'Élèves par thème');
     X.utils.book_append_sheet(wb, sheet(chapterRows()), 'Classe par thème');
     X.utils.book_append_sheet(wb, sheet(hardRows()), 'Les plus ratées');
+    X.utils.book_append_sheet(wb, sheet(schemaClassRows()), 'Schémas (classe)');
+    X.utils.book_append_sheet(wb, sheet(students().flatMap(b => schemaRowsOf(b).map(r => Object.assign({ Élève: label(b) }, r)))), 'Schémas par élève');
     const rows = [];
     for (const b of students()) {
       for (const p of evo(b)) {

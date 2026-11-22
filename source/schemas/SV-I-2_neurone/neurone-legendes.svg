@@ -1,0 +1,130 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 445" font-family="Arial, Helvetica, sans-serif" xmlns:c2pa="http://c2pa.org/manifest">
+<title>Neurone</title><rect width="960" height="445" fill="#ffffff"/>
+<g id="neurone">
+<ellipse cx="262" cy="210" rx="56" ry="50" fill="#E07B1F" stroke="#E07B1F" stroke-width="4"/>
+<polyline points="282,165 290,125 298,90 304,58" fill="none" stroke="#E07B1F" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="290,125 268,100 255,78" fill="none" stroke="#E07B1F" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="298,90 325,72" fill="none" stroke="#E07B1F" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="304,58 292,40" fill="none" stroke="#E07B1F" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="238,172 205,142 175,120 140,104" fill="none" stroke="#E07B1F" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="205,142 196,108 186,80" fill="none" stroke="#E07B1F" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="175,120 148,136 112,140" fill="none" stroke="#E07B1F" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="140,104 118,84" fill="none" stroke="#E07B1F" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="186,80 168,62" fill="none" stroke="#E07B1F" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="214,212 175,214 140,205 102,200" fill="none" stroke="#E07B1F" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="175,214 150,240 118,250" fill="none" stroke="#E07B1F" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="140,205 118,182" fill="none" stroke="#E07B1F" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="102,200 80,212" fill="none" stroke="#E07B1F" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="118,250 95,262" fill="none" stroke="#E07B1F" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="232,248 205,280 185,310 160,332" fill="none" stroke="#E07B1F" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="205,280 166,274 130,286" fill="none" stroke="#E07B1F" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="185,310 196,342" fill="none" stroke="#E07B1F" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="130,286 108,276" fill="none" stroke="#E07B1F" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="252,256 238,292 220,322 200,348" fill="none" stroke="#E07B1F" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="238,292 244,318" fill="none" stroke="#E07B1F" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="312,192 350,176 385,170 418,158" fill="none" stroke="#E07B1F" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="385,170 402,196" fill="none" stroke="#E07B1F" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="418,158 440,166" fill="none" stroke="#E07B1F" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="296,232 330,248" fill="none" stroke="#E07B1F" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="328,247 362,258" fill="none" stroke="#E07B1F" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="360,258 400,262 450,251 500,233 560,213 620,200 656,195" fill="none" stroke="#E07B1F" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="655,195 700,184 745,169 788,150" fill="none" stroke="#E07B1F" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="700,184 722,160 746,136" fill="none" stroke="#E07B1F" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="722,160 698,146" fill="none" stroke="#E07B1F" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="745,169 782,178" fill="none" stroke="#E07B1F" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="658,197 692,212 722,224 762,216" fill="none" stroke="#E07B1F" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="722,224 746,244" fill="none" stroke="#E07B1F" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="668,200 680,240 695,266 700,292" fill="none" stroke="#E07B1F" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="680,240 658,256" fill="none" stroke="#E07B1F" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="695,266 726,266" fill="none" stroke="#E07B1F" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="788" cy="150" r="7.5" fill="#E07B1F" stroke="#E07B1F" stroke-width="4"/>
+<circle cx="746" cy="136" r="7.5" fill="#E07B1F" stroke="#E07B1F" stroke-width="4"/>
+<circle cx="698" cy="146" r="7.5" fill="#E07B1F" stroke="#E07B1F" stroke-width="4"/>
+<circle cx="782" cy="178" r="7.5" fill="#E07B1F" stroke="#E07B1F" stroke-width="4"/>
+<circle cx="762" cy="216" r="7.5" fill="#E07B1F" stroke="#E07B1F" stroke-width="4"/>
+<circle cx="746" cy="244" r="7.5" fill="#E07B1F" stroke="#E07B1F" stroke-width="4"/>
+<circle cx="700" cy="292" r="7.5" fill="#E07B1F" stroke="#E07B1F" stroke-width="4"/>
+<circle cx="658" cy="256" r="7.5" fill="#E07B1F" stroke="#E07B1F" stroke-width="4"/>
+<circle cx="726" cy="266" r="7.5" fill="#E07B1F" stroke="#E07B1F" stroke-width="4"/>
+<ellipse cx="262" cy="210" rx="56" ry="50" fill="#FFF3BF" stroke="#FFF3BF" stroke-width="0"/>
+<polyline points="282,165 290,125 298,90 304,58" fill="none" stroke="#FFF3BF" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="290,125 268,100 255,78" fill="none" stroke="#FFF3BF" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="298,90 325,72" fill="none" stroke="#FFF3BF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="304,58 292,40" fill="none" stroke="#FFF3BF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="238,172 205,142 175,120 140,104" fill="none" stroke="#FFF3BF" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="205,142 196,108 186,80" fill="none" stroke="#FFF3BF" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="175,120 148,136 112,140" fill="none" stroke="#FFF3BF" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="140,104 118,84" fill="none" stroke="#FFF3BF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="186,80 168,62" fill="none" stroke="#FFF3BF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="214,212 175,214 140,205 102,200" fill="none" stroke="#FFF3BF" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="175,214 150,240 118,250" fill="none" stroke="#FFF3BF" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="140,205 118,182" fill="none" stroke="#FFF3BF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="102,200 80,212" fill="none" stroke="#FFF3BF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="118,250 95,262" fill="none" stroke="#FFF3BF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="232,248 205,280 185,310 160,332" fill="none" stroke="#FFF3BF" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="205,280 166,274 130,286" fill="none" stroke="#FFF3BF" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="185,310 196,342" fill="none" stroke="#FFF3BF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="130,286 108,276" fill="none" stroke="#FFF3BF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="252,256 238,292 220,322 200,348" fill="none" stroke="#FFF3BF" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="238,292 244,318" fill="none" stroke="#FFF3BF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="312,192 350,176 385,170 418,158" fill="none" stroke="#FFF3BF" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="385,170 402,196" fill="none" stroke="#FFF3BF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="418,158 440,166" fill="none" stroke="#FFF3BF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="296,232 330,248" fill="none" stroke="#FFF3BF" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="328,247 362,258" fill="none" stroke="#FFF3BF" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="360,258 400,262 450,251 500,233 560,213 620,200 656,195" fill="none" stroke="#FFF3BF" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="655,195 700,184 745,169 788,150" fill="none" stroke="#FFF3BF" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="700,184 722,160 746,136" fill="none" stroke="#FFF3BF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="722,160 698,146" fill="none" stroke="#FFF3BF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="745,169 782,178" fill="none" stroke="#FFF3BF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="658,197 692,212 722,224 762,216" fill="none" stroke="#FFF3BF" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="722,224 746,244" fill="none" stroke="#FFF3BF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="668,200 680,240 695,266 700,292" fill="none" stroke="#FFF3BF" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="680,240 658,256" fill="none" stroke="#FFF3BF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="695,266 726,266" fill="none" stroke="#FFF3BF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="788" cy="150" r="7.5" fill="#FFF3BF" stroke="#FFF3BF" stroke-width="0"/>
+<circle cx="746" cy="136" r="7.5" fill="#FFF3BF" stroke="#FFF3BF" stroke-width="0"/>
+<circle cx="698" cy="146" r="7.5" fill="#FFF3BF" stroke="#FFF3BF" stroke-width="0"/>
+<circle cx="782" cy="178" r="7.5" fill="#FFF3BF" stroke="#FFF3BF" stroke-width="0"/>
+<circle cx="762" cy="216" r="7.5" fill="#FFF3BF" stroke="#FFF3BF" stroke-width="0"/>
+<circle cx="746" cy="244" r="7.5" fill="#FFF3BF" stroke="#FFF3BF" stroke-width="0"/>
+<circle cx="700" cy="292" r="7.5" fill="#FFF3BF" stroke="#FFF3BF" stroke-width="0"/>
+<circle cx="658" cy="256" r="7.5" fill="#FFF3BF" stroke="#FFF3BF" stroke-width="0"/>
+<circle cx="726" cy="266" r="7.5" fill="#FFF3BF" stroke="#FFF3BF" stroke-width="0"/>
+<circle cx="262" cy="210" r="21" fill="#D6D6D6" stroke="#7d7d7d" stroke-width="1.5"/>
+</g>
+<g id="accolades">
+<path d="M352,374 Q352,382 364,382 L484.0,382 Q496.0,382 496.0,390 Q496.0,382 508.0,382 L628,382 Q640,382 640,374" fill="none" stroke="#222" stroke-width="2"/>
+<path d="M650,374 Q650,382 662,382 L713.0,382 Q725.0,382 725.0,390 Q725.0,382 737.0,382 L788,382 Q800,382 800,374" fill="none" stroke="#222" stroke-width="2"/>
+</g>
+<g class="legende" data-n="1" data-terme="Dendrites">
+<line x1="150" y1="36" x2="120" y2="92" stroke="#222" stroke-width="1.3"/>
+<line x1="150" y1="36" x2="196" y2="108" stroke="#222" stroke-width="1.3"/>
+<line x1="150" y1="36" x2="268" y2="100" stroke="#222" stroke-width="1.3"/>
+<text x="150" y="28" font-size="17" text-anchor="middle" fill="#222">Dendrites</text>
+</g>
+<g class="legende" data-n="2" data-terme="Corps cellulaire">
+<line x1="262" y1="388" x2="282" y2="244" stroke="#222" stroke-width="1.3"/>
+<text x="262" y="408" font-size="17" text-anchor="middle" fill="#222">Corps cellulaire</text>
+</g>
+<g class="legende" data-n="3" data-terme="Noyau">
+<line x1="388" y1="78" x2="276" y2="198" stroke="#222" stroke-width="1.3"/>
+<text x="395" y="72" font-size="17" text-anchor="middle" fill="#222">Noyau</text>
+</g>
+<g class="legende" data-n="4" data-terme="Axone">
+<text x="497" y="408" font-size="17" text-anchor="middle" fill="#222">Axone</text>
+</g>
+<g class="legende" data-n="5" data-terme="Arborisation terminale">
+<text x="724" y="408" font-size="17" text-anchor="middle" fill="#222">Arborisation</text>
+<text x="724" y="427" font-size="17" text-anchor="middle" fill="#222">terminale</text>
+</g>
+<g class="legende" data-n="6" data-terme="Bouton synaptique">
+<line x1="818" y1="118" x2="794" y2="145" stroke="#222" stroke-width="1.3"/>
+<text x="812" y="112" font-size="17" text-anchor="start" fill="#222">Bouton synaptique</text>
+</g>
+<g class="legende" data-n="7" data-terme="Cône d'implantation (zone gâchette)">
+<line x1="385" y1="304" x2="330" y2="250" stroke="#222" stroke-width="1.3"/>
+<text x="378" y="318" font-size="17" text-anchor="start" fill="#222">Cône d'implantation</text>
+<text x="378" y="337" font-size="17" text-anchor="start" fill="#222">(zone gâchette)</text>
+</g>
+<metadata><c2pa:manifest>AAAWgmp1bWIAAAAeanVtZGMycGEAEQAQgAAAqgA4m3EDYzJwYQAAABZcanVtYgAAAEdqdW1kYzJtYQARABCAAACqADibcQN1cm46YzJwYTpjZWI2YjYxYy1lY2U1LTQzZjYtODAwNi0wZjk0MTU2YjhiYjMAAAADl2p1bWIAAAApanVtZGMyYXMAEQAQgAAAqgA4m3EDYzJwYS5hc3NlcnRpb25zAAAAALxqdW1iAAAARGp1bWRjYm9yABEAEIAAAKoAOJtxE2MycGEuaW5ncmVkaWVudC52MwAAAAAYYzJzaMaxLLcFlsLQQOrtSQ00yUgAAABwY2JvcqNpZGM6Zm9ybWF0bWltYWdlL3N2Zyt4bWxqaW5zdGFuY2VJRHgseG1wOmlpZDo3MmJmNjZmNC1mZTg1LTRjMGItYmRjMy01ODE1MjdkMWJiNjNscmVsYXRpb25zaGlwaHBhcmVudE9mAAAB4mp1bWIAAABBanVtZGNib3IAEQAQgAAAqgA4m3ETYzJwYS5hY3Rpb25zLnYyAAAAABhjMnNonhT8+AaJ89t+8kyfOYtQUQAAAZljYm9yomdhY3Rpb25zgqJmYWN0aW9ua2MycGEub3BlbmVkanBhcmFtZXRlcnOha2luZ3JlZGllbnRzgaJjdXJseC1zZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmluZ3JlZGllbnQudjNkaGFzaFggumW7TfiJqMIcRWGWk+bPhQ0Km/N+VLZui3kkQGpsAQakZmFjdGlvbngdY29tLmFudGhyb3BpYy5jbGF1ZGUucHJvdmlkZWRqcGFyYW1ldGVyc6F4H2NvbS5hbnRocm9waWMub3JpZ2luLWNvbmZpZGVuY2VndW5rbm93bmtkZXNjcmlwdGlvbnhmQ2xhdWRlIHByb3ZpZGVkIHRoaXMgZmlsZSBhdCB0aGUgcmVxdWVzdCBvZiBhIHVzZXIgYW5kIG1heSBoYXZlIGNyZWF0ZWQgb3IgbW9kaWZpZWQgdGhlIGZpbGUgY29udGVudHMubXNvZnR3YXJlQWdlbnShZG5hbWVmQ2xhdWRlcmFsbEFjdGlvbnNJbmNsdWRlZPUAAADIanVtYgAAAEBqdW1kY2JvcgARABCAAACqADibcRNjMnBhLmhhc2guZGF0YQAAAAAYYzJzaEKajAtylMQdP+KSEpTTXZoAAACAY2JvcqVjYWxnZnNoYTI1NmNwYWRMAAAAAAAAAAAAAAAAZGhhc2hYIKSzMNMs90q3dsS36/u1ZgTycuM490tYzlkid5UapDyxZG5hbWVuanVtYmYgbWFuaWZlc3RqZXhjbHVzaW9uc4GiZXN0YXJ0GTXIZmxlbmd0aBkeBAAAAj5qdW1iAAAAJ2p1bWRjMmNsABEAEIAAAKoAOJtxA2MycGEuY2xhaW0udjIAAAACD2Nib3KlY2FsZ2ZzaGEyNTZpc2lnbmF0dXJleE1zZWxmI2p1bWJmPS9jMnBhL3VybjpjMnBhOmNlYjZiNjFjLWVjZTUtNDNmNi04MDA2LTBmOTQxNTZiOGJiMy9jMnBhLnNpZ25hdHVyZWppbnN0YW5jZUlEeCx4bXA6aWlkOjBiNGViNzJiLWEyZDUtNDdkYi04YzY5LTJkYWFhMTZmOGZjNXJjcmVhdGVkX2Fzc2VydGlvbnODomN1cmx4LXNlbGYjanVtYmY9YzJwYS5hc3NlcnRpb25zL2MycGEuaW5ncmVkaWVudC52M2RoYXNoWCC6ZbtN+ImowhxFYZaT5s+FDQqb835Utm6LeSRAamwBBqJjdXJseCpzZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmFjdGlvbnMudjJkaGFzaFggGrGQTur6MxQdJ7XxP6fFAOT0nh9UNoL4ps48U3UQa6uiY3VybHgpc2VsZiNqdW1iZj1jMnBhLmFzc2VydGlvbnMvYzJwYS5oYXNoLmRhdGFkaGFzaFggGjAieWCx5YlwJRm7iz0ZckZyaUMc3Je8whH0xR/ksJZ0Y2xhaW1fZ2VuZXJhdG9yX2luZm+jZG5hbWVvQW50aHJvcGljIEZpbGVzZ3ZlcnNpb25lMS4wLjBrc3BlY1ZlcnNpb25lMi40LjAAABA4anVtYgAAAChqdW1kYzJjcwARABCAAACqADibcQNjMnBhLnNpZ25hdHVyZQAAABAIY2JvctKEWQISogEmGCFZAgowggIGMIIBjaADAgECAhRA5aAK7sI50L64g/oGQgU9Z1UTADAKBggqhkjOPQQDAzBJMRcwFQYDVQQKEw5BbnRocm9waWMsIFBCQzEuMCwGA1UEAxMlQW50aHJvcGljIENvbnRlbnQgQ3JlZGVudGlhbHMgUm9vdCBDQTAeFw0yNjA4MDcxODQzNTZaFw0yODA4MDYxOTQzNTZaMEQxFzAVBgNVBAoTDkFudGhyb3BpYywgUEJDMSkwJwYDVQQDEyBBbnRocm9waWMgQ2xhdWRlIENvbnRlbnQgU2lnbmluZzBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABJh6CmvLUBgFFNU0vUKlOVtE6djd17L5SuwX0LemFisBM3dkd/3cyjxFA3Qo5S46fX0/ihY0VZ7mfb9KF703t5OjWDBWMA4GA1UdDwEB/wQEAwIHgDAVBgNVHSUEDjAMBgorBgEEAYPoXgIBMAwGA1UdEwEB/wQCMAAwHwYDVR0jBBgwFoAUzlHiBIFOZFsj+OPEz5o+nMHXXMIwCgYIKoZIzj0EAwMDZwAwZAIwMXMdFJ4BetLLVY7ORuE9noqbbAZOZn/aArXyTwFAZfKrPzxF2vPoJNf1+UCdg1XGAjBwX1zd9WGqYkqmL5SFqw1QySjr1zJfpJM9+1rdDwSPLMOPOjKuiXjoU/pUUeG9RwmhY3BhZFkNngAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPZYQBoqZCE0HMgikNSA4oyNSsQ+o4VSg1NTRWT+pc/GgpyTbpxwNPpVyFcAra5W3Wv6IlTXv3m5uG2uihEZW9+zv1E=</c2pa:manifest></metadata></svg>
