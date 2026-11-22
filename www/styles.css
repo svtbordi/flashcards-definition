@@ -298,3 +298,31 @@ button.write-toggle { font-size: 14px; }
 .disc button.on { background: var(--accent-text); color: var(--accent); }
 .disc-n { background: var(--due); color: #1d2321; border-radius: 999px; font-size: 11px; padding: 0 6px; line-height: 18px; }
 @media (max-width: 380px) { .top h1 { font-size: 15px; overflow-wrap: normal; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .top { gap: 4px; padding-left: 12px; padding-right: 12px; } .icon-btn { width: 34px; } .disc button { padding: 6px 7px; } }
+
+/* Schémas à légender */
+.seg { display: grid; grid-template-columns: 1fr 1fr; gap: 0; margin: 0 0 14px; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.seg button { border: 0; border-radius: 0; min-height: 44px; background: var(--surface); }
+.seg button[aria-checked="true"] { background: var(--accent); color: var(--accent-text); font-weight: 600; }
+button.done { opacity: .7; }
+/* fond blanc même en mode sombre : les schémas sont dessinés sur fond clair */
+.plate { background: #ffffff; border: 1px solid var(--line); border-radius: 12px; padding: 6px; margin: 0 0 8px; touch-action: pinch-zoom; }
+.plate svg { display: block; width: 100%; height: auto; }
+.plate g.tap { cursor: pointer; }
+.sch-rows { list-style: none; margin: 8px 0 16px; padding: 0; display: grid; gap: 6px; }
+.sch-row { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 6px 10px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); }
+.sch-row[role="button"] { cursor: pointer; }
+.sch-row .term { font-size: 16px; margin: 0; font-weight: 600; }
+.sch-row .wrong { text-decoration: line-through; color: var(--again); }
+.sch-row.ok { border-color: var(--good); }
+.sch-row.ko { border-color: var(--again); }
+.sch-row.known { opacity: .65; }
+.num { flex: none; display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--text); font-weight: 700; font-size: 15px; background: #fff3b0; color: #1d2321; }
+.sch-row.ok .num { background: #c9ecd6; }
+.sch-row.ko .num { background: #f6cfc8; }
+.sch-row.known .num { background: #e4e3dc; }
+.sheet { position: fixed; inset: 0; z-index: 50; background: rgba(0, 0, 0, .45); display: flex; align-items: flex-end; justify-content: center; }
+.sheet-box { width: 100%; max-width: 560px; max-height: 85vh; overflow: auto; background: var(--surface); color: var(--text); border-radius: 16px 16px 0 0; padding: 16px 16px calc(16px + env(safe-area-inset-bottom)); }
+.sheet-title { display: flex; align-items: center; gap: 10px; margin: 0 0 12px; font-weight: 600; }
+.sheet-opts { display: grid; gap: 8px; margin-bottom: 10px; }
+.sheet-opts button { text-align: left; }
+.sheet-cancel { width: 100%; }

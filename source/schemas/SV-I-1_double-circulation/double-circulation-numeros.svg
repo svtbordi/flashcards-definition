@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="70 0 850 680" font-family="Arial, Helvetica, sans-serif" xmlns:c2pa="http://c2pa.org/manifest">
+<title>Double circulation</title><rect x="70" width="850" height="680" fill="#fff"/>
+<g id="dessin">
+<linearGradient id="gp" gradientUnits="userSpaceOnUse" x1="230" y1="0" x2="470" y2="0"><stop offset="0" stop-color="#5B88D6"/><stop offset="1" stop-color="#F4938A"/></linearGradient>
+<path d="M230,85.0 C302.0,76.0 398.0,94.0 470,85.0" fill="none" stroke="url(#gp)" stroke-width="5"/>
+<path d="M230,112.5 C302.0,121.5 398.0,103.5 470,112.5" fill="none" stroke="url(#gp)" stroke-width="5"/>
+<path d="M230,140.0 C302.0,131.0 398.0,149.0 470,140.0" fill="none" stroke="url(#gp)" stroke-width="5"/>
+<path d="M278.0,85 C288.0,112.5 268.0,112.5 278.0,140" fill="none" stroke="url(#gp)" stroke-width="3.5"/>
+<path d="M326.0,85 C336.0,112.5 316.0,112.5 326.0,140" fill="none" stroke="url(#gp)" stroke-width="3.5"/>
+<path d="M374.0,85 C384.0,112.5 364.0,112.5 374.0,140" fill="none" stroke="url(#gp)" stroke-width="3.5"/>
+<path d="M422.0,85 C432.0,112.5 412.0,112.5 422.0,140" fill="none" stroke="url(#gp)" stroke-width="3.5"/>
+<linearGradient id="gs" gradientUnits="userSpaceOnUse" x1="205" y1="0" x2="510" y2="0"><stop offset="0" stop-color="#5B88D6"/><stop offset="1" stop-color="#F4938A"/></linearGradient>
+<path d="M205,540.0 C296.5,531.0 418.5,549.0 510,540.0" fill="none" stroke="url(#gs)" stroke-width="5"/>
+<path d="M205,567.5 C296.5,576.5 418.5,558.5 510,567.5" fill="none" stroke="url(#gs)" stroke-width="5"/>
+<path d="M205,595.0 C296.5,586.0 418.5,604.0 510,595.0" fill="none" stroke="url(#gs)" stroke-width="5"/>
+<path d="M266.0,540 C276.0,567.5 256.0,567.5 266.0,595" fill="none" stroke="url(#gs)" stroke-width="3.5"/>
+<path d="M327.0,540 C337.0,567.5 317.0,567.5 327.0,595" fill="none" stroke="url(#gs)" stroke-width="3.5"/>
+<path d="M388.0,540 C398.0,567.5 378.0,567.5 388.0,595" fill="none" stroke="url(#gs)" stroke-width="3.5"/>
+<path d="M449.0,540 C459.0,567.5 439.0,567.5 449.0,595" fill="none" stroke="url(#gs)" stroke-width="3.5"/>
+<polyline points="324,300 324,205 230,205 230,75" fill="none" stroke="#2F569E" stroke-width="20" stroke-linejoin="round" stroke-linecap="butt"/>
+<polyline points="324,300 324,205 230,205 230,75" fill="none" stroke="#5B88D6" stroke-width="14" stroke-linejoin="round" stroke-linecap="butt"/>
+<path transform="translate(324.0,252.5) rotate(-90.0)" d="M6,0 L-5,-5 L-5,5 Z" fill="#fff"/>
+<path transform="translate(277.0,205.0) rotate(180.0)" d="M6,0 L-5,-5 L-5,5 Z" fill="#fff"/>
+<polyline points="470,75 470,200 470,318 435,318" fill="none" stroke="#C9584D" stroke-width="20" stroke-linejoin="round" stroke-linecap="butt"/>
+<polyline points="470,75 470,200 470,318 435,318" fill="none" stroke="#F4938A" stroke-width="14" stroke-linejoin="round" stroke-linecap="butt"/>
+<path transform="translate(470.0,259.0) rotate(90.0)" d="M6,0 L-5,-5 L-5,5 Z" fill="#fff"/>
+<polyline points="205,605 205,318 255,318" fill="none" stroke="#2F569E" stroke-width="20" stroke-linejoin="round" stroke-linecap="butt"/>
+<polyline points="205,605 205,318 255,318" fill="none" stroke="#5B88D6" stroke-width="14" stroke-linejoin="round" stroke-linecap="butt"/>
+<path transform="translate(205.0,461.5) rotate(-90.0)" d="M6,0 L-5,-5 L-5,5 Z" fill="#fff"/>
+<polyline points="364,300 364,232 510,232 510,605" fill="none" stroke="#C9584D" stroke-width="20" stroke-linejoin="round" stroke-linecap="butt"/>
+<polyline points="364,300 364,232 510,232 510,605" fill="none" stroke="#F4938A" stroke-width="14" stroke-linejoin="round" stroke-linecap="butt"/>
+<path transform="translate(437.0,232.0) rotate(0.0)" d="M6,0 L-5,-5 L-5,5 Z" fill="#fff"/>
+<path transform="translate(510.0,418.5) rotate(90.0)" d="M6,0 L-5,-5 L-5,5 Z" fill="#fff"/>
+<path d="M240,300 C240,262 300,255 344,278 C388,255 450,262 450,300 L450,410 C450,468 396,488 346,478 C298,488 240,468 240,410 Z" fill="#F3E4D8" stroke="#8A5A44" stroke-width="3"/>
+<line x1="344" y1="282" x2="344" y2="474" stroke="#8A5A44" stroke-width="3"/>
+<ellipse cx="282" cy="318" rx="30" ry="27" fill="#D3E0F6" stroke="#2F569E" stroke-width="2"/>
+<path d="M256,362 L312,362 L312,286 L338,286 L338,456 Q300,476 262,450 Z" fill="#B9CDF0" stroke="#2F569E" stroke-width="2" stroke-linejoin="round"/>
+<ellipse cx="408" cy="318" rx="30" ry="27" fill="#FBD9D4" stroke="#C9584D" stroke-width="2"/>
+<path d="M350,286 L376,286 L376,362 L436,362 L434,450 Q395,476 350,456 Z" fill="#F7C2BB" stroke="#C9584D" stroke-width="2" stroke-linejoin="round"/>
+<path d="M282,330 L282,372" stroke="#2F569E" stroke-width="3"/><path d="M276,366 L282,378 L288,366 Z" fill="#2F569E"/>
+<path d="M410,330 L410,372" stroke="#C9584D" stroke-width="3"/><path d="M404,366 L410,378 L416,366 Z" fill="#C9584D"/>
+<text x="345" y="32" font-size="17" text-anchor="middle" fill="#222" ></text>
+<path d="M664,55 Q672,55 672,65 L672,142.5 Q672,152.5 680,152.5 Q672,152.5 672,162.5 L672,240 Q672,250 664,250" fill="none" stroke="#222" stroke-width="2"/><path d="M664,262 Q672,262 672,272 L672,366.0 Q672,376.0 680,376.0 Q672,376.0 672,386.0 L672,480 Q672,490 664,490" fill="none" stroke="#222" stroke-width="2"/><path d="M664,502 Q672,502 672,512 L672,546.0 Q672,556.0 680,556.0 Q672,556.0 672,566.0 L672,600 Q672,610 664,610" fill="none" stroke="#222" stroke-width="2"/><path d="M782,55 Q790,55 790,65 L790,322.5 Q790,332.5 798,332.5 Q790,332.5 790,342.5 L790,600 Q790,610 782,610" fill="none" stroke="#222" stroke-width="2"/>
+</g>
+<g class="legende" data-n="1" data-terme="Artères pulmonaires">
+<line x1="171" y1="164" x2="230" y2="150" stroke="#222" stroke-width="1.3"/><circle cx="230" cy="150" r="2.5" fill="#222"/>
+<circle cx="171" cy="164" r="14" fill="#fff" stroke="#222" stroke-width="2"/><text x="171" y="169" font-size="15" text-anchor="middle" fill="#222" font-weight="bold">1</text>
+</g>
+<g class="legende" data-n="2" data-terme="Veines pulmonaires">
+<line x1="554" y1="94" x2="472" y2="100" stroke="#222" stroke-width="1.3"/><circle cx="472" cy="100" r="2.5" fill="#222"/>
+<circle cx="554" cy="94" r="14" fill="#fff" stroke="#222" stroke-width="2"/><text x="554" y="99" font-size="15" text-anchor="middle" fill="#222" font-weight="bold">2</text>
+</g>
+<g class="legende" data-n="3" data-terme="Artères systémiques">
+<line x1="554" y1="464" x2="512" y2="465" stroke="#222" stroke-width="1.3"/><circle cx="512" cy="465" r="2.5" fill="#222"/>
+<circle cx="554" cy="464" r="14" fill="#fff" stroke="#222" stroke-width="2"/><text x="554" y="469" font-size="15" text-anchor="middle" fill="#222" font-weight="bold">3</text>
+</g>
+<g class="legende" data-n="4" data-terme="Veines systémiques">
+<line x1="166" y1="444" x2="203" y2="445" stroke="#222" stroke-width="1.3"/><circle cx="203" cy="445" r="2.5" fill="#222"/>
+<circle cx="166" cy="444" r="14" fill="#fff" stroke="#222" stroke-width="2"/><text x="166" y="449" font-size="15" text-anchor="middle" fill="#222" font-weight="bold">4</text>
+</g>
+<g class="legende" data-n="5" data-terme="Oreillette droite">
+<line x1="171" y1="249" x2="268" y2="312" stroke="#222" stroke-width="1.3"/><circle cx="268" cy="312" r="2.5" fill="#222"/>
+<circle cx="171" cy="249" r="14" fill="#fff" stroke="#222" stroke-width="2"/><text x="171" y="254" font-size="15" text-anchor="middle" fill="#222" font-weight="bold">5</text>
+</g>
+<g class="legende" data-n="6" data-terme="Ventricule droit">
+<line x1="166" y1="364" x2="290" y2="415" stroke="#222" stroke-width="1.3"/><circle cx="290" cy="415" r="2.5" fill="#222"/>
+<circle cx="166" cy="364" r="14" fill="#fff" stroke="#222" stroke-width="2"/><text x="166" y="369" font-size="15" text-anchor="middle" fill="#222" font-weight="bold">6</text>
+</g>
+<g class="legende" data-n="7" data-terme="Oreillette gauche">
+<line x1="554" y1="289" x2="420" y2="312" stroke="#222" stroke-width="1.3"/><circle cx="420" cy="312" r="2.5" fill="#222"/>
+<circle cx="554" cy="289" r="14" fill="#fff" stroke="#222" stroke-width="2"/><text x="554" y="294" font-size="15" text-anchor="middle" fill="#222" font-weight="bold">7</text>
+</g>
+<g class="legende" data-n="8" data-terme="Ventricule gauche">
+<line x1="554" y1="379" x2="400" y2="420" stroke="#222" stroke-width="1.3"/><circle cx="400" cy="420" r="2.5" fill="#222"/>
+<circle cx="554" cy="379" r="14" fill="#fff" stroke="#222" stroke-width="2"/><text x="554" y="384" font-size="15" text-anchor="middle" fill="#222" font-weight="bold">8</text>
+</g>
+<g class="legende" data-n="9" data-terme="Poumons">
+<line x1="350" y1="39" x2="350" y2="80" stroke="#222" stroke-width="1.3"/><circle cx="350" cy="80" r="2.5" fill="#222"/>
+<circle cx="350" cy="39" r="14" fill="#fff" stroke="#222" stroke-width="2"/><text x="350" y="44" font-size="15" text-anchor="middle" fill="#222" font-weight="bold">9</text>
+</g>
+<g class="legende" data-n="10" data-terme="Organes et tissus autres que les poumons">
+<line x1="357" y1="634" x2="357" y2="598" stroke="#222" stroke-width="1.3"/><circle cx="357" cy="598" r="2.5" fill="#222"/>
+<circle cx="357" cy="634" r="14" fill="#fff" stroke="#222" stroke-width="2"/><text x="357" y="639" font-size="15" text-anchor="middle" fill="#222" font-weight="bold">10</text>
+</g>
+<g class="legende" data-n="11" data-terme="Circulation pulmonaire (petite circulation)">
+<circle cx="704" cy="149" r="14" fill="#fff" stroke="#222" stroke-width="2"/><text x="704" y="154" font-size="15" text-anchor="middle" fill="#222" font-weight="bold">11</text>
+</g>
+<g class="legende" data-n="12" data-terme="Pompe = cœur">
+<circle cx="704" cy="376" r="14" fill="#fff" stroke="#222" stroke-width="2"/><text x="704" y="381" font-size="15" text-anchor="middle" fill="#222" font-weight="bold">12</text>
+</g>
+<g class="legende" data-n="13" data-terme="Circulation systémique (grande circulation)">
+<circle cx="704" cy="554" r="14" fill="#fff" stroke="#222" stroke-width="2"/><text x="704" y="559" font-size="15" text-anchor="middle" fill="#222" font-weight="bold">13</text>
+</g>
+<g class="legende" data-n="14" data-terme="Double circulation">
+<circle cx="822" cy="334" r="14" fill="#fff" stroke="#222" stroke-width="2"/><text x="822" y="339" font-size="15" text-anchor="middle" fill="#222" font-weight="bold">14</text>
+</g>
+<metadata><c2pa:manifest>AAAWgmp1bWIAAAAeanVtZGMycGEAEQAQgAAAqgA4m3EDYzJwYQAAABZcanVtYgAAAEdqdW1kYzJtYQARABCAAACqADibcQN1cm46YzJwYTpiZDExYmM3Yi04MGY3LTRiZjAtYjYzMS0wNTFiNzIxNjIyYjkAAAADl2p1bWIAAAApanVtZGMyYXMAEQAQgAAAqgA4m3EDYzJwYS5hc3NlcnRpb25zAAAAALxqdW1iAAAARGp1bWRjYm9yABEAEIAAAKoAOJtxE2MycGEuaW5ncmVkaWVudC52MwAAAAAYYzJzaF4KB0w9eLI8FAZLGXoxlVMAAABwY2JvcqNpZGM6Zm9ybWF0bWltYWdlL3N2Zyt4bWxqaW5zdGFuY2VJRHgseG1wOmlpZDoxNTBmYzA1My1mYjZlLTRiNTctODQzMy1mYjExNTBjNTc3MTdscmVsYXRpb25zaGlwaHBhcmVudE9mAAAB4mp1bWIAAABBanVtZGNib3IAEQAQgAAAqgA4m3ETYzJwYS5hY3Rpb25zLnYyAAAAABhjMnNodDaaJM8CwGgAWtoy04M7pwAAAZljYm9yomdhY3Rpb25zgqJmYWN0aW9ua2MycGEub3BlbmVkanBhcmFtZXRlcnOha2luZ3JlZGllbnRzgaJjdXJseC1zZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmluZ3JlZGllbnQudjNkaGFzaFggLYQ9xgigrRxSkGy/v0TfNlsxhZct6BMdlOPKc+fYfkSkZmFjdGlvbngdY29tLmFudGhyb3BpYy5jbGF1ZGUucHJvdmlkZWRqcGFyYW1ldGVyc6F4H2NvbS5hbnRocm9waWMub3JpZ2luLWNvbmZpZGVuY2VndW5rbm93bmtkZXNjcmlwdGlvbnhmQ2xhdWRlIHByb3ZpZGVkIHRoaXMgZmlsZSBhdCB0aGUgcmVxdWVzdCBvZiBhIHVzZXIgYW5kIG1heSBoYXZlIGNyZWF0ZWQgb3IgbW9kaWZpZWQgdGhlIGZpbGUgY29udGVudHMubXNvZnR3YXJlQWdlbnShZG5hbWVmQ2xhdWRlcmFsbEFjdGlvbnNJbmNsdWRlZPUAAADIanVtYgAAAEBqdW1kY2JvcgARABCAAACqADibcRNjMnBhLmhhc2guZGF0YQAAAAAYYzJzaE8F/wai9sFAIy/3aQ1WaiUAAACAY2JvcqVjYWxnZnNoYTI1NmNwYWRMAAAAAAAAAAAAAAAAZGhhc2hYIBBJy8JSvCUH65ONhJCKyGxim6iM8LsNH58cnxm1YxvfZG5hbWVuanVtYmYgbWFuaWZlc3RqZXhjbHVzaW9uc4GiZXN0YXJ0GSfoZmxlbmd0aBkeBAAAAj5qdW1iAAAAJ2p1bWRjMmNsABEAEIAAAKoAOJtxA2MycGEuY2xhaW0udjIAAAACD2Nib3KlY2FsZ2ZzaGEyNTZpc2lnbmF0dXJleE1zZWxmI2p1bWJmPS9jMnBhL3VybjpjMnBhOmJkMTFiYzdiLTgwZjctNGJmMC1iNjMxLTA1MWI3MjE2MjJiOS9jMnBhLnNpZ25hdHVyZWppbnN0YW5jZUlEeCx4bXA6aWlkOjY2NDYxNWE4LTAxMTUtNDY2OS05YTYzLWVkNTY0N2M0YmZmYnJjcmVhdGVkX2Fzc2VydGlvbnODomN1cmx4LXNlbGYjanVtYmY9YzJwYS5hc3NlcnRpb25zL2MycGEuaW5ncmVkaWVudC52M2RoYXNoWCAthD3GCKCtHFKQbL+/RN82WzGFly3oEx2U48pz59h+RKJjdXJseCpzZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmFjdGlvbnMudjJkaGFzaFggIydZsDfNTb2RDbTzhuDOWt2F7H31/x2AtXEGsHWyr8iiY3VybHgpc2VsZiNqdW1iZj1jMnBhLmFzc2VydGlvbnMvYzJwYS5oYXNoLmRhdGFkaGFzaFgg1t9u5Y6qMGtmWknv6QOQScM2LmgVQlvaRYbSjH+gfxd0Y2xhaW1fZ2VuZXJhdG9yX2luZm+jZG5hbWVvQW50aHJvcGljIEZpbGVzZ3ZlcnNpb25lMS4wLjBrc3BlY1ZlcnNpb25lMi40LjAAABA4anVtYgAAAChqdW1kYzJjcwARABCAAACqADibcQNjMnBhLnNpZ25hdHVyZQAAABAIY2JvctKEWQISogEmGCFZAgowggIGMIIBjaADAgECAhRA5aAK7sI50L64g/oGQgU9Z1UTADAKBggqhkjOPQQDAzBJMRcwFQYDVQQKEw5BbnRocm9waWMsIFBCQzEuMCwGA1UEAxMlQW50aHJvcGljIENvbnRlbnQgQ3JlZGVudGlhbHMgUm9vdCBDQTAeFw0yNjA4MDcxODQzNTZaFw0yODA4MDYxOTQzNTZaMEQxFzAVBgNVBAoTDkFudGhyb3BpYywgUEJDMSkwJwYDVQQDEyBBbnRocm9waWMgQ2xhdWRlIENvbnRlbnQgU2lnbmluZzBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABJh6CmvLUBgFFNU0vUKlOVtE6djd17L5SuwX0LemFisBM3dkd/3cyjxFA3Qo5S46fX0/ihY0VZ7mfb9KF703t5OjWDBWMA4GA1UdDwEB/wQEAwIHgDAVBgNVHSUEDjAMBgorBgEEAYPoXgIBMAwGA1UdEwEB/wQCMAAwHwYDVR0jBBgwFoAUzlHiBIFOZFsj+OPEz5o+nMHXXMIwCgYIKoZIzj0EAwMDZwAwZAIwMXMdFJ4BetLLVY7ORuE9noqbbAZOZn/aArXyTwFAZfKrPzxF2vPoJNf1+UCdg1XGAjBwX1zd9WGqYkqmL5SFqw1QySjr1zJfpJM9+1rdDwSPLMOPOjKuiXjoU/pUUeG9RwmhY3BhZFkNngAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPZYQOBztPY3Y3Sfuq3X4qLpsrcKjB6qX9I3TZWlFaN2SXV85vbozLODopkz+CFiec0ziCVWAX5viXDgzDJMibxppQs=</c2pa:manifest></metadata></svg>
