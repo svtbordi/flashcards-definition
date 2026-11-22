@@ -286,3 +286,15 @@ button.write-toggle { font-size: 14px; }
 .typed-answer p { margin: 0 0 4px; white-space: pre-wrap; }
 .typed-label { margin: 0 0 6px; }
 .typed-label + .def { border-top: 0; padding-top: 0; }
+
+/* Premier lancement : comment ajouter des chapitres */
+.welcome h2 { font-size: 18px; margin: 0 0 8px; }
+.welcome ol { padding-left: 22px; margin: 8px 0; }
+.welcome li { margin: 6px 0; }
+
+/* Bascule Bio / Géol dans le bandeau */
+.disc { display: flex; border: 1px solid rgba(255,255,255,.6); border-radius: 999px; overflow: hidden; flex: none; }
+.disc button { background: none; border: 0; color: var(--accent-text); font: inherit; font-size: 14px; font-weight: 600; padding: 6px 10px; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+.disc button.on { background: var(--accent-text); color: var(--accent); }
+.disc-n { background: var(--due); color: #1d2321; border-radius: 999px; font-size: 11px; padding: 0 6px; line-height: 18px; }
+@media (max-width: 380px) { .top h1 { font-size: 15px; overflow-wrap: normal; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .top { gap: 4px; padding-left: 12px; padding-right: 12px; } .icon-btn { width: 34px; } .disc button { padding: 6px 7px; } }

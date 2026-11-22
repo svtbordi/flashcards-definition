@@ -4,7 +4,9 @@ Application installable (téléphone Android ou iPhone, ordinateur) pour apprend
 
 ## Ce que fait l'application
 
-- Révisions espacées du jour : les nouvelles cartes viennent seulement des chapitres vus en cours, cochés par l'enseignant (voir « Chapitres vus en cours »). Les cartes déjà commencées ailleurs continuent d'être révisées selon leur calendrier.
+- Révisions espacées du jour : les nouvelles cartes viennent seulement de « Mes chapitres », la liste que l'élève compose lui-même (bouton « ＋ Ajouter des chapitres à mes révisions » sur l'accueil, ou « Ajouter aussi à mes chapitres » en entraînement libre), au fil des chapitres vus en cours. « Méthodes et techniques » s'y ajoute comme un chapitre. Retirer un chapitre ne retire aucune carte commencée : les cartes déjà commencées, ici ou ailleurs, continuent d'être révisées selon leur calendrier. La liste est enregistrée avec la progression (sauvegarde comprise).
+- Bascule « Bio / Géol » dans le bandeau : l'accueil, les révisions espacées du jour, « Mes chapitres », l'entraînement libre, les méthodes et « Mes chapitres commencés » ne montrent que la biologie (SV) ou la géologie (ST) ; les biogéosciences (BG) sont dans les deux (même carte, une seule révision). Le choix est mémorisé (réglage `discipline`, Bio par défaut) et ne modifie aucune carte. Le nombre de cartes à revoir aujourd'hui dans l'autre discipline (hors BG) s'affiche sur la bascule, pour qu'elles ne s'accumulent pas sans qu'on le voie. La limite de nouvelles cartes par jour et l'objectif quotidien sont communs aux deux disciplines. Le lexique, les définitions cochées et « Ma progression » couvrent tout.
+- Premier lancement : tant que « Mes chapitres » est vide, l'accueil montre en trois étapes comment ajouter des chapitres, à la place du bloc des révisions.
 - Entraînement libre sur un chapitre, plusieurs (BCPST 1 compris, par exemple pendant les vacances), ou « Mes chapitres commencés ». Les chapitres vus en cours y sont signalés.
 - Méthodes et techniques : les définitions marquées « M » en colonne E du tableur (principe et objectif d'une méthode du programme) ont leur bouton en entraînement libre, tous chapitres confondus. Elles restent aussi dans leur chapitre et, sauf si l'enseignant décoche l'option sur la page « Chapitres vus en cours », entrent toujours dans les révisions espacées, car elles servent dans toutes les parties.
 - Mots-clés à vérifier : quand une définition a des éléments-clés (colonne D du tableur), ils sont soulignés au verso et l'élève coche ceux qu'il avait cités ; « Su » ne s'active que s'il les a tous. Comparer sa réponse à des éléments précis corrige la tendance à se juger trop vite (Dunlosky et Rawson, 2012).
@@ -56,13 +58,11 @@ Format attendu : onglet « Toutes » (sinon le premier onglet), sans ligne d'en-
 
 Le terme sert d'identifiant : corriger une définition garde la progression des élèves, renommer un terme crée une nouvelle carte. Les majuscules, accents, « œ » et apostrophes typographiques sont ignorés dans cette comparaison.
 
-## Chapitres vus en cours (enseignant)
+## Chapitres : choisis par les élèves (depuis novembre 2026)
 
-Ouvrir `chapitres.html` (lien « Espace enseignant : chapitres vus en cours » en bas des Réglages), cocher les parties ou sous-parties traitées, puis « Publier pour les étudiants ». La liste est enregistrée dans `www/data/ouverts.json` ; les élèves la reçoivent à la prochaine ouverture avec connexion, après la republication automatique (une à deux minutes). Tant que la liste n'a jamais été publiée (`"chapitres": null`), les révisions couvrent tout le programme. Une case « Méthodes et techniques » (cochée par défaut, publiée avec la liste sous `"methodes"`) les garde toujours dans les révisions espacées.
+Ce n'est plus l'enseignant qui ouvre les chapitres : chaque élève compose « Mes chapitres ». `www/data/ouverts.json` (page `chapitres.html`, qui n'est plus liée depuis les Réglages) ne sert plus qu'à une migration, une seule fois par appareil : un élève qui avait déjà commencé avec l'ancienne version reçoit une liste « Mes chapitres » égale aux chapitres que l'enseignant proposait (méthodes comprises si elles l'étaient), avec un bandeau qui explique le changement ; ses révisions continuent donc à l'identique. Un nouvel élève part d'une liste vide. Une ancienne sauvegarde restaurée est migrée de la même façon. Ne pas vider `ouverts.json` tant que des élèves peuvent encore ouvrir l'application pour la première fois depuis la mise à jour. La page enseignant (`prof.html`) s'en sert encore pour colorer les thèmes du suivi.
 
-La publication directe demande une fois une clé GitHub personnelle (« Fine-grained token », accès limité à ce dépôt, permission « Contents : Read and write »), enregistrée seulement dans le navigateur de l'enseignant. Sans clé, la page fait télécharger `ouverts.json`, à déposer à la main dans `www/data/` sur GitHub.
-
-Une définition codée seulement au niveau d'une partie (par exemple « ST-A ») n'entre dans les révisions que si la partie entière est cochée.
+Test : `node tools/test_mes_chapitres.mjs <www de l'ancienne version> www` (migration sans perte, ancienne sauvegarde, premier lancement).
 
 ## Recevoir les signalements (une seule fois)
 
