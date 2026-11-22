@@ -339,6 +339,6 @@ button.done { opacity: .7; }
 .draw-wrap { position: relative; background: #ffffff; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
 .draw-wrap canvas { display: block; width: 100%; height: auto; touch-action: none; cursor: crosshair; }
 .draw-wrap canvas[data-tool="text"] { cursor: text; }
-.draw-input { position: absolute; z-index: 2; min-width: 150px; max-width: 70%; padding: 2px 6px; border: 1px dashed #888; border-radius: 6px; background: rgba(255, 255, 255, .92); font: inherit; transform: translateY(-50%); }
+.draw-input { position: absolute; z-index: 2; box-sizing: border-box; margin: 0; padding: 0 2px; border: 1px dashed #888; border-radius: 4px; background: rgba(255, 255, 255, .92); font-family: system-ui, -apple-system, "Segoe UI", sans-serif; resize: none; overflow: hidden; white-space: pre-wrap; overflow-wrap: anywhere; }
 .draw-grid { display: grid; gap: 12px; margin: 0 0 12px; }
 @media (min-width: 900px) { .draw-grid.two { grid-template-columns: 1fr 1fr; align-items: start; } }

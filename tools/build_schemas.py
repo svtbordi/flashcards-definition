@@ -3,7 +3,8 @@
 Usage : python tools/build_schemas.py source/schemas www/data/schemas.json
 
 source/schemas/catalogue.xlsx, onglet « catalogue » :
-  chapitre ; schema ; type (légende / leurre) ; numero ; terme ; a garder (oui/non) ; source
+  chapitre ; schema ; type (titre à dessiner / légende / leurre) ; numero ; terme ; a garder (oui/non) ; source
+  une ligne « titre à dessiner » par schéma : le titre montré en mode « Dessiner » (sinon, la balise <title> du SVG).
   une ligne « légende » par numéro du schéma ; une ligne « leurre » par étiquette erronée (sans numéro).
   un leurre marqué « non » n'est pas proposé ; vide ou « oui » : proposé.
 source/schemas/<chapitre>_<schema>/<…>-numeros.svg
@@ -26,14 +27,6 @@ TITRES = {
     'arteriole-musculaire': 'Paroi d’un vaisseau : coupe 2 (microscopie électronique)',
     'capillaire': 'Paroi d’un vaisseau : coupe 3 (microscopie électronique)',
 }
-# Mode « Dessiner » : ce que l'élève doit dessiner (le titre du schéma, sauf s'il est trop vague)
-A_DESSINER = {
-    'artere-musculaire': 'Coupe transversale d’une artère musculaire (microscopie optique)',
-    'arteriole-musculaire': 'Coupe transversale d’une artériole musculaire (microscopie électronique)',
-    'capillaire': 'Coupe transversale d’un capillaire (microscopie électronique)',
-    'potentiel-action': 'Potentiel d’action neuronal : enregistrement du potentiel de membrane',
-    'double-circulation': 'Organisation de la double circulation',
-}
 
 
 def norm(s):
@@ -43,12 +36,15 @@ def norm(s):
 
 src, out = pathlib.Path(sys.argv[1]), pathlib.Path(sys.argv[2])
 wb = load_workbook(src / 'catalogue.xlsx', read_only=True, data_only=True)
-schemas, leurres = {}, []
+schemas, leurres, a_dessiner = {}, [], {}
 for row in list(wb['catalogue'].iter_rows(values_only=True))[1:]:
     row = (tuple(row) + (None,) * 7)[:7]
     if not row[1] or row[4] is None or not str(row[4]).strip():
         continue
     chap, slug, kind, terme = str(row[0]).strip(), str(row[1]).strip(), norm(row[2] or ''), str(row[4]).strip()
+    if kind.startswith('titre'):
+        a_dessiner[slug] = terme
+        continue
     if kind.startswith('leurre'):
         if norm(row[5] or '') != 'non':
             leurres.append((slug, terme))
@@ -67,7 +63,7 @@ for slug, s in schemas.items():
     svg = files[0].read_text(encoding='utf8')
     titre = re.search(r'<title>(.*?)</title>', svg, re.S)
     titre = titre.group(1).strip().replace("'", '’') if titre else slug
-    dessin = A_DESSINER.get(slug, titre)
+    dessin = a_dessiner.get(slug, titre)  # les légendes contenues dans ce titre ne sont pas à cocher
     corr = list(src.glob(f'*_{slug}/*-legendes.svg'))
     assert len(corr) == 1, f'{slug} : {len(corr)} fichier(s) SVG légendé(s)'
     corrige = re.sub(r'<title>.*?</title>', '', corr[0].read_text(encoding='utf8'), flags=re.S)
