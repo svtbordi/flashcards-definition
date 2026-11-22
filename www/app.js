@@ -50,7 +50,7 @@ function saveJSON(key, value) {
 }
 
 const store = Object.assign(
-  { cards: {}, log: [], days: {}, settings: {}, selection: [], picked: [], qcmLog: [], revLog: [], pendingReports: [] },
+  { cards: {}, log: [], days: {}, settings: {}, selection: [], picked: [], qcmLog: [], revLog: [], pendingReports: [], schemaCards: {}, schemaLog: [] },
   loadJSON(STORE_KEY, {})
 );
 store.settings = Object.assign({}, DEFAULT_SETTINGS, store.settings);
@@ -183,6 +183,7 @@ async function loadDeck() {
     fetch('config.json', { cache: 'no-cache' }).then(r => r.json()).catch(() => ({})),
     fetch('data/ouverts.json', { cache: 'no-cache' }).then(r => r.json()).then(o => ({ o })).catch(() => null),
     fetch('data/leurres.json').then(r => r.json()).then(QCM.setCurated).catch(() => null),
+    fetch('data/schemas.json').then(r => r.json()).then(setSchemas).catch(() => null),
   ]);
   config = conf || {};
   opened = open && open.o && Array.isArray(open.o.chapitres) ? open.o : null;
@@ -567,6 +568,7 @@ function go(next, push = true) {
 
 function back() {
   if (view === 'session') session = null;
+  if (view === 'schema') schemaRun = null;
   view = viewStack.pop() || 'home';
   if (view === 'home' && !session && updateReady) return location.reload();
   render();
@@ -617,12 +619,12 @@ function bar(s) {
 function render() {
   backBtn.hidden = view === 'home';
   // pas de lexique pendant une séance : chercher la réponse avant de la donner annule l'effet du test
-  document.getElementById('btn-lexicon').hidden = view === 'session' || view === 'lexicon';
+  document.getElementById('btn-lexicon').hidden = view === 'session' || view === 'lexicon' || view === 'schema';
   renderDiscToggle();
-  const titles = { home: 'Flashcards BCPST', choose: 'Choisir des chapitres', mine: 'Mes chapitres', session: 'Entraînement', progress: 'Ma progression', settings: 'Réglages', privacy: 'Données et confidentialité', install: 'Installer l’application', bilan: 'Mon bilan', lexicon: 'Lexique' };
+  const titles = { home: 'Flashcards BCPST', choose: 'Choisir des chapitres', mine: 'Mes chapitres', session: 'Entraînement', progress: 'Ma progression', settings: 'Réglages', privacy: 'Données et confidentialité', install: 'Installer l’application', bilan: 'Mon bilan', lexicon: 'Lexique', schemas: 'Schémas', schema: 'Schéma' };
   // petit écran : la bascule Bio / Géol prend de la place dans le bandeau
   titleEl.textContent = view === 'home' && window.innerWidth < 400 ? 'Flashcards' : (titles[view] || 'Flashcards BCPST');
-  ({ home: renderHome, choose: renderChoose, mine: renderMine, session: renderSession, progress: renderProgress, settings: renderSettings, privacy: renderPrivacy, install: renderInstall, bilan: renderBilan, lexicon: renderLexicon })[view]();
+  ({ home: renderHome, choose: renderChoose, mine: renderMine, session: renderSession, progress: renderProgress, settings: renderSettings, privacy: renderPrivacy, install: renderInstall, bilan: renderBilan, lexicon: renderLexicon, schemas: renderSchemas, schema: renderSchema })[view]();
 }
 
 function renderHome() {
@@ -674,6 +676,7 @@ function renderHome() {
       ${pickedStats ? `<button id="go-picked">Réviser mes définitions cochées <small>(${plural(pickedStats.total, 'définition', 'définitions')} : ${pickedStats.due} à revoir, ${plural(pickedStats.new, 'jamais vue', 'jamais vues')})</small></button>` : ''}
       ${store.selection.length ? `<button id="go-last">Reprendre ma dernière sélection <small>(${esc(store.selection.slice(0, 3).join(', '))}${store.selection.length > 3 ? '…' : ''})</small></button>` : ''}
       ${methodsHere().length ? `<button id="go-methods">Méthodes et techniques <small>(principe et objectif de ${plural(methodsHere().length, 'méthode', 'méthodes')}, ${DISC_NAME[disc()]})</small></button>` : ''}
+      ${schemasHere().length ? `<button id="go-schemas">Schémas à légender <small>${schemasHomeLabel()}</small></button>` : ''}
       <button id="go-started" ${startedStats ? '' : 'disabled'}>Mes chapitres commencés${startedStats ? ` <small>(${startedStats.due} à revoir)</small>` : ''}</button>
     </div>
     <div class="actions secondary">
@@ -703,6 +706,8 @@ function renderHome() {
   const methods = document.getElementById('go-methods');
   if (methods) methods.onclick = () => startSession([METHODS], 'Méthodes et techniques', { inDiscOnly: true });
   document.getElementById('go-progress').onclick = () => go('progress');
+  const sch = document.getElementById('go-schemas');
+  if (sch) sch.onclick = () => go('schemas');
   const inst = document.getElementById('go-install');
   if (inst) inst.onclick = () => go('install');
   const suggest = document.getElementById('go-suggest');
@@ -2217,7 +2222,7 @@ async function importBackup(file) {
     const data = JSON.parse(await file.text());
     if (data.app !== 'flashcards-bcpst' || !data.store || typeof data.store.cards !== 'object') throw new Error('fichier non reconnu');
     if (!await askConfirm(`Restaurer la sauvegarde du ${data.exported.slice(0, 10)} ? Elle remplace la progression actuelle de cet appareil.`, 'Restaurer')) return;
-    Object.assign(store, { cards: {}, log: [], days: {}, selection: [], picked: [], mesChapitres: undefined }, data.store);
+    Object.assign(store, { cards: {}, log: [], days: {}, selection: [], picked: [], mesChapitres: undefined, schemaCards: {}, schemaLog: [] }, data.store);
     pickedSet = new Set(store.picked);
     // sauvegarde faite avant « Mes chapitres » : la liste est recréée comme pour une mise à jour
     if (!Array.isArray(store.mesChapitres)) { delete store.mesChapitres; migrateChapters(true); }
@@ -2327,6 +2332,199 @@ function renderPrivacy() {
 }
 
 /* ---------- Démarrage ---------- */
+
+
+/* ---------- Schémas à légender ---------- */
+// Un schéma numéroté (data/schemas.json, construit par tools/build_schemas.py depuis source/schemas/) : l'élève touche
+// un numéro et choisit la légende dans un menu d'environ six propositions (la bonne, d'autres légendes du même schéma,
+// des leurres du catalogue). Chaque légende a son propre calendrier FSRS (store.schemaCards), séparé de celui des
+// définitions : seule la première réponse d'une séance compte (juste = « Su », fausse = « Raté »). Les schémas suivent
+// la bascule Bio / Géol et « Mes chapitres » (ou tous les chapitres, au choix).
+let schemaList = [];
+let schemaRun = null;
+let schemaScope = '';
+const SCHEMA_OPTIONS = 6;
+
+function setSchemas(data) {
+  schemaList = data && Array.isArray(data.schemas) ? data.schemas : [];
+}
+
+const schemaLabelId = (sc, l) => `${sc.id}#${normTerm(l.terme)}`;
+const schemasHere = () => schemaList.filter(sc => codeInDisc(sc.chapitre));
+const schemaInMine = sc => matchesAny(sc.chapitre, myChapterCodes());
+
+function schemaStats(sc, now = new Date()) {
+  const endDay = endOfStudyDay(now);
+  let fresh = 0, due = 0;
+  for (const l of sc.legendes) {
+    const st = store.schemaCards[schemaLabelId(sc, l)];
+    if (!st || st.state === State.New) fresh += 1;
+    else if (new Date(st.due) <= endDay) due += 1;
+  }
+  return { total: sc.legendes.length, fresh, due };
+}
+
+function schemasHomeLabel() {
+  const list = schemasHere().filter(schemaInMine);
+  if (!list.length) return `(${plural(schemasHere().length, 'schéma', 'schémas')} en ${DISC_NAME[disc()]}, aucun dans mes chapitres)`;
+  const due = list.reduce((n, sc) => n + schemaStats(sc).due, 0);
+  return `(${plural(list.length, 'schéma', 'schémas')} dans mes chapitres${due ? ` : ${plural(due, 'légende à revoir', 'légendes à revoir')}` : ''})`;
+}
+
+function renderSchemas() {
+  const here = schemasHere();
+  const mineList = here.filter(schemaInMine);
+  if (!schemaScope) schemaScope = mineList.length ? 'mine' : 'all';
+  const list = schemaScope === 'mine' ? mineList : here;
+  const byChap = {};
+  for (const sc of list) (byChap[sc.chapitre] = byChap[sc.chapitre] || []).push(sc);
+  const codes = Object.keys(byChap).sort((a, b) => (chapterOrder[a] ?? 999) - (chapterOrder[b] ?? 999) || a.localeCompare(b));
+  app.innerHTML = `
+    <p class="muted">Touchez un numéro du schéma, puis choisissez sa légende dans le menu. Une légende ratée revient plus vite, une légende sue de plus en plus tard.</p>
+    <div class="seg" role="radiogroup" aria-label="Schémas proposés">
+      <button role="radio" data-scope="mine" aria-checked="${schemaScope === 'mine'}">Mes chapitres (${mineList.length})</button>
+      <button role="radio" data-scope="all" aria-checked="${schemaScope === 'all'}">Tous les chapitres (${here.length})</button>
+    </div>
+    ${list.length ? codes.map(code => `<h2 class="section">${esc(code)} · ${esc(chapterTitle[code] || chapterTitle[partOf(code)] || '')}</h2>
+      <div class="actions">${byChap[code].map(sc => {
+        const st = schemaStats(sc);
+        const info = st.fresh === st.total ? `${plural(st.total, 'légende', 'légendes')}, jamais fait`
+          : st.due ? `${plural(st.due, 'légende à revoir', 'légendes à revoir')}${st.fresh ? `, ${st.fresh} jamais vue${st.fresh > 1 ? 's' : ''}` : ''}`
+          : `à jour (${plural(st.total, 'légende', 'légendes')})`;
+        return `<button data-sc="${esc(sc.id)}" class="${st.due || st.fresh ? '' : 'done'}">${esc(sc.titre)} <small>${info}</small></button>`;
+      }).join('')}</div>`).join('')
+      : `<p class="card">Aucun schéma dans vos chapitres de ${DISC_NAME[disc()]} pour l’instant. Ajoutez des chapitres, ou choisissez « Tous les chapitres ».</p>`}`;
+  app.querySelectorAll('[data-scope]').forEach(b => { b.onclick = () => { schemaScope = b.dataset.scope; render(); }; });
+  app.querySelectorAll('[data-sc]').forEach(b => { b.onclick = () => startSchema(b.dataset.sc); });
+}
+
+function schemaOptions(sc, l) {
+  const others = QCM.shuffle(sc.legendes.filter(x => x !== l).map(x => x.terme));
+  const lures = QCM.shuffle(sc.leurres.slice());
+  const nLures = Math.min(lures.length, Math.floor((SCHEMA_OPTIONS - 1) / 2));
+  const picks = lures.slice(0, nLures).concat(others.slice(0, SCHEMA_OPTIONS - 1 - nLures));
+  for (const x of lures.slice(nLures)) if (picks.length < SCHEMA_OPTIONS - 1) picks.push(x);
+  return QCM.shuffle([...new Set([l.terme, ...picks])]);
+}
+
+function startSchema(id) {
+  const sc = schemaList.find(x => x.id === id);
+  if (!sc) return;
+  const now = new Date();
+  const endDay = endOfStudyDay(now);
+  const isAsked = l => { const st = store.schemaCards[schemaLabelId(sc, l)]; return !st || st.state === State.New || new Date(st.due) <= endDay; };
+  let asked = sc.legendes.filter(isAsked);
+  const ahead = !asked.length; // tout est à jour : on revoit tout le schéma en avance
+  if (ahead) asked = sc.legendes.slice();
+  schemaRun = {
+    sc, ahead,
+    rows: sc.legendes.map(l => ({ l, ask: asked.includes(l), options: schemaOptions(sc, l), answer: null, ok: null, graded: false })),
+  };
+  go('schema');
+}
+
+function schemaGrade(row) {
+  const sc = schemaRun.sc;
+  const id = schemaLabelId(sc, row.l);
+  const now = new Date();
+  const saved = store.schemaCards[id];
+  const card = saved ? toCard(saved) : createEmptyCard(now);
+  const { card: next } = scheduler.next(card, now, row.ok ? Rating.Good : Rating.Again);
+  store.schemaCards[id] = fromCard(next);
+  store.schemaLog.push({ t: now.toISOString(), id, ok: row.ok ? 1 : 0 });
+  if (store.schemaLog.length > 5000) store.schemaLog.splice(0, store.schemaLog.length - 5000);
+  row.graded = true;
+  persist();
+}
+
+function openSchemaMenu(n) {
+  const row = schemaRun && schemaRun.rows.find(r => r.l.n === n);
+  if (!row || !row.ask || row.ok) return;
+  document.querySelector('.sheet')?.remove();
+  const box = document.createElement('div');
+  box.className = 'sheet';
+  box.innerHTML = `<div class="sheet-box" role="dialog" aria-modal="true" aria-label="Légende du numéro ${n}">
+    <p class="sheet-title"><span class="num">${n}</span> Choisissez la légende</p>
+    <div class="sheet-opts">${row.options.map((o, i) => `<button data-o="${i}">${esc(o)}</button>`).join('')}</div>
+    <button class="sheet-cancel">Annuler</button></div>`;
+  document.body.appendChild(box);
+  const close = () => box.remove();
+  box.onclick = e => { if (e.target === box) close(); };
+  box.querySelector('.sheet-cancel').onclick = close;
+  box.querySelectorAll('[data-o]').forEach(b => {
+    b.onclick = () => {
+      row.answer = row.options[+b.dataset.o];
+      row.ok = normTerm(row.answer) === normTerm(row.l.terme);
+      if (!row.graded) { row.firstOk = row.ok; schemaGrade(row); } // seule la première réponse compte pour le calendrier
+      close();
+      renderSchema();
+    };
+  });
+  box.querySelector('[data-o]').focus();
+}
+
+function renderSchema() {
+  const r = schemaRun;
+  if (!r) { view = 'schemas'; return render(); }
+  const asked = r.rows.filter(x => x.ask);
+  const left = asked.filter(x => !x.ok);
+  const finished = asked.every(x => x.graded) && !left.length;
+  const firstOk = asked.filter(x => x.firstOk).length;
+  app.innerHTML = `
+    <h2 class="section">${esc(r.sc.titre)}</h2>
+    ${r.ahead ? '<p class="muted small">Toutes les légendes de ce schéma sont à jour : révision en avance.</p>' : ''}
+    <div class="plate" id="plate">${r.sc.svg}</div>
+    <p class="muted small">Touchez un numéro (ou une ligne ci-dessous). Écartez deux doigts pour agrandir le schéma.</p>
+    <ol class="sch-rows">${r.rows.map(x => {
+      const cls = !x.ask ? 'known' : x.ok ? 'ok' : x.answer ? 'ko' : 'todo';
+      const body = !x.ask ? `<span class="term">${esc(x.l.terme)}</span> <small>déjà sue</small>`
+        : x.ok ? `<span class="term">${esc(x.l.terme)}</span>${x.firstOk ? ' ✓' : ' <small>(retrouvée après une erreur)</small>'}`
+        : x.answer ? `<span class="wrong">${esc(x.answer)}</span> ✗ <small>réessayez</small>`
+        : '<span class="muted">légende à trouver</span>';
+      return `<li class="sch-row ${cls}" data-n="${x.l.n}" ${x.ask && !x.ok ? 'tabindex="0" role="button"' : ''}><span class="num">${x.l.n}</span> ${body}</li>`;
+    }).join('')}</ol>
+    ${finished ? `<section class="card center"><p class="big">${firstOk} / ${asked.length} du premier coup</p>
+      <p class="muted">${firstOk === asked.length ? 'Toutes les légendes sont justes.' : 'Les légendes ratées reviendront plus vite.'}</p></section>` : ''}
+    <div class="actions">${finished ? `${schemaNextId() ? '<button class="primary" id="sch-next">Schéma suivant</button>' : ''}<button id="sch-list">Retour aux schémas</button>`
+      : `<button id="sch-list">Arrêter là <small>les réponses déjà données sont enregistrées</small></button>`}</div>`;
+  // numéros du schéma : zone de toucher agrandie, couleur selon la réponse
+  const svg = app.querySelector('#plate svg');
+  if (svg) {
+    svg.removeAttribute('width'); svg.removeAttribute('height');
+    svg.querySelectorAll('g.legende').forEach(g => {
+      const x = r.rows.find(row => String(row.l.n) === g.dataset.n);
+      if (!x) return;
+      const circ = [...g.querySelectorAll('circle')].find(c => +c.getAttribute('r') >= 10);
+      if (circ) {
+        circ.setAttribute('r', '19');
+        circ.style.fill = !x.ask ? '#e4e3dc' : x.ok ? '#c9ecd6' : x.answer ? '#f6cfc8' : '#fff3b0';
+        circ.style.strokeWidth = '3';
+        const hit = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        hit.setAttribute('cx', circ.getAttribute('cx')); hit.setAttribute('cy', circ.getAttribute('cy'));
+        hit.setAttribute('r', '34'); hit.setAttribute('fill', 'transparent'); hit.setAttribute('class', 'hit');
+        g.appendChild(hit);
+        const txt = [...g.querySelectorAll('text')].find(tt => tt.textContent.trim() === g.dataset.n);
+        if (txt) { txt.setAttribute('font-size', '20'); txt.setAttribute('y', String(+circ.getAttribute('cy') + 7)); }
+      }
+      if (x.ask && !x.ok) { g.classList.add('tap'); g.onclick = () => openSchemaMenu(x.l.n); }
+    });
+  }
+  app.querySelectorAll('.sch-row[role="button"]').forEach(li => {
+    li.onclick = () => openSchemaMenu(+li.dataset.n);
+    li.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openSchemaMenu(+li.dataset.n); } };
+  });
+  document.getElementById('sch-list').onclick = () => { schemaRun = null; viewStack = viewStack.filter(v => v !== 'schema'); view = 'schemas'; render(); };
+  const nx = document.getElementById('sch-next');
+  if (nx) nx.onclick = () => { const id = schemaNextId(); view = 'schemas'; startSchema(id); viewStack = viewStack.filter(v => v !== 'schema'); };
+}
+
+// prochain schéma à faire (légendes à revoir ou jamais vues) dans la même liste que celle de départ
+function schemaNextId() {
+  const list = (schemaScope === 'mine' ? schemasHere().filter(schemaInMine) : schemasHere()).filter(sc => !schemaRun || sc.id !== schemaRun.sc.id);
+  const todo = list.map(sc => ({ sc, st: schemaStats(sc) })).filter(x => x.st.due || x.st.fresh);
+  todo.sort((a, b) => b.st.due - a.st.due);
+  return todo.length ? todo[0].sc.id : '';
+}
 
 async function main() {
   try {

@@ -24,6 +24,8 @@ jobs:
       - run: pip install openpyxl==3.1.5
       - name: Convertir le tableur en données de l'application
         run: python tools/build_data.py source/definitions_SVT.xlsx www/data
+      - name: Assembler les schémas à légender
+        run: python tools/build_schemas.py source/schemas www/data/schemas.json
       - name: Forcer la mise à jour du cache hors connexion
         run: sed -i "s/__BUILD__/$(date +%Y%m%d%H%M%S)/" www/sw.js
       - uses: actions/configure-pages@v5

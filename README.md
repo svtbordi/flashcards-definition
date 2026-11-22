@@ -64,6 +64,17 @@ Ce n'est plus l'enseignant qui ouvre les chapitres : chaque élève compose « M
 
 Test : `node tools/test_mes_chapitres.mjs <www de l'ancienne version> www` (migration sans perte, ancienne sauvegarde, premier lancement).
 
+## Schémas à légender (pilote, novembre 2026)
+
+Dans « Entraînement libre », le bouton **Schémas à légender** ouvre la liste des schémas de la discipline choisie (Bio ou Géol), d'abord ceux des chapitres de l'élève (« Mes chapitres »), avec un onglet « Tous les chapitres ». L'élève touche un numéro (sur le schéma ou dans la liste dessous) et choisit la légende parmi 6 propositions : la bonne, jusqu'à 2 étiquettes erronées du catalogue, et d'autres légendes du même schéma. Chaque légende a son propre calendrier (FSRS, séparé des définitions : les statistiques et l'objectif du jour des définitions ne changent pas). Seule la première réponse compte ; une légende ratée revient plus vite. La progression est dans la sauvegarde exportée.
+
+Ajouter ou modifier un schéma :
+- `source/schemas/<CODE-CHAPITRE>_<nom>/<nom>-numeros.svg` : version numérotée ; chaque numéro est un `<g class="legende" data-n="…">`.
+- `source/schemas/catalogue.xlsx`, onglet `legendes` (chapitre, schema, numero, terme) et onglet `leurres` (chapitre, schema, étiquette erronée, source, à garder : « non » = écartée).
+- `python tools/build_schemas.py source/schemas www/data/schemas.json` (fait automatiquement à la publication GitHub). Le script vérifie que les numéros du SVG et du catalogue correspondent, retire du SVG les réponses (`data-terme`, `<title>`) et remplace un titre qui donnerait une légende par un titre neutre (dictionnaire `TITRES` du script).
+- Le calendrier d'une légende est rattaché au nom du schéma et au texte de la légende : renuméroter ne perd rien, mais renommer une légende la fait repartir de zéro.
+- Test : `node tools/schemas_test.mjs`.
+
 ## Recevoir les signalements (une seule fois)
 
 Le bouton ⚠ n'apparaît que lorsque `www/config.json` contient une adresse. Chaque signalement devient une ligne d'un tableur Google qui t'appartient (onglet « Signalements », avec une case « Traité » à cocher) : tu le consultes quand tu veux, sur ordinateur ou dans l'application Google Sheets. Pas de mail, sauf si tu l'actives. Ton adresse n'est jamais visible dans l'application.
