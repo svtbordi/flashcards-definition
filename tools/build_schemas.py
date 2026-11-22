@@ -2,10 +2,10 @@
 
 Usage : python tools/build_schemas.py source/schemas www/data/schemas.json
 
-source/schemas/catalogue.xlsx
-  onglet « legendes » : chapitre ; schema ; numero ; terme (une ligne par légende attendue)
-  onglet « leurres »  : chapitre ; schema ; etiquette erronee ; source ; a garder (oui/non)
-    un leurre marqué « non » n'est pas proposé ; vide ou « oui » : proposé.
+source/schemas/catalogue.xlsx, onglet « catalogue » :
+  chapitre ; schema ; type (légende / leurre) ; numero ; terme ; a garder (oui/non) ; source
+  une ligne « légende » par numéro du schéma ; une ligne « leurre » par étiquette erronée (sans numéro).
+  un leurre marqué « non » n'est pas proposé ; vide ou « oui » : proposé.
 source/schemas/<chapitre>_<schema>/<…>-numeros.svg
   version numérotée du schéma : chaque numéro est un <g class="legende" data-n="…">.
 
@@ -33,19 +33,22 @@ def norm(s):
 
 src, out = pathlib.Path(sys.argv[1]), pathlib.Path(sys.argv[2])
 wb = load_workbook(src / 'catalogue.xlsx', read_only=True, data_only=True)
-schemas = {}
-for row in list(wb['legendes'].iter_rows(values_only=True))[1:]:
-    if not row or not row[1] or row[3] is None:
+schemas, leurres = {}, []
+for row in list(wb['catalogue'].iter_rows(values_only=True))[1:]:
+    row = (tuple(row) + (None,) * 7)[:7]
+    if not row[1] or row[4] is None or not str(row[4]).strip():
         continue
-    chap, slug, n, terme = (str(row[0]).strip(), str(row[1]).strip(), int(row[2]), str(row[3]).strip())
+    chap, slug, kind, terme = str(row[0]).strip(), str(row[1]).strip(), norm(row[2] or ''), str(row[4]).strip()
+    if kind.startswith('leurre'):
+        if norm(row[5] or '') != 'non':
+            leurres.append((slug, terme))
+        continue
+    assert kind.startswith('legende'), f'{slug} « {terme} » : type « {row[2]} » (attendu : légende ou leurre)'
     s = schemas.setdefault(slug, {'id': slug, 'chapitre': chap, 'legendes': [], 'leurres': []})
-    s['legendes'].append({'n': n, 'terme': terme})
-for row in list(wb['leurres'].iter_rows(values_only=True))[1:]:
-    if not row or not row[1] or not row[2]:
-        continue
-    slug, terme, garder = str(row[1]).strip(), str(row[2]).strip(), str(row[4] or '').strip().lower()
-    if slug in schemas and garder != 'non':
-        schemas[slug]['leurres'].append(terme)
+    s['legendes'].append({'n': int(row[3]), 'terme': terme})
+for slug, terme in leurres:
+    assert slug in schemas, f'leurre « {terme} » : schéma « {slug} » sans légende'
+    schemas[slug]['leurres'].append(terme)
 
 result = []
 for slug, s in schemas.items():

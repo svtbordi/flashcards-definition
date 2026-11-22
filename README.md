@@ -70,7 +70,7 @@ Dans « Entraînement libre », le bouton **Schémas à légender** ouvre la lis
 
 Ajouter ou modifier un schéma :
 - `source/schemas/<CODE-CHAPITRE>_<nom>/<nom>-numeros.svg` : version numérotée ; chaque numéro est un `<g class="legende" data-n="…">`.
-- `source/schemas/catalogue.xlsx`, onglet `legendes` (chapitre, schema, numero, terme) et onglet `leurres` (chapitre, schema, étiquette erronée, source, à garder : « non » = écartée).
+- `source/schemas/catalogue.xlsx`, onglet `catalogue` : chapitre, schema, type (`légende` ou `leurre`), numero (légendes seulement), terme, à garder (« non » = leurre écarté), source. Les leurres d'un schéma sont rangés sous ses légendes.
 - `python tools/build_schemas.py source/schemas www/data/schemas.json` (fait automatiquement à la publication GitHub). Le script vérifie que les numéros du SVG et du catalogue correspondent, retire du SVG les réponses (`data-terme`, `<title>`) et remplace un titre qui donnerait une légende par un titre neutre (dictionnaire `TITRES` du script).
 - Le calendrier d'une légende est rattaché au nom du schéma et au texte de la légende : renuméroter ne perd rien, mais renommer une légende la fait repartir de zéro.
 - Test : `node tools/schemas_test.mjs`.
