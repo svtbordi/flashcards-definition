@@ -58,9 +58,32 @@ if os.path.exists(LEURRES):
             leurres[row[0]] = {'l': row[2], 'a': [x.strip() for x in row[3].split('|') if x.strip()]}
 json.dump(leurres, open(f'{OUT}/leurres.json', 'w', encoding='utf8'), ensure_ascii=False)
 
+# Termes renommés (source/renommages.csv, à côté du tableur) : ancien terme ; nouveau terme. L'identifiant d'une carte
+# est son terme normalisé : sans cette correspondance, un renommage ferait perdre sa progression à l'élève.
+renames = {}
+RENAMES = os.path.join(os.path.dirname(XLSX), 'renommages.csv')
+ids = {c['id'] for c in cards}
+if os.path.exists(RENAMES):
+    for row in list(csv.reader(open(RENAMES, encoding='utf-8-sig'), delimiter=';'))[1:]:
+        row = [x.strip() for x in row] + [''] * 2
+        if not row[0] or not row[1]:
+            continue
+        old, new = norm(row[0]), norm(row[1])
+        if old != new:
+            renames[old] = new
+    for old in list(renames):  # chaînes a → b → c : directement vers le dernier nom
+        seen_chain = {old}
+        while renames[old] in renames and renames[old] not in seen_chain:
+            seen_chain.add(renames[old])
+            renames[old] = renames[renames[old]]
+    for old, new in list(renames.items()):
+        if old in ids or new not in ids:  # ancien nom réutilisé, ou nouveau nom absent du tableur : ignoré
+            print('renommage ignoré :', old, '->', new, '(ancien nom encore présent)' if old in ids else '(nouveau nom absent)')
+            del renames[old]
+
 stamp = datetime.date.today().isoformat()
-json.dump({'version': stamp, 'source': 'definitions_SVT.xlsx', 'cards': cards},
+json.dump({'version': stamp, 'source': 'definitions_SVT.xlsx', 'cards': cards, 'renames': renames},
           open(f'{OUT}/definitions.json', 'w', encoding='utf8'), ensure_ascii=False)
 if chapters:
     json.dump(chapters, open(f'{OUT}/chapters.json', 'w', encoding='utf8'), ensure_ascii=False, indent=0)
-print(len(cards), 'cartes,', skipped, 'sans chapitre ignorées,', sum(v > 1 for v in seen.values()), 'termes en double;', len(chapters), 'chapitres;', len(leurres), 'listes de leurres')
+print(len(cards), 'cartes,', skipped, 'sans chapitre ignorées,', sum(v > 1 for v in seen.values()), 'termes en double;', len(chapters), 'chapitres;', len(leurres), 'listes de leurres;', len(renames), 'renommages')

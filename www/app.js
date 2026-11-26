@@ -167,7 +167,7 @@ function setPicked(ids, on) {
   persist();
 }
 
-// seulement les définitions encore présentes dans le paquet (un terme renommé perd sa coche, comme sa progression)
+// seulement les définitions encore présentes dans le paquet (un terme renommé garde sa coche : voir migrateRenames)
 const pickedCards = () => deck.cards.filter(c => pickedSet.has(c.id));
 
 function matchesSelection(card, selected) {
@@ -199,6 +199,42 @@ async function loadDeck() {
   deck = imported && imported.version >= bundled.version ? imported : bundled;
   deck.cards = deck.cards.filter(c => c.codes.length); // une définition sans chapitre n'est pas proposée
   bundledVersion = bundled.version;
+  deckRenames = bundled.renames || {};
+  migrateRenames(deckRenames);
+}
+let deckRenames = {};
+
+// Terme renommé dans le tableur (source/renommages.csv) : l'identifiant d'une carte est son terme normalisé, donc
+// on reporte sous le nouveau nom la progression, la coche du lexique et l'historique de l'ancien. Si l'élève a déjà
+// commencé la carte sous son nouveau nom, cette progression-là est gardée. Une carte supprimée du tableur n'est
+// plus proposée, mais sa progression reste enregistrée (elle revient si la définition est remise).
+function migrateRenames(renames) {
+  if (!renames || typeof renames !== 'object') return false;
+  const known = new Set(deck.cards.map(c => c.id));
+  const map = new Map(Object.entries(renames).filter(([o, n]) => o !== n && known.has(n) && !known.has(o)));
+  if (!map.size) return false;
+  let changed = false;
+  for (const [o, n] of map) {
+    if (store.cards[o]) {
+      if (!store.cards[n]) store.cards[n] = store.cards[o];
+      delete store.cards[o];
+      changed = true;
+    }
+    if (pickedSet.has(o)) {
+      pickedSet.delete(o);
+      pickedSet.add(n);
+      store.picked = [...pickedSet];
+      changed = true;
+    }
+  }
+  for (const list of [store.log, store.revLog, store.qcmLog]) {
+    for (const e of list || []) {
+      if (e && map.has(e.id)) { e.id = map.get(e.id); changed = true; }
+      if (e && map.has(e.pick)) { e.pick = map.get(e.pick); changed = true; }
+    }
+  }
+  if (changed) persist();
+  return changed;
 }
 let bundledVersion = '';
 let config = {};
@@ -2229,6 +2265,7 @@ async function importBackup(file) {
     if (!await askConfirm(`Restaurer la sauvegarde du ${data.exported.slice(0, 10)} ? Elle remplace la progression actuelle de cet appareil.`, 'Restaurer')) return;
     Object.assign(store, { cards: {}, log: [], days: {}, selection: [], picked: [], mesChapitres: undefined, schemaCards: {}, schemaLog: [], schemaDraw: {} }, data.store);
     pickedSet = new Set(store.picked);
+    migrateRenames(deckRenames); // sauvegarde faite avant un renommage de terme
     // sauvegarde faite avant « Mes chapitres » : la liste est recréée comme pour une mise à jour
     if (!Array.isArray(store.mesChapitres)) { delete store.mesChapitres; migrateChapters(true); }
     store.settings = Object.assign({}, DEFAULT_SETTINGS, store.settings);
