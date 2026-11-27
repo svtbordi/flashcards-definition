@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 820" font-family="Arial, Helvetica, sans-serif" xmlns:c2pa="http://c2pa.org/manifest">
+<title>Voie parasympathique et cellule nodale</title><rect width="1000" height="820" fill="#fff"/>
+<g id="dessin">
+<rect x="200" y="262" width="620" height="460" rx="46" fill="#FFF6D6" stroke="#E8873A" stroke-width="14"/>
+<rect x="200" y="262" width="620" height="460" rx="46" fill="none" stroke="#fff" stroke-width="3" stroke-dasharray="2 5"/>
+<path d="M150,0 C170,40 200,60 260,70 C320,30 470,40 500,110 C520,165 470,205 390,208 C310,212 250,190 235,140 C228,118 200,90 120,28 Z" fill="#FFF6D6" stroke="#E8873A" stroke-width="10" stroke-linejoin="round"/>
+<circle cx="330" cy="110" r="20" fill="#fff" stroke="#B23A3A" stroke-width="2.5"/>
+<circle cx="324" cy="105" r="7" fill="#F3A3A3" stroke="#B23A3A" stroke-width="2"/>
+<circle cx="337" cy="116" r="7" fill="#F3A3A3" stroke="#B23A3A" stroke-width="2"/>
+<circle cx="390" cy="95" r="20" fill="#fff" stroke="#B23A3A" stroke-width="2.5"/>
+<circle cx="384" cy="90" r="7" fill="#F3A3A3" stroke="#B23A3A" stroke-width="2"/>
+<circle cx="397" cy="101" r="7" fill="#F3A3A3" stroke="#B23A3A" stroke-width="2"/>
+<circle cx="440" cy="140" r="20" fill="#fff" stroke="#B23A3A" stroke-width="2.5"/>
+<circle cx="434" cy="135" r="7" fill="#F3A3A3" stroke="#B23A3A" stroke-width="2"/>
+<circle cx="447" cy="146" r="7" fill="#F3A3A3" stroke="#B23A3A" stroke-width="2"/>
+<circle cx="370" cy="160" r="20" fill="#fff" stroke="#B23A3A" stroke-width="2.5"/>
+<circle cx="364" cy="155" r="7" fill="#F3A3A3" stroke="#B23A3A" stroke-width="2"/>
+<circle cx="377" cy="166" r="7" fill="#F3A3A3" stroke="#B23A3A" stroke-width="2"/>
+<path d="M420,198 Q426,212 434,214 Q442,212 446,198" fill="#fff" stroke="#B23A3A" stroke-width="2.5"/>
+<circle cx="452" cy="228" r="7" fill="#F3A3A3" stroke="#B23A3A" stroke-width="2"/>
+<circle cx="472" cy="240" r="7" fill="#F3A3A3" stroke="#B23A3A" stroke-width="2"/>
+<circle cx="436" cy="236" r="7" fill="#F3A3A3" stroke="#B23A3A" stroke-width="2"/>
+<rect x="486" y="236" width="10" height="52" rx="5" fill="#C9D8EE" stroke="#3E5F8A" stroke-width="2"/>
+<rect x="498" y="236" width="10" height="52" rx="5" fill="#C9D8EE" stroke="#3E5F8A" stroke-width="2"/>
+<rect x="510" y="236" width="10" height="52" rx="5" fill="#C9D8EE" stroke="#3E5F8A" stroke-width="2"/>
+<rect x="522" y="236" width="10" height="52" rx="5" fill="#C9D8EE" stroke="#3E5F8A" stroke-width="2"/>
+<rect x="534" y="236" width="10" height="52" rx="5" fill="#C9D8EE" stroke="#3E5F8A" stroke-width="2"/>
+<rect x="546" y="236" width="10" height="52" rx="5" fill="#C9D8EE" stroke="#3E5F8A" stroke-width="2"/>
+<rect x="558" y="236" width="10" height="52" rx="5" fill="#C9D8EE" stroke="#3E5F8A" stroke-width="2"/>
+<circle cx="520" cy="230" r="7" fill="#F3A3A3" stroke="#B23A3A" stroke-width="2"/>
+<ellipse cx="555" cy="338" rx="38" ry="24" fill="#F3A3A3" stroke="#B23A3A" stroke-width="2.5"/><rect x="588" y="322" width="16" height="16" transform="rotate(45 596 330)" fill="#FFD3E8" stroke="#A0306A" stroke-width="2"/>
+<path d="M530,292 Q532,312 540,318" fill="none" stroke="#B23A3A" stroke-width="3"/><path transform="translate(544,322) rotate(50)" d="M2,0 L-12,-7 L-12,7 Z" fill="#B23A3A"/>
+<rect x="640" y="222" width="78" height="112" rx="30" fill="#C9D8EE" stroke="#3E5F8A" stroke-width="2.5"/>
+<path d="M594,348 Q620,352 636,320" fill="none" stroke="#B23A3A" stroke-width="3"/><path transform="translate(638,314) rotate(-70)" d="M2,0 L-12,-7 L-12,7 Z" fill="#B23A3A"/><circle cx="622" cy="366" r="11" fill="#fff" stroke="#B23A3A" stroke-width="2.5"/><line x1="616" y1="366" x2="628" y2="366" stroke="#B23A3A" stroke-width="2.5"/>
+<path d="M660,250 L700,300 M700,250 L660,300" stroke="#B23A3A" stroke-width="5" stroke-linecap="round"/>
+<text x="640" y="400" font-size="16" text-anchor="middle" fill="#222" >ATP</text>
+<line x1="662" y1="395" x2="702.0" y2="395.0" stroke="#222" stroke-width="2"/><path transform="translate(712,395) rotate(0.0)" d="M2,0 L-12,-7 L-12,7 Z" fill="#222"/>
+<polygon points="752.0,383.0 760.6,389.2 757.3,399.3 746.7,399.3 743.4,389.2" fill="#FFE08A" stroke="#9A7400" stroke-width="2"/><circle cx="763" cy="399" r="5" fill="none" stroke="#9A7400" stroke-width="2"/>
+<rect x="635.0" y="692" width="24" height="60" rx="10" fill="#C9D8EE" stroke="#3E5F8A" stroke-width="2.5"/><rect x="661.0" y="692" width="24" height="60" rx="10" fill="#C9D8EE" stroke="#3E5F8A" stroke-width="2.5"/>
+<path d="M648,760 L672,784 M672,760 L648,784" stroke="#7A4FB5" stroke-width="3"/><text x="682" y="800" font-size="18" text-anchor="start" fill="#7A4FB5" font-weight="bold">Na⁺</text>
+<path d="M760,414 C770,520 720,620 678,684" fill="none" stroke="#B23A3A" stroke-width="2.5" stroke-dasharray="8 6"/><path transform="translate(674,692) rotate(115)" d="M2,0 L-12,-7 L-12,7 Z" fill="#B23A3A"/><circle cx="748" cy="560" r="11" fill="#fff" stroke="#B23A3A" stroke-width="2.5"/><line x1="742" y1="560" x2="754" y2="560" stroke="#B23A3A" stroke-width="2.5"/>
+<ellipse cx="520" cy="420" rx="26" ry="18" fill="#F3A3A3" stroke="#B23A3A" stroke-width="2.5"/>
+<path d="M548,350 Q540,380 530,396" fill="none" stroke="#B23A3A" stroke-width="3"/><path transform="translate(528,400) rotate(100)" d="M2,0 L-12,-7 L-12,7 Z" fill="#B23A3A"/>
+<path d="M510,440 C490,540 450,620 430,684" fill="none" stroke="#B23A3A" stroke-width="3"/><path transform="translate(428,692) rotate(100)" d="M2,0 L-12,-7 L-12,7 Z" fill="#B23A3A"/><circle cx="486" cy="560" r="11" fill="#fff" stroke="#B23A3A" stroke-width="2.5"/><line x1="480" y1="560" x2="492" y2="560" stroke="#B23A3A" stroke-width="2.5"/><line x1="486" y1="554" x2="486" y2="566" stroke="#B23A3A" stroke-width="2.5"/>
+<rect x="388.0" y="692" width="24" height="60" rx="10" fill="#CFEDEF" stroke="#1E7A8C" stroke-width="2.5"/><rect x="428.0" y="692" width="24" height="60" rx="10" fill="#CFEDEF" stroke="#1E7A8C" stroke-width="2.5"/>
+<line x1="420" y1="670" x2="420.0" y2="790.0" stroke="#1E7A8C" stroke-width="3"/><path transform="translate(420,800) rotate(90.0)" d="M2,0 L-12,-7 L-12,7 Z" fill="#1E7A8C"/><text x="442" y="800" font-size="18" text-anchor="start" fill="#1E7A8C" font-weight="bold">K⁺</text>
+<text x="394" y="650" font-size="15" text-anchor="end" fill="#222" >sortie de K⁺ :</text><text x="394" y="670" font-size="15" text-anchor="end" fill="#222" >hyperpolarisation</text>
+<line x1="300" y1="640" x2="300.0" y2="628.0" stroke="#B23A3A" stroke-width="2.5"/><path transform="translate(300,618) rotate(-90.0)" d="M2,0 L-12,-7 L-12,7 Z" fill="#B23A3A"/>
+</g>
+<g class="legende" data-n="1" data-terme="Terminaison parasympathique">
+<line x1="156" y1="74" x2="250" y2="120" stroke="#222" stroke-width="1.3"/><circle cx="250" cy="120" r="3" fill="#222"/>
+<text x="150" y="70" font-size="17" text-anchor="end" fill="#222" >Terminaison</text>
+<text x="150" y="90" font-size="17" text-anchor="end" fill="#222" >parasympathique</text>
+</g>
+<g class="legende" data-n="2" data-terme="Acétylcholine">
+<line x1="156" y1="224" x2="444" y2="236" stroke="#222" stroke-width="1.3"/><circle cx="444" cy="236" r="3" fill="#222"/>
+<text x="150" y="230" font-size="17" text-anchor="end" fill="#222" >Acétylcholine</text>
+</g>
+<g class="legende" data-n="3" data-terme="Récepteur à l’acétylcholine">
+<line x1="156" y1="304" x2="486" y2="270" stroke="#222" stroke-width="1.3"/><circle cx="486" cy="270" r="3" fill="#222"/>
+<text x="150" y="300" font-size="17" text-anchor="end" fill="#222" >Récepteur à</text>
+<text x="150" y="320" font-size="17" text-anchor="end" fill="#222" >l’acétylcholine</text>
+</g>
+<g class="legende" data-n="4" data-terme="Protéine Gi activée">
+<line x1="156" y1="404" x2="530" y2="344" stroke="#222" stroke-width="1.3"/><circle cx="530" cy="344" r="3" fill="#222"/>
+<text x="150" y="400" font-size="17" text-anchor="end" fill="#222" >Protéine Gi</text>
+<text x="150" y="420" font-size="17" text-anchor="end" fill="#222" >activée</text>
+</g>
+<g class="legende" data-n="5" data-terme="Adénylate cyclase">
+<line x1="864" y1="254" x2="716" y2="262" stroke="#222" stroke-width="1.3"/><circle cx="716" cy="262" r="3" fill="#222"/>
+<text x="870" y="250" font-size="17" text-anchor="start" fill="#222" >Adénylate</text>
+<text x="870" y="270" font-size="17" text-anchor="start" fill="#222" >cyclase</text>
+</g>
+<g class="legende" data-n="6" data-terme="AMPc">
+<line x1="864" y1="404" x2="768" y2="398" stroke="#222" stroke-width="1.3"/><circle cx="768" cy="398" r="3" fill="#222"/>
+<text x="870" y="410" font-size="17" text-anchor="start" fill="#222" >AMPc</text>
+</g>
+<g class="legende" data-n="7" data-terme="Canal HCN">
+<line x1="864" y1="694" x2="684" y2="712" stroke="#222" stroke-width="1.3"/><circle cx="684" cy="712" r="3" fill="#222"/>
+<text x="870" y="700" font-size="17" text-anchor="start" fill="#222" >Canal HCN</text>
+</g>
+<g class="legende" data-n="8" data-terme="Canal K⁺">
+<line x1="156" y1="694" x2="396" y2="712" stroke="#222" stroke-width="1.3"/><circle cx="396" cy="712" r="3" fill="#222"/>
+<text x="150" y="700" font-size="17" text-anchor="end" fill="#222" >Canal K⁺</text>
+</g>
+<g class="legende" data-n="9" data-terme="Cellule nodale">
+<line x1="156" y1="504" x2="290" y2="470" stroke="#222" stroke-width="1.3"/><circle cx="290" cy="470" r="3" fill="#222"/>
+<text x="150" y="500" font-size="17" text-anchor="end" fill="#222" >Cellule</text>
+<text x="150" y="520" font-size="17" text-anchor="end" fill="#222" >nodale</text>
+</g>
+<g class="legende" data-n="10" data-terme="Effet chronotrope négatif">
+<rect x="242" y="560" width="186" height="44" rx="6" fill="#fff" stroke="#B23A3A" stroke-width="2"/>
+<text x="250" y="580" font-size="17" text-anchor="start" fill="#B23A3A" font-weight="bold">Effet chronotrope</text>
+<text x="250" y="600" font-size="17" text-anchor="start" fill="#B23A3A" font-weight="bold">négatif</text>
+</g>
+<metadata><c2pa:manifest>AAAWgmp1bWIAAAAeanVtZGMycGEAEQAQgAAAqgA4m3EDYzJwYQAAABZcanVtYgAAAEdqdW1kYzJtYQARABCAAACqADibcQN1cm46YzJwYTpiY2Q0NWE4ZC1iODIwLTQ1MTItOTAzMC03NGZhYjJhMjFmOTcAAAADl2p1bWIAAAApanVtZGMyYXMAEQAQgAAAqgA4m3EDYzJwYS5hc3NlcnRpb25zAAAAALxqdW1iAAAARGp1bWRjYm9yABEAEIAAAKoAOJtxE2MycGEuaW5ncmVkaWVudC52MwAAAAAYYzJzaO4CrNGc5IHRUEs0OhIaBREAAABwY2JvcqNpZGM6Zm9ybWF0bWltYWdlL3N2Zyt4bWxqaW5zdGFuY2VJRHgseG1wOmlpZDo5YTEyNjQzMC01ZjA3LTQ4ZDUtOGQyZS0yM2M3MDgwYTY3YTdscmVsYXRpb25zaGlwaHBhcmVudE9mAAAB4mp1bWIAAABBanVtZGNib3IAEQAQgAAAqgA4m3ETYzJwYS5hY3Rpb25zLnYyAAAAABhjMnNopFsL/xf9iakh9n1m95X+ZQAAAZljYm9yomdhY3Rpb25zgqJmYWN0aW9ua2MycGEub3BlbmVkanBhcmFtZXRlcnOha2luZ3JlZGllbnRzgaJjdXJseC1zZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmluZ3JlZGllbnQudjNkaGFzaFgg3bkBpmqc9md4RNr3ReugMbIzpXDJRqLYlS2z9YjIRmmkZmFjdGlvbngdY29tLmFudGhyb3BpYy5jbGF1ZGUucHJvdmlkZWRqcGFyYW1ldGVyc6F4H2NvbS5hbnRocm9waWMub3JpZ2luLWNvbmZpZGVuY2VndW5rbm93bmtkZXNjcmlwdGlvbnhmQ2xhdWRlIHByb3ZpZGVkIHRoaXMgZmlsZSBhdCB0aGUgcmVxdWVzdCBvZiBhIHVzZXIgYW5kIG1heSBoYXZlIGNyZWF0ZWQgb3IgbW9kaWZpZWQgdGhlIGZpbGUgY29udGVudHMubXNvZnR3YXJlQWdlbnShZG5hbWVmQ2xhdWRlcmFsbEFjdGlvbnNJbmNsdWRlZPUAAADIanVtYgAAAEBqdW1kY2JvcgARABCAAACqADibcRNjMnBhLmhhc2guZGF0YQAAAAAYYzJzaAZR52iMZy9+evNywZr8IxQAAACAY2JvcqVjYWxnZnNoYTI1NmNwYWRMAAAAAAAAAAAAAAAAZGhhc2hYIH9Yk/7SKyWkWhpXVVwfQoUk1U+13itxO/AxJOqp2+dTZG5hbWVuanVtYmYgbWFuaWZlc3RqZXhjbHVzaW9uc4GiZXN0YXJ0GSa2Zmxlbmd0aBkeBAAAAj5qdW1iAAAAJ2p1bWRjMmNsABEAEIAAAKoAOJtxA2MycGEuY2xhaW0udjIAAAACD2Nib3KlY2FsZ2ZzaGEyNTZpc2lnbmF0dXJleE1zZWxmI2p1bWJmPS9jMnBhL3VybjpjMnBhOmJjZDQ1YThkLWI4MjAtNDUxMi05MDMwLTc0ZmFiMmEyMWY5Ny9jMnBhLnNpZ25hdHVyZWppbnN0YW5jZUlEeCx4bXA6aWlkOjM5YWE1YmNmLTJkZjEtNGI4MC04OTczLWRjZWM1NzkzMTRjZXJjcmVhdGVkX2Fzc2VydGlvbnODomN1cmx4LXNlbGYjanVtYmY9YzJwYS5hc3NlcnRpb25zL2MycGEuaW5ncmVkaWVudC52M2RoYXNoWCDduQGmapz2Z3hE2vdF66AxsjOlcMlGotiVLbP1iMhGaaJjdXJseCpzZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmFjdGlvbnMudjJkaGFzaFggN+BYM6wXZN6kbR7Uu1BVNDxGbHMW4mnLfyhXLiML4u6iY3VybHgpc2VsZiNqdW1iZj1jMnBhLmFzc2VydGlvbnMvYzJwYS5oYXNoLmRhdGFkaGFzaFggoYhQpRAwTdZOdv44EaO6Uk0js3kJpQ+sg6bjHg327Jh0Y2xhaW1fZ2VuZXJhdG9yX2luZm+jZG5hbWVvQW50aHJvcGljIEZpbGVzZ3ZlcnNpb25lMS4wLjBrc3BlY1ZlcnNpb25lMi40LjAAABA4anVtYgAAAChqdW1kYzJjcwARABCAAACqADibcQNjMnBhLnNpZ25hdHVyZQAAABAIY2JvctKEWQISogEmGCFZAgowggIGMIIBjaADAgECAhRA5aAK7sI50L64g/oGQgU9Z1UTADAKBggqhkjOPQQDAzBJMRcwFQYDVQQKEw5BbnRocm9waWMsIFBCQzEuMCwGA1UEAxMlQW50aHJvcGljIENvbnRlbnQgQ3JlZGVudGlhbHMgUm9vdCBDQTAeFw0yNjA4MDcxODQzNTZaFw0yODA4MDYxOTQzNTZaMEQxFzAVBgNVBAoTDkFudGhyb3BpYywgUEJDMSkwJwYDVQQDEyBBbnRocm9waWMgQ2xhdWRlIENvbnRlbnQgU2lnbmluZzBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABJh6CmvLUBgFFNU0vUKlOVtE6djd17L5SuwX0LemFisBM3dkd/3cyjxFA3Qo5S46fX0/ihY0VZ7mfb9KF703t5OjWDBWMA4GA1UdDwEB/wQEAwIHgDAVBgNVHSUEDjAMBgorBgEEAYPoXgIBMAwGA1UdEwEB/wQCMAAwHwYDVR0jBBgwFoAUzlHiBIFOZFsj+OPEz5o+nMHXXMIwCgYIKoZIzj0EAwMDZwAwZAIwMXMdFJ4BetLLVY7ORuE9noqbbAZOZn/aArXyTwFAZfKrPzxF2vPoJNf1+UCdg1XGAjBwX1zd9WGqYkqmL5SFqw1QySjr1zJfpJM9+1rdDwSPLMOPOjKuiXjoU/pUUeG9RwmhY3BhZFkNngAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPZYQJdTpXFGbq/UGrJt6+cRJZIQ0s+s/hco3MtgABorbboK9gafQitR2q2a7mcg8TmlaW/qCUchcgkENHeWg4JOsdE=</c2pa:manifest></metadata></svg>

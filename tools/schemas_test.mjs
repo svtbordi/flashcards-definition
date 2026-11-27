@@ -55,7 +55,7 @@ const mine = await page.$$eval('[data-sc]', bs => bs.map(b => b.dataset.sc));
 check(mine.length === 3 && mine.every(id => ['neurone', 'potentiel-action', 'synapse-neuromusculaire'].includes(id)), `Mes chapitres : ${mine.join(', ')}`);
 await page.click('[data-scope="all"]');
 const all = await page.$$eval('[data-sc]', bs => bs.map(b => b.dataset.sc));
-check(all.length === 10, `Tous les chapitres : ${all.length} schémas`);
+check(all.length === 12, `Tous les chapitres : ${all.length} schémas`);
 await page.screenshot({ path: '/tmp/s1-liste.png', fullPage: true });
 await page.click('[data-scope="mine"]');
 

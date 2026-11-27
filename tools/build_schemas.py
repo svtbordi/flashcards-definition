@@ -27,6 +27,8 @@ TITRES = {
     'artere-musculaire': 'Paroi d’un vaisseau : coupe 1 (microscopie optique)',
     'arteriole-musculaire': 'Paroi d’un vaisseau : coupe 2 (microscopie électronique)',
     'capillaire': 'Paroi d’un vaisseau : coupe 3 (microscopie électronique)',
+    'controle-sympathique': 'Contrôle nerveux de la fréquence cardiaque (1)',
+    'controle-parasympathique': 'Contrôle nerveux de la fréquence cardiaque (2)',
 }
 
 
