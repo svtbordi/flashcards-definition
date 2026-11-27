@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 720" font-family="Arial, Helvetica, sans-serif" xmlns:c2pa="http://c2pa.org/manifest">
+<title>Cœur de Mammifère en coupe frontale</title><rect width="960" height="720" fill="#fff"/>
+<g id="dessin">
+<path d="M300,200 L690,200 C712,222 714,300 704,350 C724,450 682,570 520,656 C392,606 285,506 268,400 C258,340 258,245 300,200 Z" fill="#F3D9C6" stroke="#8A5A44" stroke-width="3" stroke-linejoin="round"/>
+<path d="M536,100 L536,44" fill="none" stroke="#C9584D" stroke-width="18" stroke-linejoin="round"/><path d="M536,100 L536,44" fill="none" stroke="#F6AFA6" stroke-width="12" stroke-linejoin="round"/><ellipse cx="536" cy="44" rx="6" ry="3" transform="rotate(0 536 44)" fill="#F6AFA6" stroke="#C9584D" stroke-width="3" filter="brightness(0.9)"/>
+<path d="M575,94 L575,38" fill="none" stroke="#C9584D" stroke-width="18" stroke-linejoin="round"/><path d="M575,94 L575,38" fill="none" stroke="#F6AFA6" stroke-width="12" stroke-linejoin="round"/><ellipse cx="575" cy="38" rx="6" ry="3" transform="rotate(0 575 38)" fill="#F6AFA6" stroke="#C9584D" stroke-width="3" filter="brightness(0.9)"/>
+<path d="M614,100 L614,44" fill="none" stroke="#C9584D" stroke-width="18" stroke-linejoin="round"/><path d="M614,100 L614,44" fill="none" stroke="#F6AFA6" stroke-width="12" stroke-linejoin="round"/><ellipse cx="614" cy="44" rx="6" ry="3" transform="rotate(0 614 44)" fill="#F6AFA6" stroke="#C9584D" stroke-width="3" filter="brightness(0.9)"/>
+<path d="M262,160 L615,160" fill="none" stroke="#2F569E" stroke-width="36" stroke-linejoin="round"/><path d="M262,160 L615,160" fill="none" stroke="#9DBBEA" stroke-width="30" stroke-linejoin="round"/><ellipse cx="615" cy="160" rx="5" ry="15" transform="rotate(0 615 160)" fill="#9DBBEA" stroke="#2F569E" stroke-width="3" filter="brightness(0.9)"/><ellipse cx="262" cy="160" rx="5" ry="15" transform="rotate(0 262 160)" fill="#9DBBEA" stroke="#2F569E" stroke-width="3" filter="brightness(0.9)"/>
+<path d="M425,224 L425,178" fill="none" stroke="#2F569E" stroke-width="36" stroke-linejoin="round"/><path d="M425,224 L425,178" fill="none" stroke="#9DBBEA" stroke-width="30" stroke-linejoin="round"/><line x1="425" y1="150" x2="425" y2="200" stroke="#9DBBEA" stroke-width="30"/>
+<path d="M489,224 L489,140 C489,62 660,62 660,140 L660,178" fill="none" stroke="#C9584D" stroke-width="46" stroke-linejoin="round"/><path d="M489,224 L489,140 C489,62 660,62 660,140 L660,178" fill="none" stroke="#F6AFA6" stroke-width="40" stroke-linejoin="round"/><ellipse cx="660" cy="178" rx="20" ry="6" transform="rotate(0 660 178)" fill="#F6AFA6" stroke="#C9584D" stroke-width="3" filter="brightness(0.9)"/>
+<path d="M330,36 L330,234" fill="none" stroke="#2F569E" stroke-width="36" stroke-linejoin="round"/><path d="M330,36 L330,234" fill="none" stroke="#9DBBEA" stroke-width="30" stroke-linejoin="round"/><ellipse cx="330" cy="36" rx="15" ry="5" transform="rotate(0 330 36)" fill="#9DBBEA" stroke="#2F569E" stroke-width="3" filter="brightness(0.9)"/>
+<path d="M236,690 L236,440 C236,395 252,372 304,357" fill="none" stroke="#2F569E" stroke-width="38" stroke-linejoin="round"/><path d="M236,690 L236,440 C236,395 252,372 304,357" fill="none" stroke="#9DBBEA" stroke-width="32" stroke-linejoin="round"/><ellipse cx="236" cy="690" rx="16" ry="5" transform="rotate(0 236 690)" fill="#9DBBEA" stroke="#2F569E" stroke-width="3" filter="brightness(0.9)"/>
+<path d="M776,246 L660,269" fill="none" stroke="#C9584D" stroke-width="26" stroke-linejoin="round"/><path d="M776,246 L660,269" fill="none" stroke="#F6AFA6" stroke-width="20" stroke-linejoin="round"/><ellipse cx="776" cy="246" rx="4" ry="10" transform="rotate(-8 776 246)" fill="#F6AFA6" stroke="#C9584D" stroke-width="3" filter="brightness(0.9)"/>
+<path d="M776,334 L660,311" fill="none" stroke="#C9584D" stroke-width="26" stroke-linejoin="round"/><path d="M776,334 L660,311" fill="none" stroke="#F6AFA6" stroke-width="20" stroke-linejoin="round"/><ellipse cx="776" cy="334" rx="4" ry="10" transform="rotate(8 776 334)" fill="#F6AFA6" stroke="#C9584D" stroke-width="3" filter="brightness(0.9)"/>
+<path d="M302,224 C284,252 282,320 292,362 L318,382 C298,394 288,406 290,420 C300,486 356,552 470,596 C456,532 446,462 446,400 L446,215 L404,215 L404,350 C404,360 398,366 390,366 C384,330 386,262 382,226 C356,212 326,212 302,224 Z" fill="#9DBBEA" stroke="#2F569E" stroke-width="2.5" stroke-linejoin="round"/>
+<path d="M530,224 C560,210 630,210 658,226 C672,262 672,330 660,362 L636,382 C658,396 668,412 664,432 C650,520 602,582 522,626 C500,560 478,470 470,400 L468,215 L510,215 L510,350 C510,360 516,366 524,366 C530,330 528,262 530,224 Z" fill="#F6AFA6" stroke="#C9584D" stroke-width="2.5" stroke-linejoin="round"/>
+<line x1="330" y1="218" x2="330" y2="234" stroke="#9DBBEA" stroke-width="30"/>
+<line x1="425" y1="208" x2="425" y2="224" stroke="#9DBBEA" stroke-width="30"/>
+<line x1="489" y1="208" x2="489" y2="224" stroke="#F6AFA6" stroke-width="40"/>
+<line x1="286" y1="362" x2="304" y2="357" stroke="#9DBBEA" stroke-width="32"/>
+<line x1="672" y1="268" x2="660" y2="269" stroke="#F6AFA6" stroke-width="20"/>
+<line x1="672" y1="312" x2="660" y2="311" stroke="#F6AFA6" stroke-width="20"/>
+<path d="M318,382 Q332.0,404.0 334,426" fill="none" stroke="#2F569E" stroke-width="5" stroke-linecap="round"/>
+<path d="M390,366 Q375.0,392.0 372,418" fill="none" stroke="#2F569E" stroke-width="5" stroke-linecap="round"/>
+<path d="M524,366 Q540.0,392.0 544,418" fill="none" stroke="#C9584D" stroke-width="5" stroke-linecap="round"/>
+<path d="M636,382 Q622.0,404.0 620,426" fill="none" stroke="#C9584D" stroke-width="5" stroke-linecap="round"/>
+<path d="M404,214 Q406,234 422,226" fill="none" stroke="#2F569E" stroke-width="4" stroke-linecap="round"/>
+<path d="M446,214 Q444,234 428,226" fill="none" stroke="#2F569E" stroke-width="4" stroke-linecap="round"/>
+<path d="M468,214 Q470,234 486,226" fill="none" stroke="#C9584D" stroke-width="4" stroke-linecap="round"/>
+<path d="M510,214 Q508,234 492,226" fill="none" stroke="#C9584D" stroke-width="4" stroke-linecap="round"/>
+<path transform="translate(330,100) rotate(90) scale(1.0)" d="M8,0 L-6,-7 L-6,7 Z" fill="#fff"/>
+<path transform="translate(236,560) rotate(-90) scale(1.0)" d="M8,0 L-6,-7 L-6,7 Z" fill="#fff"/>
+<path transform="translate(330,330) rotate(90) scale(1.3)" d="M8,0 L-6,-7 L-6,7 Z" fill="#2F569E"/>
+<path transform="translate(425,300) rotate(-90) scale(1.3)" d="M8,0 L-6,-7 L-6,7 Z" fill="#2F569E"/>
+<path transform="translate(290,160) rotate(180) scale(1.0)" d="M8,0 L-6,-7 L-6,7 Z" fill="#fff"/>
+<path transform="translate(565,160) rotate(0) scale(1.0)" d="M8,0 L-6,-7 L-6,7 Z" fill="#fff"/>
+<path transform="translate(730,253) rotate(172) scale(1.0)" d="M8,0 L-6,-7 L-6,7 Z" fill="#fff"/>
+<path transform="translate(730,327) rotate(-172) scale(1.0)" d="M8,0 L-6,-7 L-6,7 Z" fill="#fff"/>
+<path transform="translate(600,320) rotate(90) scale(1.3)" d="M8,0 L-6,-7 L-6,7 Z" fill="#C9584D"/>
+<path transform="translate(489,300) rotate(-90) scale(1.3)" d="M8,0 L-6,-7 L-6,7 Z" fill="#C9584D"/>
+<path transform="translate(489,125) rotate(-90) scale(1.0)" d="M8,0 L-6,-7 L-6,7 Z" fill="#fff"/>
+<path transform="translate(660,140) rotate(90) scale(1.0)" d="M8,0 L-6,-7 L-6,7 Z" fill="#fff"/>
+</g>
+<line x1="800" y1="670" x2="894" y2="670" stroke="#222" stroke-width="3"/><text x="847" y="694" font-size="14" text-anchor="middle" fill="#222" >2,5 cm chez l’Homme</text>
+<g class="legende" data-n="1" data-terme="Artères pulmonaires">
+<line x1="196" y1="144" x2="280" y2="160" stroke="#222" stroke-width="1.3"/><circle cx="280" cy="160" r="3" fill="#222"/>
+<text x="190" y="140" font-size="17" text-anchor="end" fill="#222" >Artères</text>
+<text x="190" y="160" font-size="17" text-anchor="end" fill="#222" >pulmonaires</text>
+</g>
+<g class="legende" data-n="2" data-terme="Valvules artérielles">
+<line x1="196" y1="216" x2="408" y2="222" stroke="#222" stroke-width="1.3"/><circle cx="408" cy="222" r="3" fill="#222"/>
+<line x1="196" y1="216" x2="472" y2="222" stroke="#222" stroke-width="1.3"/><circle cx="472" cy="222" r="3" fill="#222"/>
+<text x="190" y="212" font-size="17" text-anchor="end" fill="#222" >Valvules</text>
+<text x="190" y="232" font-size="17" text-anchor="end" fill="#222" >artérielles</text>
+</g>
+<g class="legende" data-n="3" data-terme="Oreillette droite">
+<line x1="196" y1="294" x2="330" y2="300" stroke="#222" stroke-width="1.3"/><circle cx="330" cy="300" r="3" fill="#222"/>
+<text x="190" y="290" font-size="17" text-anchor="end" fill="#222" >Oreillette</text>
+<text x="190" y="310" font-size="17" text-anchor="end" fill="#222" >droite</text>
+</g>
+<g class="legende" data-n="4" data-terme="Veines caves">
+<line x1="196" y1="454" x2="228" y2="460" stroke="#222" stroke-width="1.3"/><circle cx="228" cy="460" r="3" fill="#222"/>
+<line x1="196" y1="454" x2="318" y2="196" stroke="#222" stroke-width="1.3"/><circle cx="318" cy="196" r="3" fill="#222"/>
+<text x="190" y="450" font-size="17" text-anchor="end" fill="#222" >Veines</text>
+<text x="190" y="470" font-size="17" text-anchor="end" fill="#222" >caves</text>
+</g>
+<g class="legende" data-n="5" data-terme="Ventricule droit">
+<line x1="196" y1="564" x2="360" y2="480" stroke="#222" stroke-width="1.3"/><circle cx="360" cy="480" r="3" fill="#222"/>
+<text x="190" y="560" font-size="17" text-anchor="end" fill="#222" >Ventricule</text>
+<text x="190" y="580" font-size="17" text-anchor="end" fill="#222" >droit</text>
+</g>
+<g class="legende" data-n="6" data-terme="Aorte">
+<line x1="784" y1="90" x2="678" y2="110" stroke="#222" stroke-width="1.3"/><circle cx="678" cy="110" r="3" fill="#222"/>
+<text x="790" y="96" font-size="17" text-anchor="start" fill="#222" >Aorte</text>
+</g>
+<g class="legende" data-n="7" data-terme="Oreillette gauche">
+<line x1="794" y1="180" x2="600" y2="250" stroke="#222" stroke-width="1.3"/><circle cx="600" cy="250" r="3" fill="#222"/>
+<text x="800" y="176" font-size="17" text-anchor="start" fill="#222" >Oreillette</text>
+<text x="800" y="196" font-size="17" text-anchor="start" fill="#222" >gauche</text>
+</g>
+<g class="legende" data-n="8" data-terme="Veines pulmonaires">
+<line x1="794" y1="284" x2="762" y2="248" stroke="#222" stroke-width="1.3"/><circle cx="762" cy="248" r="3" fill="#222"/>
+<line x1="794" y1="284" x2="762" y2="332" stroke="#222" stroke-width="1.3"/><circle cx="762" cy="332" r="3" fill="#222"/>
+<text x="800" y="280" font-size="17" text-anchor="start" fill="#222" >Veines</text>
+<text x="800" y="300" font-size="17" text-anchor="start" fill="#222" >pulmonaires</text>
+</g>
+<g class="legende" data-n="9" data-terme="Valvules auriculo-ventriculaires">
+<line x1="714" y1="404" x2="628" y2="404" stroke="#222" stroke-width="1.3"/><circle cx="628" cy="404" r="3" fill="#222"/>
+<line x1="714" y1="404" x2="326" y2="404" stroke="#222" stroke-width="1.3"/><circle cx="326" cy="404" r="3" fill="#222"/>
+<text x="720" y="400" font-size="17" text-anchor="start" fill="#222" >Valvules auriculo-</text>
+<text x="720" y="420" font-size="17" text-anchor="start" fill="#222" >ventriculaires</text>
+</g>
+<g class="legende" data-n="10" data-terme="Ventricule gauche">
+<line x1="714" y1="524" x2="600" y2="480" stroke="#222" stroke-width="1.3"/><circle cx="600" cy="480" r="3" fill="#222"/>
+<text x="720" y="520" font-size="17" text-anchor="start" fill="#222" >Ventricule</text>
+<text x="720" y="540" font-size="17" text-anchor="start" fill="#222" >gauche</text>
+</g>
+<metadata><c2pa:manifest>AAAWgmp1bWIAAAAeanVtZGMycGEAEQAQgAAAqgA4m3EDYzJwYQAAABZcanVtYgAAAEdqdW1kYzJtYQARABCAAACqADibcQN1cm46YzJwYTpiM2RmYzE5MS1hOTNkLTRiNGEtYmZhZC0yYjM4ZDE2MWQzMGQAAAADl2p1bWIAAAApanVtZGMyYXMAEQAQgAAAqgA4m3EDYzJwYS5hc3NlcnRpb25zAAAAALxqdW1iAAAARGp1bWRjYm9yABEAEIAAAKoAOJtxE2MycGEuaW5ncmVkaWVudC52MwAAAAAYYzJzaAYscwDoMunmZZiWwXGV50IAAABwY2JvcqNpZGM6Zm9ybWF0bWltYWdlL3N2Zyt4bWxqaW5zdGFuY2VJRHgseG1wOmlpZDo0MzFjYWMzNC0yNmUxLTQyNzctYTdiNS0yZTY0ZjU3OWE4MmFscmVsYXRpb25zaGlwaHBhcmVudE9mAAAB4mp1bWIAAABBanVtZGNib3IAEQAQgAAAqgA4m3ETYzJwYS5hY3Rpb25zLnYyAAAAABhjMnNo9OpUJRv8mbqSaxIT/IkF6wAAAZljYm9yomdhY3Rpb25zgqJmYWN0aW9ua2MycGEub3BlbmVkanBhcmFtZXRlcnOha2luZ3JlZGllbnRzgaJjdXJseC1zZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmluZ3JlZGllbnQudjNkaGFzaFggpro7mU6zr0dyrRYHW63MDX3ZqIebU6eT+oGFtD3msF6kZmFjdGlvbngdY29tLmFudGhyb3BpYy5jbGF1ZGUucHJvdmlkZWRqcGFyYW1ldGVyc6F4H2NvbS5hbnRocm9waWMub3JpZ2luLWNvbmZpZGVuY2VndW5rbm93bmtkZXNjcmlwdGlvbnhmQ2xhdWRlIHByb3ZpZGVkIHRoaXMgZmlsZSBhdCB0aGUgcmVxdWVzdCBvZiBhIHVzZXIgYW5kIG1heSBoYXZlIGNyZWF0ZWQgb3IgbW9kaWZpZWQgdGhlIGZpbGUgY29udGVudHMubXNvZnR3YXJlQWdlbnShZG5hbWVmQ2xhdWRlcmFsbEFjdGlvbnNJbmNsdWRlZPUAAADIanVtYgAAAEBqdW1kY2JvcgARABCAAACqADibcRNjMnBhLmhhc2guZGF0YQAAAAAYYzJzaEcqeIhKaDNXfu74AHERTGAAAACAY2JvcqVjYWxnZnNoYTI1NmNwYWRMAAAAAAAAAAAAAAAAZGhhc2hYIDqP6mLzi/X1MbaYg6WJKInVqNeOikIqhX+gUgTA5/ZZZG5hbWVuanVtYmYgbWFuaWZlc3RqZXhjbHVzaW9uc4GiZXN0YXJ0GSzUZmxlbmd0aBkeBAAAAj5qdW1iAAAAJ2p1bWRjMmNsABEAEIAAAKoAOJtxA2MycGEuY2xhaW0udjIAAAACD2Nib3KlY2FsZ2ZzaGEyNTZpc2lnbmF0dXJleE1zZWxmI2p1bWJmPS9jMnBhL3VybjpjMnBhOmIzZGZjMTkxLWE5M2QtNGI0YS1iZmFkLTJiMzhkMTYxZDMwZC9jMnBhLnNpZ25hdHVyZWppbnN0YW5jZUlEeCx4bXA6aWlkOmUxY2UxNGIzLTA2ODYtNDQ0OS1hYmM1LWYwMzNlZTFmYjlkZnJjcmVhdGVkX2Fzc2VydGlvbnODomN1cmx4LXNlbGYjanVtYmY9YzJwYS5hc3NlcnRpb25zL2MycGEuaW5ncmVkaWVudC52M2RoYXNoWCCmujuZTrOvR3KtFgdbrcwNfdmoh5tTp5P6gYW0PeawXqJjdXJseCpzZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmFjdGlvbnMudjJkaGFzaFggN0E8Z1JDutpsKQIJAJVMciaJ7oPzKYLIMdVSBkeSRbWiY3VybHgpc2VsZiNqdW1iZj1jMnBhLmFzc2VydGlvbnMvYzJwYS5oYXNoLmRhdGFkaGFzaFggt1KGjrmAaJRsJXupnTVN55dHaE9x0Lc+mKhSXv4Mbu90Y2xhaW1fZ2VuZXJhdG9yX2luZm+jZG5hbWVvQW50aHJvcGljIEZpbGVzZ3ZlcnNpb25lMS4wLjBrc3BlY1ZlcnNpb25lMi40LjAAABA4anVtYgAAAChqdW1kYzJjcwARABCAAACqADibcQNjMnBhLnNpZ25hdHVyZQAAABAIY2JvctKEWQISogEmGCFZAgowggIGMIIBjaADAgECAhRA5aAK7sI50L64g/oGQgU9Z1UTADAKBggqhkjOPQQDAzBJMRcwFQYDVQQKEw5BbnRocm9waWMsIFBCQzEuMCwGA1UEAxMlQW50aHJvcGljIENvbnRlbnQgQ3JlZGVudGlhbHMgUm9vdCBDQTAeFw0yNjA4MDcxODQzNTZaFw0yODA4MDYxOTQzNTZaMEQxFzAVBgNVBAoTDkFudGhyb3BpYywgUEJDMSkwJwYDVQQDEyBBbnRocm9waWMgQ2xhdWRlIENvbnRlbnQgU2lnbmluZzBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABJh6CmvLUBgFFNU0vUKlOVtE6djd17L5SuwX0LemFisBM3dkd/3cyjxFA3Qo5S46fX0/ihY0VZ7mfb9KF703t5OjWDBWMA4GA1UdDwEB/wQEAwIHgDAVBgNVHSUEDjAMBgorBgEEAYPoXgIBMAwGA1UdEwEB/wQCMAAwHwYDVR0jBBgwFoAUzlHiBIFOZFsj+OPEz5o+nMHXXMIwCgYIKoZIzj0EAwMDZwAwZAIwMXMdFJ4BetLLVY7ORuE9noqbbAZOZn/aArXyTwFAZfKrPzxF2vPoJNf1+UCdg1XGAjBwX1zd9WGqYkqmL5SFqw1QySjr1zJfpJM9+1rdDwSPLMOPOjKuiXjoU/pUUeG9RwmhY3BhZFkNngAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPZYQA2E0xs81BCn4pExNKJgJ+TXH3b0pppct1yOq7sNIvoqY/nAZeGd+H6c5IMfY3YqicdL/D3OA5XOtM4qNS6a7dU=</c2pa:manifest></metadata></svg>
