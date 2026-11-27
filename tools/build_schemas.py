@@ -3,10 +3,11 @@
 Usage : python tools/build_schemas.py source/schemas www/data/schemas.json
 
 source/schemas/catalogue.xlsx, onglet « catalogue » :
-  chapitre ; schema ; type (titre à dessiner / légende / leurre) ; numero ; terme ; a garder (oui/non) ; source
+  chapitre ; schema ; type (titre à dessiner / légende / leurre) ; numero ; terme ; a garder (oui/non) ; source ; groupe
   une ligne « titre à dessiner » par schéma : le titre montré en mode « Dessiner » (sinon, la balise <title> du SVG).
   une ligne « légende » par numéro du schéma ; une ligne « leurre » par étiquette erronée (sans numéro).
   un leurre marqué « non » n'est pas proposé ; vide ou « oui » : proposé.
+  groupe (facultatif) : une légende d'un groupe ne propose que les légendes et leurres de ce groupe (vaisseaux entre eux…).
 source/schemas/<chapitre>_<schema>/<…>-numeros.svg
   version numérotée du schéma : chaque numéro est un <g class="legende" data-n="…">.
 source/schemas/<chapitre>_<schema>/<…>-legendes.svg
@@ -26,6 +27,8 @@ TITRES = {
     'artere-musculaire': 'Paroi d’un vaisseau : coupe 1 (microscopie optique)',
     'arteriole-musculaire': 'Paroi d’un vaisseau : coupe 2 (microscopie électronique)',
     'capillaire': 'Paroi d’un vaisseau : coupe 3 (microscopie électronique)',
+    'controle-sympathique': 'Contrôle nerveux de la fréquence cardiaque (1)',
+    'controle-parasympathique': 'Contrôle nerveux de la fréquence cardiaque (2)',
 }
 
 
@@ -38,7 +41,8 @@ src, out = pathlib.Path(sys.argv[1]), pathlib.Path(sys.argv[2])
 wb = load_workbook(src / 'catalogue.xlsx', read_only=True, data_only=True)
 schemas, leurres, a_dessiner = {}, [], {}
 for row in list(wb['catalogue'].iter_rows(values_only=True))[1:]:
-    row = (tuple(row) + (None,) * 7)[:7]
+    row = (tuple(row) + (None,) * 8)[:8]
+    groupe = str(row[7]).strip() if row[7] is not None and str(row[7]).strip() else None
     if not row[1] or row[4] is None or not str(row[4]).strip():
         continue
     chap, slug, kind, terme = str(row[0]).strip(), str(row[1]).strip(), norm(row[2] or ''), str(row[4]).strip()
@@ -47,14 +51,19 @@ for row in list(wb['catalogue'].iter_rows(values_only=True))[1:]:
         continue
     if kind.startswith('leurre'):
         if norm(row[5] or '') != 'non':
-            leurres.append((slug, terme))
+            leurres.append((slug, terme, groupe))
         continue
     assert kind.startswith('legende'), f'{slug} « {terme} » : type « {row[2]} » (attendu : légende ou leurre)'
     s = schemas.setdefault(slug, {'id': slug, 'chapitre': chap, 'legendes': [], 'leurres': []})
-    s['legendes'].append({'n': int(row[3]), 'terme': terme})
-for slug, terme in leurres:
+    s['legendes'].append({'n': int(row[3]), 'terme': terme, **({'groupe': groupe} if groupe else {})})
+for slug, terme, groupe in leurres:
     assert slug in schemas, f'leurre « {terme} » : schéma « {slug} » sans légende'
-    schemas[slug]['leurres'].append(terme)
+    if groupe:
+        groupes = {l.get('groupe') for l in schemas[slug]['legendes']}
+        assert groupe in groupes, f'leurre « {terme} » : groupe « {groupe} » sans légende dans « {slug} »'
+        schemas[slug].setdefault('leurresGroupes', {}).setdefault(groupe, []).append(terme)
+    else:
+        schemas[slug]['leurres'].append(terme)
 
 result = []
 for slug, s in schemas.items():
@@ -81,6 +90,8 @@ for slug, s in schemas.items():
     assert nums == attendus, f'{slug} : numéros du SVG {nums} ≠ catalogue {attendus}'
     # un leurre ne doit jamais être la bonne réponse d'un autre numéro du même schéma
     s['leurres'] = [x for x in dict.fromkeys(s['leurres']) if norm(x) not in termes]
+    for g, xs in s.get('leurresGroupes', {}).items():
+        s['leurresGroupes'][g] = [x for x in dict.fromkeys(xs) if norm(x) not in termes]
     s['legendes'].sort(key=lambda l: l['n'])
     result.append(dict(s, titre=titre, svg=svg.strip(), dessin=dessin, corrige=corrige))
 

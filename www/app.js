@@ -2454,6 +2454,12 @@ function renderSchemas() {
 }
 
 function schemaOptions(sc, l) {
+  // légende d'un groupe (vaisseaux, cavités…) : on ne propose que les termes du même groupe
+  if (l.groupe) {
+    const pool = sc.legendes.filter(x => x !== l && x.groupe === l.groupe).map(x => x.terme)
+      .concat((sc.leurresGroupes || {})[l.groupe] || []);
+    return QCM.shuffle([...new Set([l.terme, ...QCM.shuffle(pool).slice(0, SCHEMA_OPTIONS - 1)])]);
+  }
   const others = QCM.shuffle(sc.legendes.filter(x => x !== l).map(x => x.terme));
   const lures = QCM.shuffle(sc.leurres.slice());
   const nLures = Math.min(lures.length, Math.floor((SCHEMA_OPTIONS - 1) / 2));

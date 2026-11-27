@@ -55,7 +55,7 @@ const mine = await page.$$eval('[data-sc]', bs => bs.map(b => b.dataset.sc));
 check(mine.length === 3 && mine.every(id => ['neurone', 'potentiel-action', 'synapse-neuromusculaire'].includes(id)), `Mes chapitres : ${mine.join(', ')}`);
 await page.click('[data-scope="all"]');
 const all = await page.$$eval('[data-sc]', bs => bs.map(b => b.dataset.sc));
-check(all.length === 8, `Tous les chapitres : ${all.length} schémas`);
+check(all.length === 12, `Tous les chapitres : ${all.length} schémas`);
 await page.screenshot({ path: '/tmp/s1-liste.png', fullPage: true });
 await page.click('[data-scope="mine"]');
 
@@ -136,6 +136,28 @@ await p3.locator('#plate g.legende[data-n="2"] circle.hit').tap();
 await p3.click('.sheet-opts button >> nth=0');
 const l3 = await saved(p3);
 check(Object.keys(l3.schemaCards).length === 1 && JSON.stringify(l3.cards) === JSON.stringify(before.cards), 'stockage d’avant les schémas : réponse enregistrée, définitions intactes');
+
+// 8. Cœur : chaque légende ne propose que les termes de son groupe (vaisseaux, cavités, valvules + leurres)
+await page.goto(URL);
+await page.waitForSelector('#go-schemas');
+await page.click('#go-schemas');
+await page.click('[data-scope="all"]');
+await page.click('[data-sc="coeur"]');
+await page.waitForSelector('#plate svg');
+const G = {
+  vaisseaux: ['Artères pulmonaires', 'Veines caves', 'Aorte', 'Veines pulmonaires'],
+  cavites: ['Oreillette droite', 'Oreillette gauche', 'Ventricule droit', 'Ventricule gauche'],
+  valvules: ['Valvules artérielles', 'Valvules auriculo-ventriculaires', 'Valvules ventriculaires', 'Valvules auriculaires'],
+};
+const same = (a, b) => a.length === b.length && a.every(x => b.includes(x));
+for (const [n, g] of [[1, 'vaisseaux'], [3, 'cavites'], [9, 'valvules']]) {
+  await page.locator(`#plate g.legende[data-n="${n}"] circle.hit`).tap();
+  await page.waitForSelector('.sheet');
+  const o = await page.$$eval('.sheet-opts button', bs => bs.map(b => b.textContent));
+  check(same(o, G[g]), `cœur n° ${n} (${g}) : ${o.join(' / ')}`);
+  await page.click(`.sheet-opts button >> nth=0`);
+}
+await page.screenshot({ path: '/tmp/s5-coeur.png', fullPage: true });
 
 check(!errors.length, `aucune erreur JavaScript${errors.length ? ' : ' + errors.join(' | ') : ''}`);
 await browser.close();
